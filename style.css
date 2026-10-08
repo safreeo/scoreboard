@@ -1,3 +1,127 @@
 :root{--navy:#06285f;--blue:#07569d;--green:#18a94d;--bg:#f4f7fb;--line:#d5dee8;--muted:#64748b;--danger:#d9343a}*{box-sizing:border-box}body{margin:0;font-family:Inter,Arial,sans-serif;background:var(--bg);color:#0f172a}button,input,select,textarea{font:inherit}.page{max-width:980px;margin:auto;min-height:100vh;padding:18px 18px 95px}.home{text-align:center}.club-logo{width:150px;max-width:42vw;margin:18px auto 5px}.app-title{font-size:clamp(27px,5vw,42px);font-weight:900;color:var(--navy);margin:8px 0 2px}.tagline{font-weight:700;color:#526173;margin-bottom:26px}.menu{display:grid;gap:12px;max-width:520px;margin:auto}.btn{border:0;border-radius:14px;padding:15px 18px;font-weight:800;cursor:pointer}.btn.primary{background:var(--navy);color:#fff}.btn.green{background:var(--green);color:#fff}.btn.soft{background:#fff;color:var(--navy);border:1px solid var(--line)}.btn.danger{background:#fee2e2;color:#991b1b}.menu .btn{font-size:17px}.footer{margin-top:35px;color:#7a8796;font-size:13px}.top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px}.top h1{font-size:22px;margin:0;color:var(--navy)}.card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:18px;margin:14px 0;box-shadow:0 4px 18px #0f172a0b}.section{font-size:13px;letter-spacing:.08em;color:var(--blue);font-weight:900;margin:0 0 12px}.seg{display:grid;grid-template-columns:1fr 1fr;gap:8px}.seg button{padding:12px;border-radius:11px;border:1px solid var(--line);background:#fff;font-weight:800}.seg button.active{background:var(--navy);color:#fff}.field{margin:12px 0}.field label{display:block;font-weight:800;font-size:13px;margin-bottom:6px}.field input,.field select,.field textarea{width:100%;border:1px solid #bdc9d6;border-radius:11px;padding:12px;background:#fff}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.preset{display:flex;justify-content:space-between;gap:10px;padding:12px;border:1px solid var(--line);border-radius:12px}.muted{color:var(--muted);font-size:13px}.chips{display:flex;flex-wrap:wrap;gap:8px}.chip{border:1px solid var(--line);background:#fff;padding:8px 11px;border-radius:999px}.chip.active{background:#e5f0ff;border-color:#7fb2ef;color:#064b91}.score-head{text-align:center;position:sticky;top:0;background:var(--bg);z-index:4;padding:6px 0}.score-meta{font-weight:900;font-size:21px}.progress{color:#526173;font-weight:800}.archer-name{font-size:30px;font-weight:900;margin:12px 0}.score-table{overflow:auto;border:1px solid var(--line);border-radius:16px;background:#fff}.score-grid{min-width:620px;display:grid;grid-template-columns:52px repeat(6,1fr) 74px 78px}.cell{min-height:48px;border-right:1px solid var(--line);border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-weight:800}.head{background:var(--blue);color:#fff}.endrow{background:var(--blue);color:#fff}.filled{background:#fff8b4}.keypad{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin:12px 0}.key{padding:16px 8px;border:0;border-radius:13px;font-size:26px;font-weight:900;box-shadow:0 3px 8px #0f172a20}.gold{background:#ffd21f}.red{background:#f44949;color:#fff}.cyan{background:#1495cb;color:#fff}.black{background:#111827;color:#fff}.white{background:#fff}.miss{background:#9aaabd}.bottomnav{position:fixed;left:0;right:0;bottom:0;background:var(--blue);display:flex;justify-content:center;z-index:9}.bottomnav button{width:min(20%,150px);background:none;border:0;color:#fff;padding:11px 3px;font-weight:800}.summary-table{width:100%;border-collapse:collapse}.summary-table th,.summary-table td{padding:9px;border-bottom:1px solid var(--line);text-align:right}.summary-table th:nth-child(1),.summary-table td:nth-child(1){text-align:left}.filterbar{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.statgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.stat{background:#f7f9fc;border-radius:12px;padding:12px}.stat b{display:block;font-size:20px}.notice{padding:11px;border-radius:10px;background:#fff3cd;color:#805b00}.dangertext{color:var(--danger);font-weight:900}.stars{font-size:30px;letter-spacing:4px;cursor:pointer}.timer{min-height:75vh;display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:22px;color:#fff;text-align:center}.timer.ready,.timer.stop{background:#d72828}.timer.shoot{background:#12a84f}.timer.warning{background:#ef8b17}.timer .clock{font-size:clamp(80px,22vw,180px);font-weight:900}.timer h2{font-size:34px}.responsive-scroll{overflow:auto}@media(max-width:640px){.page{padding:12px 12px 92px}.grid,.filterbar,.statgrid{grid-template-columns:1fr}.club-logo{width:125px}.bottomnav button{font-size:12px}.score-meta{font-size:18px}.archer-name{font-size:27px}}
 .archer-tabs{display:flex;gap:8px;overflow-x:auto;padding:8px 0 4px;scrollbar-width:thin}.archer-tab{flex:0 0 auto;border:1px solid var(--line);background:#fff;border-radius:12px;padding:9px 13px;font-weight:800;color:var(--navy)}.archer-tab small{display:block;font-size:10px;color:var(--muted);margin-top:2px}.archer-tab.active{background:var(--navy);color:#fff}.archer-tab.active small{color:#dbeafe}.archer-tab.done{border-color:#38a169}.score-grid{grid-auto-rows:minmax(48px,auto)}.cell.editing{outline:3px solid #f59e0b;outline-offset:-3px}.current-end{box-shadow:inset 4px 0 0 #f59e0b}.scorehint{padding:7px 3px}.history-card{cursor:pointer}.history-card:hover{border-color:#7fb2ef}.history-open{margin-top:10px;color:var(--blue);font-weight:800;font-size:13px}
 .full{width:100%}.timer-open{margin-top:9px}.home{max-width:520px;margin:auto;min-height:calc(100vh - 36px);display:flex;flex-direction:column}.home .club-logo{width:92px;margin-top:44px}.home .app-title{font-size:34px;line-height:1.05}.home .tagline{font-size:17px;color:#48617f;margin:8px 0 54px}.home-menu{gap:12px}.homebtn{border:0;border-radius:17px;padding:14px 18px;color:#fff;font-size:18px;font-weight:900;display:grid;grid-template-columns:46px 1fr 20px;align-items:center;text-align:left;min-height:72px;box-shadow:0 6px 12px #0f172a18}.homebtn span{width:42px;height:42px;border-radius:50%;background:#ffffff24;display:flex;align-items:center;justify-content:center;font-size:22px}.homebtn b{text-align:right;font-size:27px}.hb-blue{background:#1472d4}.hb-green{background:#00a82d}.hb-orange{background:#f5652f}.hb-purple{background:#7040bf}.hb-magenta{background:#a00078}.home-footer{margin-top:auto;padding-top:54px;color:#07569d;font-size:14px}.team-title{display:flex;justify-content:space-between}.lane-box{margin-top:12px;padding:12px;border:1px dashed var(--line);border-radius:12px}.lane-name{min-width:150px;font-weight:800}.laneinput{width:110px!important}.archer-list-row{display:flex;width:100%;justify-content:space-between;border:0;border-bottom:1px solid var(--line);background:#fff;padding:13px 5px;text-align:left;font-weight:800}.archer-list-row span{color:var(--muted);font-size:12px}.profile-toolbar{display:flex;gap:10px;align-items:center}.seg.four{grid-template-columns:repeat(4,1fr);flex:1}.select-actions{margin:10px 0}.profile-check{float:right}.navlist{display:grid;gap:9px}.rating{padding:12px 0;border-bottom:1px solid var(--line)}.stars{display:flex;gap:2px}.stars button{border:0;background:transparent;font-size:34px;color:#f5b400;padding:2px;cursor:pointer}.print-head{text-align:center}.filterbar select{border:1px solid var(--line);border-radius:10px;padding:10px;background:#fff}@media(max-width:640px){.home .club-logo{width:84px;margin-top:34px}.home .tagline{margin-bottom:48px}.homebtn{min-height:72px}.profile-toolbar{align-items:stretch;flex-direction:column}.seg.four{grid-template-columns:repeat(2,1fr)}.score-table{max-height:44vh}.score-grid{min-width:max-content}.home-footer{padding-top:48px}}@media print{.no-print,.top,.bottomnav{display:none!important}.page{max-width:none;padding:0}.card{box-shadow:none;break-inside:avoid}}
+/* =====================================================
+   ASSAFRA SCOREBOARD - COMPACT MOBILE HOME
+   ===================================================== */
+
+@media (max-width: 640px) {
+
+  /* Main page */
+  .page {
+    padding: 8px 12px 82px;
+  }
+
+  /* Home screen only */
+  .home {
+    max-width: 520px;
+    margin: 0 auto;
+    min-height: calc(100dvh - 16px);
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+  }
+
+  /* ASSAFRA Club Logo */
+  .home .club-logo {
+    width: 76px;
+    max-width: 76px;
+    margin: 14px auto 4px;
+  }
+
+  /* ASSAFRA SCOREBOARD title */
+  .home .app-title {
+    font-size: 28px;
+    line-height: 1.02;
+    margin: 5px 0 2px;
+    font-weight: 900;
+  }
+
+  /* Practice • Improve • Consistent */
+  .home .tagline {
+    font-size: 15px;
+    line-height: 1.2;
+    margin: 7px 0 24px;
+  }
+
+  /* Menu */
+  .home-menu {
+    display: grid;
+    gap: 9px;
+    width: 100%;
+  }
+
+  /* Main menu buttons */
+  .homebtn {
+    min-height: 60px;
+    padding: 8px 14px;
+    border-radius: 16px;
+
+    grid-template-columns: 40px 1fr 18px;
+    gap: 8px;
+
+    font-size: 16px;
+    line-height: 1.1;
+  }
+
+  /* Round icon inside button */
+  .homebtn span {
+    width: 36px;
+    height: 36px;
+    font-size: 19px;
+  }
+
+  /* Arrow > */
+  .homebtn b {
+    font-size: 22px;
+  }
+
+  /* Footer */
+  .home-footer {
+    margin-top: auto;
+    padding-top: 18px;
+    padding-bottom: 6px;
+    font-size: 13px;
+  }
+}
+
+
+/* Extra adjustment for shorter phones */
+@media (max-width: 640px) and (max-height: 750px) {
+
+  .home .club-logo {
+    width: 66px;
+    max-width: 66px;
+    margin-top: 8px;
+  }
+
+  .home .app-title {
+    font-size: 25px;
+  }
+
+  .home .tagline {
+    font-size: 14px;
+    margin: 5px 0 16px;
+  }
+
+  .home-menu {
+    gap: 7px;
+  }
+
+  .homebtn {
+    min-height: 54px;
+    padding: 6px 12px;
+    font-size: 15px;
+  }
+
+  .homebtn span {
+    width: 33px;
+    height: 33px;
+    font-size: 18px;
+  }
+
+  .home-footer {
+    padding-top: 12px;
+    font-size: 12px;
+  }
+}
