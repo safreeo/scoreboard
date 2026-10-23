@@ -1,22 +1,25 @@
 {
-  "name": "Scoreboard",
-  "short_name": "Scoreboard",
+  "name": "SCOREBOARD",
+  "short_name": "SCOREBOARD",
+  "description": "Practical archery scoring, practice tracking and performance review.",
   "start_url": "./",
+  "scope": "./",
   "display": "standalone",
   "background_color": "#f4f7fb",
-  "theme_color": "#06285f",
+  "theme_color": "#0b2f5b",
+  "orientation": "any",
   "icons": [
     {
-      "src": "assets/icon-192.png",
-      "sizes": "192x192",
+      "src": "assets/scoreboard-logo.png",
+      "sizes": "any",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
     },
     {
-      "src": "assets/icon-512.png",
-      "sizes": "512x512",
+      "src": "assets/scoreboard-logo.png",
+      "sizes": "any",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "maskable"
     }
   ]
 }
