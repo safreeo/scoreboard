@@ -4676,39 +4676,38 @@ function saveAndExit() {
 
 
 function discardAndExit() {
+  if (document.getElementById("discardSessionDialog")) return;
 
-  if (
-    !confirm(
-      "Discard this unfinished session and all current scores?"
-    )
-  ) {
+  const overlay = document.createElement("div");
+  overlay.id = "discardSessionDialog";
+  overlay.className = "modal-overlay";
+  overlay.innerHTML = `
+    <div class="modal-card">
+      <h3>Discard Session?</h3>
+      <p>Discard this unfinished session and all current scores?</p>
+      <div class="modal-actions">
+        <button class="btn danger" onclick="confirmDiscardAndExit()">
+          DISCARD
+        </button>
+        <button class="btn soft" onclick="closeModal('discardSessionDialog')">
+          CANCEL
+        </button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+}
 
-    return;
-  }
-
-
+function confirmDiscardAndExit() {
   clearUnfinished();
-
-
+  closeModal("discardSessionDialog");
   closeExitDialog();
 
-
-  S.session =
-    null;
-
-
-  editMode =
-    false;
-
-  editEnd =
-    null;
-
-  editDirty =
-    false;
-
-  selectedScoreCell =
-    null;
-
+  S.session = null;
+  editMode = false;
+  editEnd = null;
+  editDirty = false;
+  selectedScoreCell = null;
 
   setup();
 }
