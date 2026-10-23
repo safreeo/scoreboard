@@ -1,4 +1,4 @@
-/* SCOREBOARD R78 — PDF/WhatsApp output and selector refinements */
+/* SCOREBOARD R79 — PDF/WhatsApp output and selector refinements */
 
 /* ---------- Helpers ---------- */
 function r78RoundTotal(archer, round, setup){
@@ -67,13 +67,12 @@ r76Share=function(h,o){
     if(o.has('highest')){detail.push(`${l1}:${c1}`);detail.push(`${l2}:${c2}`)}
     if(o.has('average'))detail.push(`Avg:${m.avg.toFixed(2)}`);
     if(o.has('score'))detail.push(`Score: ${m.score.toFixed(1)}%`);
-    if(detail.length)lines.push(`    └ ${detail.join(' | ')}`);
-    if(i<ranking.length-1)lines.push('');
+    if(detail.length) lines.push(`    └ ${detail.join(' | ')}`);
+    if(i<ranking.length-1) lines.push('');
   });
   lines.push('--------------------------------------------------');
   lines.push('App: SCOREBOARD');
-  lines.push('');
-  if(h.location)lines.push(`Loc: ${h.location}`);
+  if(h.location) lines.push(`Loc: ${h.location}`);
   window.open('https://wa.me/?text='+encodeURIComponent(lines.join('\n')),'_blank');
 };
 
@@ -117,6 +116,6 @@ r78Style.textContent=`
 `;
 document.head.appendChild(r78Style);
 
-/* ---------- Application Info R78 ---------- */
+/* ---------- Application Info R79 ---------- */
 const r78Info=info;
-info=function(tab=null){r78Info(tab);const meta=document.querySelector('.info-meta');if(meta){const spans=meta.querySelectorAll('span'),bm=infoLang==='BM';if(spans[0])spans[0].innerHTML=`<b>${bm?'Versi Aplikasi':'App Version'}:</b> 1.0.3 (R78)`;if(spans[1])spans[1].innerHTML=`<b>${bm?'Kemas Kini Terakhir':'Last Updated'}:</b> 23 October 2026`}};
+info=function(tab=null){r78Info(tab);const meta=document.querySelector('.info-meta');if(meta){const spans=meta.querySelectorAll('span'),bm=infoLang==='BM';if(spans[0])spans[0].innerHTML=`<b>${bm?'Versi Aplikasi':'App Version'}:</b> 1.0.4 (R79)`;if(spans[1])spans[1].innerHTML=`<b>${bm?'Kemas Kini Terakhir':'Last Updated'}:</b> 23 October 2026`}};
