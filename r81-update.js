@@ -1,7 +1,7 @@
-/* SCOREBOARD R81 — rename Normal format label to Static */
+/* SCOREBOARD R81 — rename Normal practice format label to Static only */
 (function(){
   function renameNormalToStatic(){
-    document.querySelectorAll('button').forEach(btn=>{
+    document.querySelectorAll('.practice-type-btn').forEach(btn=>{
       if(btn.textContent.trim()==='Normal') btn.textContent='Static';
     });
   }
