@@ -1,4 +1,4 @@
-/* SCOREBOARD v1.1.9 — final BM translation patch
+/* SCOREBOARD v1.1.10 — final BM translation/UI patch
    Translation/UI metadata only. No scoring or session logic is changed. */
 (() => {
   const isBM = () => (window.getScoreboardLanguage?.() || localStorage.getItem('scoreboard_language_v11')) === 'bm';
@@ -13,7 +13,8 @@
     ['ARCHERY TIMER','PEMASA MEMANAH'],['‹ Scoring','‹ Pemarkahan'],['READY','SEDIA'],['Press START','Tekan MULA'],['PAUSE / RESUME','JEDA / SAMBUNG'],['RESET','TETAP SEMULA'],
     ['Preparation','Persediaan'],['Shooting','Panahan'],['Warning','Amaran'],['Stop','Berhenti'],['PREPARATION','PERSEDIAAN'],['Get ready','Bersedia'],['SHOOTING','PANAHAN'],['Start shooting','Mula memanah'],
     ['WARNING','AMARAN'],['Time running out','Masa hampir tamat'],['STOP','BERHENTI'],['End complete','End selesai'],['PAUSED','DIJEDA'],['RESUMED','DISAMBUNG'],
-    ['SEND VIA WHATSAPP','HANTAR MELALUI WHATSAPP'],['Timer','Pemasa']
+    ['SEND VIA WHATSAPP','HANTAR MELALUI WHATSAPP'],['Timer','Pemasa'],
+    ['Position','No.'],['POSITION','NO.']
   ]);
   const phrases = [
     ['Discard unfinished session?','Buang sesi yang belum selesai?'],['All scores in this unfinished session will be deleted.','Semua markah dalam sesi yang belum selesai ini akan dipadam.'],
@@ -41,8 +42,18 @@
     root.querySelectorAll?.('[placeholder]').forEach(el=>{const old=el.getAttribute('placeholder'),next=bmText(old);if(next!==old)el.setAttribute('placeholder',next);});
     root.querySelectorAll?.('*').forEach(el=>{if(el.children.length===0&&el.textContent.trim()==='17 October 2026')el.textContent='28 October 2026';});
   }
+  function languageSwitchContrast(){
+    if(document.getElementById('v1110-lang-style'))return;
+    const style=document.createElement('style');
+    style.id='v1110-lang-style';
+    style.textContent=`
+      .lang-switch-v11 button:not(.active){background:#cbd3dc !important;color:#0b2f5b !important;opacity:1 !important;}
+      .lang-switch-v11 button.active{opacity:1 !important;}
+    `;
+    document.head.appendChild(style);
+  }
   let queued=false;
-  const run=()=>{if(queued)return;queued=true;queueMicrotask(()=>{queued=false;translateDOM();});};
+  const run=()=>{if(queued)return;queued=true;queueMicrotask(()=>{queued=false;translateDOM();languageSwitchContrast();});};
   new MutationObserver(run).observe(document.documentElement,{childList:true,subtree:true,characterData:true});
   document.addEventListener('DOMContentLoaded',run,{once:true});
   setTimeout(run,0);
