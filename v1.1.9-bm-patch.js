@@ -1,4 +1,4 @@
-/* SCOREBOARD v1.1.10 — final BM translation/UI patch
+/* SCOREBOARD v1.1.11 — final BM translation/UI patch
    Translation/UI metadata only. No scoring or session logic is changed. */
 (() => {
   const isBM = () => (window.getScoreboardLanguage?.() || localStorage.getItem('scoreboard_language_v11')) === 'bm';
@@ -14,7 +14,8 @@
     ['Preparation','Persediaan'],['Shooting','Panahan'],['Warning','Amaran'],['Stop','Berhenti'],['PREPARATION','PERSEDIAAN'],['Get ready','Bersedia'],['SHOOTING','PANAHAN'],['Start shooting','Mula memanah'],
     ['WARNING','AMARAN'],['Time running out','Masa hampir tamat'],['STOP','BERHENTI'],['End complete','End selesai'],['PAUSED','DIJEDA'],['RESUMED','DISAMBUNG'],
     ['SEND VIA WHATSAPP','HANTAR MELALUI WHATSAPP'],['Timer','Pemasa'],
-    ['Position','No.'],['POSITION','NO.']
+    ['Position','No.'],['POSITION','NO.'],['Kedudukan','No.'],['KEDUDUKAN','NO.'],
+    ['ADD NOTE','TAMBAH NOTA'],['Add Note','Tambah Nota']
   ]);
   const phrases = [
     ['Discard unfinished session?','Buang sesi yang belum selesai?'],['All scores in this unfinished session will be deleted.','Semua markah dalam sesi yang belum selesai ini akan dipadam.'],
