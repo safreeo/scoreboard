@@ -1,10 +1,11 @@
-/* SCOREBOARD v1.1.11 — final BM translation/UI patch
+/* SCOREBOARD v1.1.12 — final BM translation/UI patch
    Translation/UI metadata only. No scoring or session logic is changed. */
 (() => {
   const isBM = () => (window.getScoreboardLanguage?.() || localStorage.getItem('scoreboard_language_v11')) === 'bm';
   const exact = new Map([
     ['UNFINISHED SESSION DETECTED','SESI BELUM SELESAI DIKESAN'],['RESUME','SAMBUNG'],['DISCARD','BUANG'],['Last saved:','Terakhir disimpan:'],
     ['Please Confirm','Sila Sahkan'],['Discard unfinished session?','Buang sesi yang belum selesai?'],['All scores in this unfinished session will be deleted.','Semua markah dalam sesi yang belum selesai ini akan dipadam.'],
+    ['Finish this practice session?','Tamatkan sesi latihan ini?'],['The practice session is not complete.','Sesi latihan ini belum selesai.'],
     ['Select at least one active archer.','Pilih sekurang-kurangnya seorang pemanah aktif.'],['Enter Group No.','Masukkan No. Kumpulan.'],['Enter Lane No.','Masukkan No. Lorong.'],
     ['SAVE PRESET','SIMPAN PRESET'],['Preset name','Nama preset'],['EDIT PRESET','EDIT PRESET'],['Scoring Matrix','Matriks Pemarkahan'],
     ['Change Format, Timer, Lane or Matrix above, then Update.','Tukar Format, Pemasa, Lorong atau Matriks di atas, kemudian Kemas Kini.'],['UPDATE PRESET','KEMAS KINI PRESET'],['Delete this preset?','Padam preset ini?'],['DELETE','PADAM'],
@@ -14,12 +15,15 @@
     ['Preparation','Persediaan'],['Shooting','Panahan'],['Warning','Amaran'],['Stop','Berhenti'],['PREPARATION','PERSEDIAAN'],['Get ready','Bersedia'],['SHOOTING','PANAHAN'],['Start shooting','Mula memanah'],
     ['WARNING','AMARAN'],['Time running out','Masa hampir tamat'],['STOP','BERHENTI'],['End complete','End selesai'],['PAUSED','DIJEDA'],['RESUMED','DISAMBUNG'],
     ['SEND VIA WHATSAPP','HANTAR MELALUI WHATSAPP'],['Timer','Pemasa'],
-    ['Position','No.'],['POSITION','NO.'],['Kedudukan','No.'],['KEDUDUKAN','NO.'],
-    ['ADD NOTE','TAMBAH NOTA'],['Add Note','Tambah Nota']
+    ['Position','No.'],['POSITION','NO.'],['Kedudukan','No.'],['KEDUDUKAN','NO.'],['Rank','No.'],['RANK','NO.'],
+    ['ADD NOTE','TAMBAH NOTA'],['Add Note','Tambah Nota'],
+    ['VIEW DETAILED RESULT','LIHAT KEPUTUSAN TERPERINCI'],['RANKING SUMMARY','RINGKASAN KEDUDUKAN'],['DETAILED RESULTS','KEPUTUSAN TERPERINCI'],
+    ['Archery Detailed Results','Keputusan Terperinci Memanah'],['Scoring Summary','Ringkasan Markah'],['Date / Day / Time','Tarikh / Hari / Masa'],['Location','Lokasi'],['Distance','Jarak'],['Target Face','Muka Sasaran'],['Matrix','Matriks'],['Format','Format'],['Archer','Pemanah'],['Total','Jumlah'],['Average','Purata'],['Score %','Skor %'],['Maximum Score','Skor Maksimum'],
+    ['EDIT TITLE','EDIT TAJUK'],['SHARE TO WHATSAPP','KONGSI KE WHATSAPP'],['PRINT / SAVE PDF','CETAK / SIMPAN PDF']
   ]);
   const phrases = [
     ['Discard unfinished session?','Buang sesi yang belum selesai?'],['All scores in this unfinished session will be deleted.','Semua markah dalam sesi yang belum selesai ini akan dipadam.'],
-    ['Delete this preset?','Padam preset ini?'],['Select at least one active archer.','Pilih sekurang-kurangnya seorang pemanah aktif.'],['Enter Group No.','Masukkan No. Kumpulan.'],['Enter Lane No.','Masukkan No. Lorong.']
+    ['Finish this practice session?','Tamatkan sesi latihan ini?'],['Delete this preset?','Padam preset ini?'],['Select at least one active archer.','Pilih sekurang-kurangnya seorang pemanah aktif.'],['Enter Group No.','Masukkan No. Kumpulan.'],['Enter Lane No.','Masukkan No. Lorong.']
   ];
   function bmText(s) {
     if (!isBM() || typeof s !== 'string') return s;
