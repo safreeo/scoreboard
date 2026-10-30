@@ -1,6 +1,6 @@
-const CACHE_NAME = "scoreboard-v1.1.29-r97";
+const CACHE_NAME = "scoreboard-v1.1.30-r98";
 const APP_SHELL = [
-  "./", "./index.html", "./style.css", "./app.js", "./r75-update.js", "./r76-update.js", "./r78-update.js", "./r80-update.js", "./r81-update.js", "./v1.1-language.js", "./v1.1.9-bm-patch.js", "./r82-update.js", "./r83-update.js", "./r87-update.js", "./r88-update.js", "./r89-update.js", "./r90-update.js", "./r91-update.js", "./r92-update.js", "./r93-update.js", "./r94-update.js", "./r97-update.js", "./manifest.webmanifest",
+  "./", "./index.html", "./style.css", "./app.js", "./r75-update.js", "./r76-update.js", "./r78-update.js", "./r80-update.js", "./r81-update.js", "./v1.1-language.js", "./v1.1.9-bm-patch.js", "./r82-update.js", "./r83-update.js", "./r87-update.js", "./r88-update.js", "./r89-update.js", "./r90-update.js", "./r91-update.js", "./r92-update.js", "./r93-update.js", "./r94-update.js", "./r97-update.js", "./r98-update.js", "./manifest.webmanifest",
   "./assets/scoreboard-logo.png", "./assets/icon-192.png", "./assets/icon-512.png",
   "./assets/icon-maskable-512.png", "./assets/referee-whistle.mp3"
 ];
