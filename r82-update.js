@@ -4,8 +4,12 @@
   const isBM=()=> (window.getScoreboardLanguage?.()||localStorage.getItem('scoreboard_language_v11'))==='bm';
 
   function matrixMax(matrix){
-    const nums=String(matrix||'10-1, X').match(/\d+(?:\.\d+)?/g)?.map(Number)||[10];
-    return Math.max(10,...nums.filter(Number.isFinite));
+    /* Maximum score must follow the selected scoring matrix, not a fixed 10.
+       Examples: 10-1,X => 10; 5-1 => 5; custom 8,5,3 => 8. */
+    if(typeof maxPointForMatrix==='function') return maxPointForMatrix(matrix);
+    const values=(typeof matrices==='function'&&matrices()[matrix])||String(matrix||'10-1, X').match(/X|\d+(?:\.\d+)?/gi)||['10'];
+    const nums=values.map(v=>String(v).toUpperCase()==='X'?10:Number(v)).filter(Number.isFinite);
+    return Math.max(1,...nums);
   }
   function setupMaxScore(setup){
     if(!setup) return 0;
@@ -47,11 +51,12 @@
     const setup=h.setup||(typeof DEFAULT_SETUP!=='undefined'?DEFAULT_SETUP:null); if(!setup)return;
     const max=setupMaxScore(setup); if(!max)return;
     const format=document.querySelector('.result-format-meta');
-    if(format&&!document.querySelector('.r82-max-score-meta')){
-      const span=document.createElement('span'); span.className='r82-max-score-meta';
-      span.innerHTML=`<b>${isBM()?'Skor Maksimum':'Maximum Score'}</b> ${max}`;
-      format.insertAdjacentElement('afterend',span);
+    let maxMeta=document.querySelector('.r82-max-score-meta');
+    if(format&&!maxMeta){
+      maxMeta=document.createElement('span'); maxMeta.className='r82-max-score-meta';
+      format.insertAdjacentElement('afterend',maxMeta);
     }
+    if(maxMeta) maxMeta.innerHTML=`<b>${isBM()?'Skor Maksimum':'Maximum Score'}</b> ${max}`;
     document.querySelectorAll('.result-archer').forEach(block=>{
       const name=block.querySelector('h3')?.textContent.trim();
       const archer=h.archers?.find(a=>a.name===name); if(!archer)return;
@@ -59,7 +64,7 @@
       if(typeof historyMetrics==='function') total=historyMetrics(archer,setup).total||0;
       else total=(archer.scores||[]).flat(Infinity).reduce((s,v)=>s+(v==='X'?10:(Number(v)||0)),0);
       const first=block.querySelector('.result-archer-total span:first-child');
-      if(first&&!first.dataset.r82Max){
+      if(first){
         first.dataset.r82Max='1'; const b=first.querySelector('b'); const label=b?b.outerHTML:'<b>TOTAL</b>';
         first.innerHTML=`${label}${total}/${max}`;
       }
