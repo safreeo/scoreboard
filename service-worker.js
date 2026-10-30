@@ -1,4 +1,4 @@
-const CACHE_NAME = "scoreboard-v1.1.34-r102";
+const CACHE_NAME = "scoreboard-v1.1.35-r103";
 const APP_SHELL = [
   "./", "./index.html", "./style.css", "./app.js", "./r75-update.js", "./r76-update.js", "./r78-update.js", "./r80-update.js", "./r81-update.js", "./v1.1-language.js", "./v1.1.9-bm-patch.js", "./r82-update.js", "./r83-update.js", "./r87-update.js", "./r88-update.js", "./r89-update.js", "./r90-update.js", "./r91-update.js", "./r92-update.js", "./r93-update.js", "./r94-update.js", "./r97-update.js", "./r98-update.js", "./r99-update.js", "./manifest.webmanifest",
   "./assets/scoreboard-logo.png", "./assets/icon-192.png", "./assets/icon-512.png",
