@@ -1,5 +1,5 @@
-/* SCOREBOARD R85 — PDF language, compact language switch, numeric steppers.
-   UI/output only: scoring/session data logic is unchanged. */
+/* SCOREBOARD R86 — PDF language, compact language switch, numeric steppers,
+   centered setup values and safe Single/Multiple distance switching. */
 (function(){
   const isBM=()=> (window.getScoreboardLanguage?.()||localStorage.getItem('scoreboard_language_v11'))==='bm';
   const maxScore=setup=>{
@@ -39,7 +39,6 @@
   };
   window.r85DownloadPDF=function(index){const h=S.history[index];if(!h)return;const selected=r76Selected();r76ApplyTitle(h,selected);closeModal('resultOutputDialog');r76Print(h,selected)};
 
-  /* PDF/print content follows the selected app language. */
   r76Print=function(h,o){
     const bm=isBM(),setup=h.setup||DEFAULT_SETUP,ranking=historyRanking(h),dt=dateDash(h.completedAt||h.date),w=window.open('','_blank');if(!w)return;
     const [l1,l2]=r77HighestLabels(setup.matrix),T=bm?{title:'Keputusan Terperinci Memanah',date:'Tarikh / Hari / Masa',loc:'Lokasi',dist:'Jarak',face:'Muka Sasaran',matrix:'Matriks',format:'Format',summary:'Ringkasan Pemarkahan',rank:'Kedudukan',archer:'Pemanah',total:'Jumlah',score:'Markah %',avg:'Purata',round:'ROUND',end:'End',details:'Butiran End Setiap Arrow',breakdown:'Ketepatan & Pecahan Mata'}:{title:'Archery Detailed Results',date:'Date / Day / Time',loc:'Location',dist:'Distance',face:'Target Face',matrix:'Matrix',format:'Format',summary:'Scoring Summary',rank:'Rank',archer:'Archer',total:'Total',score:'Score %',avg:'Average',round:'ROUND',end:'End',details:'Arrow-by-Arrow End Details',breakdown:'Accuracy & Point Breakdown'};
@@ -53,10 +52,35 @@
     w.document.write(`<!doctype html><html><head><title>${esc(title)}</title><style>body{font-family:Arial,sans-serif;padding:24px;color:#111}h1{text-align:center;font-size:24px}h2{font-size:18px;margin-top:22px}table{width:100%;border-collapse:collapse;margin:12px 0 24px}th,td{border:1px solid #999;padding:7px;text-align:center}.meta th{text-align:left;width:34%}.meta td{text-align:left}.breakdown-row{display:grid;grid-template-columns:90px 1fr 60px;gap:8px;margin:6px 0}.breakdown-track{background:#ddd}.breakdown-fill{height:18px;background:#555}.footer{text-align:center;margin-top:30px;font-weight:bold}@media print{button{display:none}}</style></head><body><h1>${esc(title)}</h1>${meta}${details}${arrowDetails}${breakdown}<div class="footer">PWA: SCOREBOARD</div><script>window.onload=()=>setTimeout(()=>window.print(),150)<\/script></body></html>`);w.document.close();
   };
 
-  /* Matrix Manager: matrix choices above, full-width name below. */
   const baseMatrixManager=matrixManager;matrixManager=function(){baseMatrixManager();const name=document.getElementById('matrixName'),grid=document.querySelector('.matrix-point-grid');if(!name||!grid)return;name.classList.add('r85-matrix-name-input');grid.classList.add('r85-matrix-grid');grid.insertAdjacentElement('afterend',name)};
 
-  /* Add visible +/- steppers beside setup number inputs, including 3D/2D CP, arrows, rounds and Static rounds/ends/arrows. */
+  /* Keep Single Distance Ends independent from Multiple Distances total ends. */
+  let r86SingleEnds=Math.max(1,Number(S.setup?.ends)||Number(DEFAULT_SETUP.ends)||6);
+  const r86BaseSetDistanceMode=setDistanceMode;
+  setDistanceMode=function(mode){
+    const next=mode==='multiple'?'multiple':'single';
+    if(next==='multiple'&&S.setup.distanceMode!=='multiple'){
+      syncSetup();
+      r86SingleEnds=Math.max(1,Number(S.setup.ends)||Number(DEFAULT_SETUP.ends)||6);
+      preserveNextScrollY=window.scrollY;
+      resetFormatOptions();
+      S.setup.distanceMode='multiple';
+      S.setup.ends=multiTotalEnds();
+      setup();
+      return;
+    }
+    if(next==='single'&&S.setup.distanceMode==='multiple'){
+      syncSetup();
+      preserveNextScrollY=window.scrollY;
+      resetFormatOptions();
+      S.setup.distanceMode='single';
+      S.setup.ends=Math.max(1,Number(r86SingleEnds)||Number(DEFAULT_SETUP.ends)||6);
+      setup();
+      return;
+    }
+    return r86BaseSetDistanceMode(mode);
+  };
+
   function enhanceNumberInputs(){
     if(currentView!=='setup')return;
     document.querySelectorAll('.page input[type="number"]').forEach(input=>{
@@ -77,7 +101,8 @@
     .r85-matrix-grid{margin-top:0!important}.r85-matrix-name-input{display:block!important;width:100%!important;max-width:none!important;box-sizing:border-box!important;margin:16px 0!important}
     .r85-output-actions{display:flex!important;flex-direction:column!important;gap:10px!important}.r85-output-actions .btn{width:100%!important;margin:0!important}
     .r85-stepper{display:grid!important;grid-template-columns:minmax(0,1fr) 42px!important;width:100%!important;min-width:0!important;overflow:hidden!important;border:1px solid #b9c5d2!important;border-radius:12px!important;background:#fff!important;box-sizing:border-box!important}
-    .r85-stepper>input[type="number"]{width:100%!important;min-width:0!important;border:0!important;border-radius:0!important;box-shadow:none!important;margin:0!important;background:#fff!important;-moz-appearance:textfield!important}.r85-stepper>input[type="number"]::-webkit-inner-spin-button,.r85-stepper>input[type="number"]::-webkit-outer-spin-button{-webkit-appearance:none!important;margin:0!important}
+    .r85-stepper>input[type="number"]{width:100%!important;min-width:0!important;border:0!important;border-radius:0!important;box-shadow:none!important;margin:0!important;background:#fff!important;-moz-appearance:textfield!important;text-align:center!important;padding-left:4px!important;padding-right:4px!important;box-sizing:border-box!important}
+    .r85-stepper>input[type="number"]::-webkit-inner-spin-button,.r85-stepper>input[type="number"]::-webkit-outer-spin-button{-webkit-appearance:none!important;margin:0!important}
     .r85-step-controls{display:grid!important;grid-template-rows:1fr 1fr!important;border-left:1px solid #c3ccd6!important;background:#eef2f6!important}.r85-step-controls button{border:0!important;background:transparent!important;color:#0b2f5b!important;font-size:13px!important;font-weight:900!important;padding:0!important;min-height:25px!important;line-height:1!important}.r85-step-controls button+button{border-top:1px solid #c3ccd6!important}
   `;document.head.appendChild(style);
 })();
