@@ -28,7 +28,6 @@
     const lane=!!document.getElementById('r89Lane')?.checked,group=!!document.getElementById('r89Group')?.checked;
     S.setup.lane=lane;S.setup.group=group;
     if(S.session.setup){S.session.setup.lane=lane;S.session.setup.group=group;}
-    /* Preserve explicit per-archer lanes. If Team has no lane assignments, use one common lane. */
     const team=(S.setup.mode==='team'||S.setup.practiceMode==='team'||S.setup.team===true);
     if(team&&lane&&Array.isArray(S.session.archers)){
       const explicit=S.session.archers.some(a=>a&&a.lane!=null&&String(a.lane)!=='');
@@ -37,7 +36,9 @@
     r88Apply();
   };
 
+  /* R108: R106+ owns the timer DOM. Never rewrite or inject timer buttons there. */
   function enhanceTimer(){
+    if(document.querySelector('.r106-timer'))return;
     const title=[...document.querySelectorAll('h1,h2,h3,.page-title')].find(e=>/ARCHERY TIMER|PEMASA MEMANAH/i.test(e.textContent||''));
     if(!title)return;
     const buttons=[...document.querySelectorAll('button')];
