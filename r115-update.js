@@ -1,4 +1,4 @@
-/* SCOREBOARD R115 — stable staged selectors, session/setup isolation, preset editor actions */
+/* SCOREBOARD R122 — staged CP compatibility, scoring isolation, preset editor actions */
 (function(){
   const clone=v=>JSON.parse(JSON.stringify(v));
   const isBM=()=> (window.getScoreboardLanguage?.()||localStorage.getItem('scoreboard_language_v11'))==='bm';
@@ -11,12 +11,20 @@
       return await baseStart.apply(this,arguments);
     };
   }
-  function restoreSetupAfterSession(){
-    S.setup=clone(setupBeforeSession||DEFAULT_SETUP);S.active=[];S.lanes={};S.groups={};
+
+  /* Scoring changes are temporary. Exiting Scoring restores the default Quick Preset
+     (the first preset) instead of carrying Round/End/CP changes into the next session. */
+  function restoreDefaultQuickPreset(){
+    const p=(Array.isArray(S.presets)&&S.presets.length)?S.presets[0]:DEFAULT_SETUP;
+    S.setup=clone({...DEFAULT_SETUP,...p});S.active=[];S.lanes={};S.groups={};
     try{editingPreset=null;savePresetOpen=false;}catch(_){} setupBeforeSession=null;
   }
   if(typeof window.home==='function'){
-    const baseHome=window.home;window.home=function(){if(S.session)restoreSetupAfterSession();return baseHome.apply(this,arguments);};
+    const baseHome=window.home;
+    window.home=function(){
+      if(setupBeforeSession||S.session||['scoring','summary','timer'].includes(String(currentView||'')))restoreDefaultQuickPreset();
+      return baseHome.apply(this,arguments);
+    };
   }
 
   /* R117 compatibility: keep the old R115 capture listener, but delegate CP choice to
