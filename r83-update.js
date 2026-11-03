@@ -13,7 +13,7 @@
 
   r76Share=function(h,o){
     const setup=h.setup||DEFAULT_SETUP,ranking=historyRanking(h),dt=dateDash(h.completedAt||h.date),lines=[];
-    const bm=isBM(),title=bm?'Keputusan Latihan Memanah':'Archery Practice Results',max=maxScore(setup);
+    const bm=isBM(),title=String(arguments[2]||h.title||'').trim()||(bm?'Keputusan Latihan Memanah':'Archery Practice Results'),max=maxScore(setup);
     lines.push(`🎯 *${title}*`);lines.push(`*${dt.date}* | ${dt.day} | ${dt.time}`);
     if(setup.practiceType==='target')lines.push(`${resultDistanceText(setup)} | ${setup.target}cm | ${setup.matrix} | ${r78Format(setup)}`);
     else lines.push(`${r77GameHeading(h,setup)} | ${r78Distance(setup)} | ${setup.matrix} | ${r78Format(setup)}`);
