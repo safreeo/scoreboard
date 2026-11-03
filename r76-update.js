@@ -136,11 +136,20 @@ function r76OutputDialog(kind,index=viewHistoryIndex){
 function r76TitleToggle(el){if(el.dataset.output==='title')document.getElementById('r76TitleBox').hidden=!el.checked}
 function r76Selected(){return new Set([...document.querySelectorAll('#resultOutputDialog [data-output]:checked')].map(x=>x.dataset.output))}
 function r76ApplyTitle(h,selected){const v=document.getElementById('r76OutputTitle')?.value.trim();if(selected.has('title')&&v){h.title=v;h.note=v;if(S.session?.id===h.id){S.session.title=v;S.session.note=v}save()}}
-function r76RunOutput(kind,index){const h=S.history[index];if(!h)return;const selected=r76Selected();r76ApplyTitle(h,selected);closeModal('resultOutputDialog');if(kind==='whatsapp')r76Share(h,selected);else r76Print(h,selected)}
+function r76RunOutput(kind,index){
+  const h=S.history[index];if(!h)return;
+  const selected=r76Selected();
+  // Capture the edited title before removing the dialog. Pass it directly to
+  // the share composer so it cannot fall back to an older stored title.
+  const editedTitle=selected.has('title') ? String(document.getElementById('r76OutputTitle')?.value||'').trim() : '';
+  if(editedTitle){h.title=editedTitle;h.note=editedTitle;if(S.session?.id===h.id){S.session.title=editedTitle;S.session.note=editedTitle}save()}
+  closeModal('resultOutputDialog');
+  if(kind==='whatsapp')r76Share(h,selected,editedTitle);else r76Print(h,selected);
+}
 function r77GameHeading(h,setup){const first=h.archers?.[0]?.name||'';const groupNo=r77GroupNo(h,setup,first);return `${setup.practiceType.toUpperCase()} GAME${setup.group&&groupNo?` - GROUP ${groupNo}`:''}`}
-function r76Share(h,o){
+function r76Share(h,o,editedTitle=""){
   const setup=h.setup||DEFAULT_SETUP,ranking=historyRanking(h),dt=shortDateTime(h.completedAt||h.date),lines=[];
-  lines.push(`🎯 *${h.title||'Archery Practice Result'}*`);lines.push(`${dt.date} | ${dt.day} | ${dt.time}`);
+  lines.push(`🎯 *${editedTitle || h.title || 'Archery Practice Result'}*`);lines.push(`${dt.date} | ${dt.day} | ${dt.time}`);
   if(setup.practiceType!=='target')lines.push(`${r77GameHeading(h,setup)} | ${setup.gameMinDistance||5}~${setup.gameMaxDistance||30}m | ${setup.matrix}`);else lines.push(`${resultDistanceText(setup)} | ${setup.target}cm | ${setup.matrix}`);
   lines.push('--------------------------------------------------');
   const [l1,l2]=r77HighestLabels(setup.matrix);
