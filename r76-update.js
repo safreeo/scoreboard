@@ -23,6 +23,12 @@ setup = function() {
 const r76StartSession = startSession;
 startSession = async function() {
   syncSetup();
+  // Read the visible Group fields at submission time, not only the oninput cache.
+  // Mobile keyboards and setup rerenders can leave S.groups out of sync.
+  document.querySelectorAll('input[data-group]').forEach(el => {
+    const key = el.dataset.group;
+    if (key) S.groups[key] = String(el.value ?? '').trim();
+  });
   const names = S.setup.mode === 'team' ? [...S.active] : ['__personal__'];
   if (S.setup.lane) {
     const missingLane = names.some(n => !String(S.lanes?.[n] || '').trim());
