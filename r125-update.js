@@ -1,56 +1,95 @@
-/* SCOREBOARD R128 — target real unfinished-session card/actions directly */
+/* SCOREBOARD R129 — robust paused-session action sizing + live BM/ENG */
 (function(){
-  const isBM=()=> (window.getScoreboardLanguage?.()||localStorage.getItem('scoreboard_language_v11'))==='bm';
+  const storedLang=()=> (localStorage.getItem('scoreboard_language_v11')==='bm'?'bm':'en');
+  let forcedLang=null;
 
-  function fixPausedActions(){
-    const card=document.querySelector('.setup-page .unfinished-card');
-    if(!card)return;
-    const bm=isBM();
-    const actions=card.querySelector('.unfinished-actions');
-    if(actions)actions.classList.add('r128-actions');
-    [...card.querySelectorAll('button')].forEach(b=>{
-      const t=(b.textContent||'').trim();
-      if(/RESUME SESSION|SAMBUNG SESI|^RESUME$/i.test(t)){
-        b.textContent=bm?'SAMBUNG SESI':'RESUME SESSION';
-        b.classList.add('r128-paused-btn','r128-resume');
-      } else if(/^DISCARD$|^BUANG$|^BATALKAN$/i.test(t)){
-        b.textContent=bm?'BUANG':'DISCARD';
-        b.classList.add('r128-paused-btn','r128-discard');
-      }
-    });
-    const title=card.querySelector('.unfinished-title');
+  function language(){
+    return forcedLang || ((typeof window.getScoreboardLanguage==='function' && window.getScoreboardLanguage()==='bm') ? 'bm' : storedLang());
+  }
+
+  function pausedCard(){
+    const buttons=[...document.querySelectorAll('button')];
+    const resume=buttons.find(b=>/^(RESUME SESSION|SAMBUNG SESI|RESUME)$/i.test((b.textContent||'').trim()));
+    if(!resume)return null;
+    let el=resume.parentElement;
+    while(el && el!==document.body){
+      const txt=el.textContent||'';
+      if(/PAUSED SESSION|SESI DIJEDA|Last saved:|Terakhir disimpan:/i.test(txt) && el.querySelectorAll('button').length>=2)return el;
+      el=el.parentElement;
+    }
+    return null;
+  }
+
+  function styleAction(btn,color){
+    if(!btn)return;
+    btn.style.setProperty('width','100%','important');
+    btn.style.setProperty('min-height','54px','important');
+    btn.style.setProperty('height','54px','important');
+    btn.style.setProperty('max-height','54px','important');
+    btn.style.setProperty('padding','7px 10px','important');
+    btn.style.setProperty('margin','0','important');
+    btn.style.setProperty('border-radius','11px','important');
+    btn.style.setProperty('font-size','16px','important');
+    btn.style.setProperty('line-height','1','important');
+    btn.style.setProperty('font-weight','900','important');
+    btn.style.setProperty('display','flex','important');
+    btn.style.setProperty('align-items','center','important');
+    btn.style.setProperty('justify-content','center','important');
+    btn.style.setProperty('white-space','nowrap','important');
+    btn.style.setProperty('background',color,'important');
+    btn.style.setProperty('color','#fff','important');
+    btn.style.setProperty('border-color',color,'important');
+  }
+
+  function fixPaused(){
+    const card=pausedCard();if(!card)return;
+    const bm=language()==='bm';
+    const buttons=[...card.querySelectorAll('button')];
+    const resume=buttons.find(b=>/RESUME SESSION|SAMBUNG SESI|^RESUME$/i.test((b.textContent||'').trim()));
+    const discard=buttons.find(b=>/^DISCARD$|^BUANG$|^BATALKAN$/i.test((b.textContent||'').trim()));
+    if(resume){resume.textContent=bm?'SAMBUNG SESI':'RESUME SESSION';styleAction(resume,'#198754');}
+    if(discard){discard.textContent=bm?'BUANG':'DISCARD';styleAction(discard,'#e53245');}
+    const title=[...card.querySelectorAll('*')].find(el=>/^(⏸\s*)?(PAUSED SESSION|SESI DIJEDA)$/i.test((el.textContent||'').trim()) && el.children.length===0);
     if(title)title.textContent=bm?'⏸ SESI DIJEDA':'⏸ PAUSED SESSION';
     [...card.querySelectorAll('p')].forEach(p=>{
-      if(/^Last saved:/i.test(p.textContent||'')&&bm)p.textContent=(p.textContent||'').replace(/Last saved:/i,'Terakhir disimpan:');
-      else if(/^Terakhir disimpan:/i.test(p.textContent||'')&&!bm)p.textContent=(p.textContent||'').replace(/Terakhir disimpan:/i,'Last saved:');
+      if(bm && /^Last saved:/i.test(p.textContent||''))p.textContent=(p.textContent||'').replace(/^Last saved:/i,'Terakhir disimpan:');
+      if(!bm && /^Terakhir disimpan:/i.test(p.textContent||''))p.textContent=(p.textContent||'').replace(/^Terakhir disimpan:/i,'Last saved:');
     });
   }
 
   function refineHome(){
     const home=document.querySelector('.home');if(!home)return;
-    const logo=home.querySelector('.club-logo,.home-logo');if(logo)logo.classList.add('r128-logo');
-    const sw=home.querySelector('.lang-switch-v11');if(sw)sw.classList.add('r128-lang');
-    home.classList.toggle('r128-has-resume',!!home.querySelector('.r87-resume-session'));
+    const logo=home.querySelector('.club-logo,.home-logo');if(logo)logo.style.setProperty('filter','drop-shadow(0 9px 9px rgba(11,47,91,.24)) drop-shadow(0 2px 2px rgba(0,0,0,.16))','important');
+    const sw=home.querySelector('.lang-switch-v11');
+    if(sw && home.querySelector('.r87-resume-session')){
+      sw.style.setProperty('margin','14px auto 8px','important');
+      sw.style.setProperty('transform','scale(.82)','important');
+      sw.style.setProperty('transform-origin','center','important');
+      sw.style.setProperty('flex-shrink','0','important');
+    }
   }
-  function refine(){refineHome();fixPausedActions();}
+
+  function refine(){fixPaused();refineHome();}
+
+  /* Capture the user's ENG/BM choice itself. This avoids timing races with the older translator. */
+  document.addEventListener('click',e=>{
+    const b=e.target.closest('button');
+    if(b){
+      const t=(b.textContent||'').trim().toUpperCase();
+      if(t==='BM'){forcedLang='bm';setTimeout(refine,0);setTimeout(refine,80);setTimeout(()=>{forcedLang=null;refine();},250);return;}
+      if(t==='ENG'){forcedLang='en';setTimeout(refine,0);setTimeout(refine,80);setTimeout(()=>{forcedLang=null;refine();},250);return;}
+    }
+    setTimeout(refine,0);
+  },true);
 
   const oldSet=window.setScoreboardLanguage;
-  if(typeof oldSet==='function')window.setScoreboardLanguage=function(){const r=oldSet.apply(this,arguments);setTimeout(refine,0);setTimeout(refine,80);return r;};
-  document.addEventListener('click',()=>setTimeout(refine,0),true);
-  new MutationObserver(()=>requestAnimationFrame(refine)).observe(document.getElementById('app')||document.body,{childList:true,subtree:true});
-  setTimeout(refine,60);
+  if(typeof oldSet==='function')window.setScoreboardLanguage=function(lang){
+    if(lang==='bm'||lang==='en')forcedLang=lang;
+    const r=oldSet.apply(this,arguments);
+    setTimeout(refine,0);setTimeout(refine,80);setTimeout(()=>{forcedLang=null;refine();},250);
+    return r;
+  };
 
-  const s=document.createElement('style');s.textContent=`
-    .setup-page .unfinished-card .unfinished-actions.r128-actions{display:grid!important;grid-template-columns:1fr 1fr!important;gap:8px!important;align-items:center!important}
-    .setup-page .unfinished-card .unfinished-actions button.r128-paused-btn{
-      width:100%!important;min-height:54px!important;height:54px!important;max-height:54px!important;
-      padding:7px 10px!important;margin:0!important;border-radius:11px!important;
-      font-size:16px!important;line-height:1.05!important;font-weight:900!important;
-      display:flex!important;align-items:center!important;justify-content:center!important;
-    }
-    .setup-page .unfinished-card .unfinished-actions button.r128-resume{background:#198754!important;color:#fff!important;border-color:#198754!important}
-    .setup-page .unfinished-card .unfinished-actions button.r128-discard{background:#e53245!important;color:#fff!important;border-color:#e53245!important}
-    .home .r128-logo{filter:drop-shadow(0 9px 9px rgba(11,47,91,.24)) drop-shadow(0 2px 2px rgba(0,0,0,.16))!important}
-    .home.r128-has-resume .lang-switch-v11.r128-lang{margin:14px auto 8px!important;transform:scale(.82)!important;transform-origin:center!important;flex-shrink:0!important;position:relative!important;z-index:4!important}
-  `;document.head.appendChild(s);
+  new MutationObserver(()=>requestAnimationFrame(refine)).observe(document.getElementById('app')||document.body,{childList:true,subtree:true});
+  setTimeout(refine,50);
 })();
