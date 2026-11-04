@@ -10227,3 +10227,15 @@ html.font-large .page { font-size: 1.125rem; }
   text-align: center !important;
   white-space: nowrap !important;
 }
+
+
+/* R137 — Editing a scored arrow must not hide its original matrix color/value.
+   Keep the existing selected-cell border and geometry unchanged. */
+.scoring-page .score-cell.selected,
+.scoring-page .score-end-row .score-cell.selected,
+.scoring-page.scoring-compact .compact-grid-scroll .score-cell.selected,
+.scoring-page.scoring-compact .compact-grid-scroll .score-end-row .score-cell.selected {
+  background: transparent !important;
+  background-color: transparent !important;
+  background-image: none !important;
+}
