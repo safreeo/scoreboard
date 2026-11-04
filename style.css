@@ -10229,21 +10229,24 @@ html.font-large .page { font-size: 1.125rem; }
 }
 
 
-/* R138 — Preserve the original score color while editing.
-   The selected cell IS the score element, so making its background transparent
-   exposes the row (white), not a separate colored cell underneath.
-   Keep its score-class paint and only overlay the existing selection outline. */
-.scoring-page .score-cell.selected,
-.scoring-page .score-end-row .score-cell.selected,
-.scoring-page.scoring-compact .compact-grid-scroll .score-cell.selected,
-.scoring-page.scoring-compact .compact-grid-scroll .score-end-row .score-cell.selected {
+/* R139 — Correct paint on active and empty scoring cells.
+   Scored cells retain their matrix colors even when selected.
+   Empty cells, including the next arrow on the yellow current-End row,
+   always have a white background. Geometry and selection border unchanged. */
+.scoring-page.scoring-compact .compact-grid-scroll .score-end-row > .score-cell.selected.score-yellow,
+.scoring-page .score-end-row > .score-cell.selected.score-yellow { background: #ffd84d !important; color: #111827 !important; }
+.scoring-page.scoring-compact .compact-grid-scroll .score-end-row > .score-cell.selected.score-red,
+.scoring-page .score-end-row > .score-cell.selected.score-red { background: #e53935 !important; color: #fff !important; }
+.scoring-page.scoring-compact .compact-grid-scroll .score-end-row > .score-cell.selected.score-blue,
+.scoring-page .score-end-row > .score-cell.selected.score-blue { background: #1976d2 !important; color: #fff !important; }
+.scoring-page.scoring-compact .compact-grid-scroll .score-end-row > .score-cell.selected.score-black,
+.scoring-page .score-end-row > .score-cell.selected.score-black { background: #263238 !important; color: #fff !important; }
+.scoring-page.scoring-compact .compact-grid-scroll .score-end-row > .score-cell.selected.score-white,
+.scoring-page .score-end-row > .score-cell.selected.score-white { background: #fff !important; color: #111827 !important; }
+.scoring-page.scoring-compact .compact-grid-scroll .score-end-row > .score-cell.selected.score-miss,
+.scoring-page .score-end-row > .score-cell.selected.score-miss { background: #9ca3af !important; color: #fff !important; }
+.scoring-page.scoring-compact .compact-grid-scroll .score-end-row > .score-cell:empty,
+.scoring-page .score-end-row > .score-cell:empty {
+  background: #fff !important;
   background-image: none !important;
-  box-shadow: 0 0 0 2px rgba(230,107,79,.22) !important;
 }
-.scoring-page .score-cell.selected.score-yellow { background-color: #ffd84d !important; color: #111827 !important; }
-.scoring-page .score-cell.selected.score-red { background-color: #e53935 !important; color: #fff !important; }
-.scoring-page .score-cell.selected.score-blue { background-color: #1976d2 !important; color: #fff !important; }
-.scoring-page .score-cell.selected.score-black { background-color: #263238 !important; color: #fff !important; }
-.scoring-page .score-cell.selected.score-white { background-color: #fff !important; color: #111827 !important; }
-.scoring-page .score-cell.selected.score-miss { background-color: #9ca3af !important; color: #fff !important; }
-.scoring-page .score-cell.selected:not(.score-yellow):not(.score-red):not(.score-blue):not(.score-black):not(.score-white):not(.score-miss) { background-color: transparent !important; }
