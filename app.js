@@ -1434,7 +1434,8 @@ function setup() {
                     syncSetup();
                     S.setup.matrix=
                     '${escAttr(name)}';
-                    rerenderKeepScroll(setup)
+                    this.parentElement.querySelectorAll('.matrix-btn').forEach(b=>b.classList.remove('active'));
+                    this.classList.add('active')
                   "
                 >
                   ${esc(name)}
