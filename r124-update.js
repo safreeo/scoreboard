@@ -18,25 +18,26 @@
   new MutationObserver(()=>requestAnimationFrame(styleExitDialog)).observe(document.body,{childList:true,subtree:true});
   setTimeout(styleExitDialog,50);
 
-  // Only the Session Saved confirmation uses the grey Continue button.
+  // Session Saved dialog is generated dynamically. Style only its Continue button.
   function styleSavedDialog(){
-    document.querySelectorAll('h1,h2,h3,h4,.modal-title').forEach(title=>{
-      if(!/Session Saved|Sesi Disimpan/i.test(title.textContent||''))return;
-      let panel=title.parentElement;
-      for(let i=0;i<5 && panel && !panel.querySelector('button');i++)panel=panel.parentElement;
-      if(!panel || panel.id==='exitDialog')return;
-      panel.querySelectorAll('button').forEach(button=>{
-        if(!/CONTINUE SCORING|TERUSKAN SCORING|SAMBUNG SKOR/i.test(button.textContent||''))return;
+    document.querySelectorAll('button').forEach(button=>{
+      if(!/CONTINUE SCORING|TERUSKAN SCORING|SAMBUNG SKOR/i.test(button.textContent||''))return;
+      if(button.closest('#exitDialog'))return;
+      let node=button.parentElement, isSaved=false;
+      for(let i=0;node&&i<6;i++,node=node.parentElement){
+        if(/Session Saved|Sesi Disimpan/i.test(node.querySelector('h1,h2,h3,h4')?.textContent||'')){isSaved=true;break;}
+      }
+      if(isSaved){
         button.style.setProperty('background','#64748b','important');
         button.style.setProperty('background-color','#64748b','important');
         button.style.setProperty('border-color','#64748b','important');
         button.style.setProperty('color','#fff','important');
-      });
+      }
     });
   }
-  document.addEventListener('click',()=>setTimeout(styleSavedDialog,0),true);
-  new MutationObserver(()=>requestAnimationFrame(styleSavedDialog)).observe(document.body,{childList:true,subtree:true});
-  setTimeout(styleSavedDialog,80);
+  document.addEventListener('click',()=>requestAnimationFrame(styleSavedDialog),true);
+  new MutationObserver(()=>requestAnimationFrame(styleSavedDialog)).observe(document.getElementById('app')||document.body,{childList:true,subtree:true});
+  requestAnimationFrame(styleSavedDialog);
   const s=document.createElement('style');s.textContent=`
     #exitDialog .r124-pause{background:#687684!important;color:#fff!important;border-color:#687684!important}
     #exitDialog .r124-continue{background:#169b69!important;color:#fff!important;border-color:#169b69!important}
