@@ -849,27 +849,53 @@ function setDistanceMode(mode) {
 
 function setMultiCount(value) {
   const nextCount = Math.max(2, Math.min(8, Math.trunc(Number(value) || 2)));
-  preserveNextScrollY = window.scrollY;
   const m = ensureMultiSetup();
-  const oldDistances = m.distances.slice();
-  const oldEnds = m.endsByDistance.slice();
+  // Save visible values, but do not call syncSetup here: it reads the old count
+  // and can reintroduce hidden distance rows during a stepper change.
   for (let i = 0; i < m.count; i++) {
     const d = document.getElementById('multiDistance' + i);
     const e = document.getElementById('multiDistanceEnds' + i);
-    if (d && Number(d.value) > 0) oldDistances[i] = Number(d.value);
-    if (e && Number(e.value) > 0) oldEnds[i] = Number(e.value);
+    if (d && Number(d.value) > 0) m.distances[i] = Number(d.value);
+    if (e && Number(e.value) > 0) m.endsByDistance[i] = Number(e.value);
   }
-  // Sync other setup fields without letting the new count truncate existing values.
-  const countInput = document.getElementById('multiCount');
-  if (countInput) countInput.value = String(m.count);
-  syncSetup();
+  const oldDistances = m.distances.slice();
+  const oldEnds = m.endsByDistance.slice();
   m.count = nextCount;
   m.distances = oldDistances.slice(0, nextCount);
   m.endsByDistance = oldEnds.slice(0, nextCount);
   while (m.distances.length < nextCount) m.distances.push((m.distances.length + 1) * 10 + 20);
   while (m.endsByDistance.length < nextCount) m.endsByDistance.push(oldEnds[0] || 5);
   S.setup.ends = m.endsByDistance.reduce((sum, n) => sum + Math.max(1, Number(n) || 1), 0);
-  setup();
+  // Update the distance rows in place. Avoid a full setup rerender, which
+  // re-triggers legacy stepper/change handlers and causes count/row mismatch.
+  const grid = document.querySelector('.multi-distance-grid');
+  if (grid) {
+    grid.innerHTML = m.distances.map((d,i) => `
+      <div class="multi-distance-item">
+        <div class="setup-field"><label>Distance ${i+1} (m)</label><div class="input-unit">
+          <input id="multiDistance${i}" type="number" min="1" value="${d}" onchange="syncSetup(); refreshSetupAt('multiDistance${i}')">
+        </div></div>
+        <div class="setup-field"><label>Ends</label><div class="input-unit">
+          <input id="multiDistanceEnds${i}" type="number" min="1" value="${m.endsByDistance[i]}" onchange="syncSetup(); refreshSetupAt('multiDistanceEnds${i}')">
+        </div></div>
+      </div>`).join('');
+  }
+  // Update round sequence and preview without rebuilding the entire page.
+  const roundList = document.querySelector('.multi-round-list');
+  if (roundList) roundList.querySelectorAll('.multi-round-row').forEach((row,i)=>{
+    const seq=multiSequence(i+1);
+    const small=row.querySelector('small');
+    if(small)small.textContent=seq.map(x=>`${x.distance}m (${m.endsByDistance[x.originalIndex]}E)`).join(' → ');
+  });
+  const preview = document.querySelector('.multi-preview');
+  if(preview){
+    const totalEnds = multiTotalEnds() * Math.max(1,Number(S.setup.rounds)||1);
+    const totalArrows = totalEnds * Math.max(1,Number(S.setup.arrows)||1);
+    preview.innerHTML = '<b>FORMAT PREVIEW</b>' +
+      Array.from({length:Math.max(1,Number(S.setup.rounds)||1)},(_,i)=>
+        `<div>R${i+1}: ${multiSequence(i+1).map(x=>`${x.distance}m × ${m.endsByDistance[x.originalIndex]}E`).join(' → ')}</div>`).join('') +
+      `<small>${S.setup.arrows} Arrows/End • Total ${totalEnds} Ends • ${totalArrows} Arrows</small>`;
+  }
 }
 
 function setRoundOrder(index, value) {
@@ -967,7 +993,7 @@ function formatFieldsHTML() {
     <div class="multi-distance-panel">
       <div class="multi-top-grid multi-count-full">
         <div class="setup-field multi-count-field"><label>No. of Distances</label><div class="input-unit">
-          <input id="multiCount" type="number" min="2" max="8" value="${m.count}" oninput="setMultiCount(this.value)" onchange="setMultiCount(this.value)">
+          <input id="multiCount" type="number" min="2" max="8" value="${m.count}" onchange="setMultiCount(this.value)">
         </div></div>
       </div>
       <div class="multi-distance-grid">${distFields}</div>
