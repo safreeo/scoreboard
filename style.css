@@ -10251,5 +10251,3 @@ html.font-large .page { font-size: 1.125rem; }
   background-image: none !important;
 }
 
-/* R146: prevent browser scroll anchoring when multi-distance rows change. */
-.setup-page .multi-distance-grid, .setup-page .multi-distance-item, .setup-page .multi-preview, .setup-page .multi-round-list { overflow-anchor: none; }
