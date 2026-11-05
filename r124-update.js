@@ -19,6 +19,6 @@
   setTimeout(styleExitDialog,50);
   const s=document.createElement('style');s.textContent=`
     #exitDialog .r124-pause{background:#687684!important;color:#fff!important;border-color:#687684!important}
-    #exitDialog .r124-continue{background:#169b69!important;color:#fff!important;border-color:#169b69!important}
+    #exitDialog .r124-continue{background:#64748b!important;color:#fff!important;border-color:#64748b!important}
   `;document.head.appendChild(s);
 })();
