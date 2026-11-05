@@ -20,16 +20,17 @@
 
   // Only the Session Saved confirmation uses the grey Continue button.
   function styleSavedDialog(){
-    document.querySelectorAll('.modal-overlay').forEach(modal=>{
-      if(modal.id==='exitDialog')return;
-      const title=modal.querySelector('h3')?.textContent?.trim()||'';
-      if(!/Session Saved|Sesi Disimpan/i.test(title))return;
-      modal.querySelectorAll('button').forEach(b=>{
-        if(/CONTINUE SCORING|TERUSKAN SCORING|SAMBUNG SKOR/i.test(b.textContent||'')){
-          b.style.setProperty('background','#64748b','important');
-          b.style.setProperty('border-color','#64748b','important');
-          b.style.setProperty('color','#fff','important');
-        }
+    document.querySelectorAll('h1,h2,h3,h4,.modal-title').forEach(title=>{
+      if(!/Session Saved|Sesi Disimpan/i.test(title.textContent||''))return;
+      let panel=title.parentElement;
+      for(let i=0;i<5 && panel && !panel.querySelector('button');i++)panel=panel.parentElement;
+      if(!panel || panel.id==='exitDialog')return;
+      panel.querySelectorAll('button').forEach(button=>{
+        if(!/CONTINUE SCORING|TERUSKAN SCORING|SAMBUNG SKOR/i.test(button.textContent||''))return;
+        button.style.setProperty('background','#64748b','important');
+        button.style.setProperty('background-color','#64748b','important');
+        button.style.setProperty('border-color','#64748b','important');
+        button.style.setProperty('color','#fff','important');
       });
     });
   }
