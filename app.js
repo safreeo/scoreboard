@@ -871,15 +871,30 @@ function setMultiCount(value) {
   // re-triggers legacy stepper/change handlers and causes count/row mismatch.
   const grid = document.querySelector('.multi-distance-grid');
   if (grid) {
-    grid.innerHTML = m.distances.map((d,i) => `
-      <div class="multi-distance-item">
+    // Keep existing distance/ends inputs mounted. Replacing innerHTML caused
+    // mobile browser scroll anchoring and repeated stepper enhancement.
+    const rows = Array.from(grid.querySelectorAll('.multi-distance-item'));
+    while (rows.length > nextCount) {
+      rows.pop().remove();
+    }
+    for (let i = rows.length; i < nextCount; i++) {
+      const holder = document.createElement('div');
+      holder.innerHTML = `<div class="multi-distance-item">
         <div class="setup-field"><label>Distance ${i+1} (m)</label><div class="input-unit">
-          <input id="multiDistance${i}" type="number" min="1" value="${d}" onchange="syncSetup(); refreshSetupAt('multiDistance${i}')">
+          <input id="multiDistance${i}" type="number" min="1" value="${m.distances[i]}" onchange="syncSetup(); refreshSetupAt('multiDistance${i}')">
         </div></div>
         <div class="setup-field"><label>Ends</label><div class="input-unit">
           <input id="multiDistanceEnds${i}" type="number" min="1" value="${m.endsByDistance[i]}" onchange="syncSetup(); refreshSetupAt('multiDistanceEnds${i}')">
         </div></div>
-      </div>`).join('');
+      </div>`;
+      grid.appendChild(holder.firstElementChild);
+    }
+    for (let i = 0; i < Math.min(rows.length, nextCount); i++) {
+      const d = document.getElementById('multiDistance' + i);
+      const e = document.getElementById('multiDistanceEnds' + i);
+      if (d && document.activeElement !== d) d.value = m.distances[i];
+      if (e && document.activeElement !== e) e.value = m.endsByDistance[i];
+    }
   }
   // Update round sequence and preview without rebuilding the entire page.
   const roundList = document.querySelector('.multi-round-list');
