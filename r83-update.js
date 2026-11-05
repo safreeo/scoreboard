@@ -17,6 +17,17 @@
     lines.push(`🎯 *${title}*`);lines.push(`*${dt.date}* | ${dt.day} | ${dt.time}`);
     if(setup.practiceType==='target')lines.push(`${resultDistanceText(setup)} | ${setup.target}cm | ${setup.matrix} | ${r78Format(setup)}`);
     else lines.push(`${r77GameHeading(h,setup)} | ${r78Distance(setup)} | ${setup.matrix} | ${r78Format(setup)}`);
+    if(o.has('lane') || o.has('group')){
+      ranking.forEach(item=>{
+        const name=item.archer.name;
+        const lane=String(h.lanes?.[name] ?? (ranking.length===1?h.lanes?.__personal__:undefined) ?? '').trim();
+        const group=String(h.groups?.[name] ?? (ranking.length===1?h.groups?.__personal__:undefined) ?? '').trim();
+        const parts=[];
+        if(o.has('lane')&&lane)parts.push('Lane: '+lane);
+        if(o.has('group')&&group)parts.push('Group: '+group);
+        if(parts.length)lines.push(name+': '+parts.join(' | '));
+      });
+    }
     lines.push('--------------------------------------------------');
     const [l1,l2]=r77HighestLabels(setup.matrix),rounds=Math.max(1,Number(setup.rounds)||1);
     ranking.forEach((item,i)=>{
@@ -35,6 +46,8 @@
   r76OutputDialog=function(kind,index=viewHistoryIndex){
     document.getElementById('resultOutputDialog')?.remove();const pdf=kind==='pdf',bm=isBM(),overlay=document.createElement('div');overlay.id='resultOutputDialog';overlay.className='modal-overlay';
     const opts=pdf?[['title',bm?'Edit Tajuk':'Edit Title',false],['summary',bm?'Ringkasan Pemarkahan':'Scoring Summary',true],['arrowdetails',bm?'Butiran End Setiap Arrow':'Arrow-by-Arrow End Details',true],['highest',bm?'Dua Markah Matriks Tertinggi':'Two Highest Matrix Scores',true],['score',bm?'Markah %':'Score %',true],['average',bm?'Purata':'Average',true],['breakdown',bm?'Ketepatan & Pecahan Mata':'Accuracy & Point Breakdown',false]]:[['title',bm?'Edit Tajuk':'Edit Title',false],['highest',bm?'Dua Markah Matriks Tertinggi':'Two Highest Matrix Scores',true],['score',bm?'Markah %':'Score %',true],['average',bm?'Purata':'Average',true]];
+    // Add opt-in per-archer lane/group fields without changing existing defaults.
+    opts.push(['lane',bm?'Lorong':'Lane',false],['group',bm?'Kumpulan':'Group',false]);
     overlay.innerHTML=`<div class="modal-card"><h3>${pdf?(bm?'TETAPAN PDF':'PDF SETTINGS'):(bm?'TETAPAN WHATSAPP':'WHATSAPP SETTINGS')}</h3><div style="display:grid;gap:10px;text-align:left">${opts.map(([id,label,checked])=>`<label><input type="checkbox" data-output="${id}" ${checked?'checked':''} onchange="r76TitleToggle(this)"> ${label}</label>`).join('')}<div id="r76TitleBox" hidden><label class="field-label">${bm?'Tajuk Baharu':'New Title'}</label><input id="r76OutputTitle" placeholder="${bm?'Masukkan tajuk baharu':'Enter new title'}"></div></div><div class="modal-actions r85-output-actions">${pdf?`<button class="btn primary" onclick="r76RunOutput('pdf',${index})">${bm?'CETAK / SIMPAN PDF':'PRINT / SAVE PDF'}</button><button class="btn green" onclick="r85DownloadPDF(${index})">${bm?'MUAT TURUN PDF':'DOWNLOAD PDF'}</button>`:`<button class="btn green" onclick="r76RunOutput('whatsapp',${index})">${bm?'KONGSI KE WHATSAPP':'SHARE TO WHATSAPP'}</button>`}<button class="btn soft" onclick="closeModal('resultOutputDialog')">${bm?'TUTUP':'CLOSE'}</button></div></div>`;document.body.appendChild(overlay);
   };
   window.r85DownloadPDF=function(index){const h=S.history[index];if(!h)return;const selected=r76Selected();r76ApplyTitle(h,selected);closeModal('resultOutputDialog');r76Print(h,selected)};
