@@ -1133,6 +1133,18 @@ function syncSetup() {
 }
 
 
+function toggleSetupLocationOption(kind) {
+  // Update only the Lane/Group fields, without rebuilding the entire Setup page.
+  syncSetup();
+  const options = document.querySelector('.setup-options');
+  if (!options) return;
+  const cards = options.parentElement;
+  cards.querySelectorAll(':scope > .lane-box').forEach(box => box.remove());
+  const holder = document.createElement('div');
+  holder.innerHTML = laneHTML() + groupHTML();
+  while (holder.firstElementChild) cards.insertBefore(holder.firstElementChild, options.nextElementSibling);
+}
+
 function setup() {
 
   const unfinished =
@@ -1350,10 +1362,7 @@ function setup() {
                   ? "checked"
                   : ""
               }
-              onchange="
-                syncSetup();
-                refreshSetupAt('laneOpt')
-              "
+              onchange="toggleSetupLocationOption('lane')"
             >
 
             Lane
@@ -1365,7 +1374,7 @@ function setup() {
               id="groupOpt"
               type="checkbox"
               ${S.setup.group ? "checked" : ""}
-              onchange="syncSetup(); refreshSetupAt('groupOpt')"
+              onchange="toggleSetupLocationOption('group')"
             >
             Group
           </label>
