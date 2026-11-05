@@ -19,4 +19,4 @@ const r80s=document.createElement('style');r80s.textContent=`
 .r80-footer{margin-top:12px;color:#fff;font-size:.72rem;font-weight:800;text-shadow:0 2px 3px #000;padding-bottom:max(2px,env(safe-area-inset-bottom))}
 @media(max-height:700px){.r80-logo{width:96px;height:96px}.r80-title{font-size:38px}.r80-year{font-size:27px;margin-bottom:9px}.r80-menu{gap:6px}.r80-btn{min-height:49px}}
 `;document.head.appendChild(r80s);
-const r80Info=info;info=function(tab=null){r80Info(tab);const meta=document.querySelector('.info-meta');if(meta){const spans=meta.querySelectorAll('span'),bm=infoLang==='BM';if(spans[0])spans[0].innerHTML=`<b>${bm?'Versi Aplikasi':'App Version'}:</b> 1.1.79 (R146)`;if(spans[1])spans[1].innerHTML=`<b>${bm?'Kemas Kini Terakhir':'Last Updated'}:</b> 5 November 2026`}}};
+const r80Info=info;info=function(tab=null){r80Info(tab);const meta=document.querySelector('.info-meta');if(meta){const spans=meta.querySelectorAll('span'),bm=infoLang==='BM';if(spans[0])spans[0].innerHTML=`<b>${bm?'Versi Aplikasi':'App Version'}:</b> 1.1.80 (R147)`;if(spans[1])spans[1].innerHTML=`<b>${bm?'Kemas Kini Terakhir':'Last Updated'}:</b> 5 November 2026`}}};
