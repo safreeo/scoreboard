@@ -849,6 +849,7 @@ function setDistanceMode(mode) {
 
 function setMultiCount(value) {
   const scrollBefore = window.scrollY;
+  const heightBefore = document.documentElement.scrollHeight;
   const countAnchor = document.getElementById("multiCount");
   const anchorBefore = countAnchor?.getBoundingClientRect().top;
   const nextCount = Math.max(2, Math.min(8, Math.trunc(Number(value) || 2)));
@@ -913,6 +914,18 @@ function setMultiCount(value) {
       Array.from({length:Math.max(1,Number(S.setup.rounds)||1)},(_,i)=>
         `<div>R${i+1}: ${multiSequence(i+1).map(x=>`${x.distance}m × ${m.endsByDistance[x.originalIndex]}E`).join(' → ')}</div>`).join('') +
       `<small>${S.setup.arrows} Arrows/End • Total ${totalEnds} Ends • ${totalArrows} Arrows</small>`;
+  }
+  // Keep the previous scroll range when removing the final distance row.
+  // Otherwise the browser clamps scrollY before a scroll restoration can run.
+  const pageEl = document.querySelector('.setup-page');
+  if (pageEl) {
+    const lostHeight = Math.max(0, heightBefore - document.documentElement.scrollHeight);
+    if (lostHeight > 0) {
+      const previous = Number(pageEl.dataset.distanceScrollReserve || 0);
+      const reserve = previous + lostHeight;
+      pageEl.style.paddingBottom = reserve + 'px';
+      pageEl.dataset.distanceScrollReserve = String(reserve);
+    }
   }
   // Restore the count control to its exact visual position, including on
   // mobile browsers that adjust scroll anchoring after a layout change.
@@ -1125,6 +1138,11 @@ function syncSetup() {
     S.setup.group = group.checked;
   }
 
+
+  // Persist per-archer group values before any setup rerender.
+  document.querySelectorAll('[data-group]').forEach(el => {
+    S.groups[el.dataset.group] = el.value;
+  });
 
   document
     .querySelectorAll(
