@@ -1142,7 +1142,8 @@ function toggleSetupLocationOption(kind) {
   cards.querySelectorAll(':scope > .lane-box').forEach(box => box.remove());
   const holder = document.createElement('div');
   holder.innerHTML = laneHTML() + groupHTML();
-  while (holder.firstElementChild) cards.insertBefore(holder.firstElementChild, options.nextElementSibling);
+  const next = options.nextElementSibling;
+  while (holder.firstElementChild) cards.insertBefore(holder.firstElementChild, next);
 }
 
 function setup() {
