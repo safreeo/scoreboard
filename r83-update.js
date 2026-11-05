@@ -91,7 +91,7 @@
   function enhanceNumberInputs(){
     if(currentView!=='setup')return;
     document.querySelectorAll('.page input[type="number"]').forEach(input=>{
-      if(input.closest('.r85-stepper')||input.dataset.r85Stepper)return;input.dataset.r85Stepper='1';
+      if(input.id==='multiCount'||input.closest('.r82-stepper-box')||input.closest('.r85-stepper')||input.dataset.r85Stepper)return;input.dataset.r85Stepper='1';
       const wrap=document.createElement('div');wrap.className='r85-stepper';input.parentNode.insertBefore(wrap,input);wrap.appendChild(input);
       const controls=document.createElement('div');controls.className='r85-step-controls';controls.innerHTML='<button type="button" aria-label="Increase">▲</button><button type="button" aria-label="Decrease">▼</button>';wrap.appendChild(controls);
       const step=dir=>{const old=Number(input.value)||0,inc=Number(input.step)||1,min=input.min!==''?Number(input.min):-Infinity,max=input.max!==''?Number(input.max):Infinity;input.value=String(Math.min(max,Math.max(min,old+dir*inc)));input.dispatchEvent(new Event('input',{bubbles:true}));input.dispatchEvent(new Event('change',{bubbles:true}))};
