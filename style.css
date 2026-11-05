@@ -10251,3 +10251,6 @@ html.font-large .page { font-size: 1.125rem; }
   background-image: none !important;
 }
 
+
+/* R151: compact normal-weight whistle choice labels. */
+#whistleSoundChoices button{font-size:13px!important;font-weight:400!important;line-height:1.3!important}
