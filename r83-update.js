@@ -17,22 +17,16 @@
     lines.push(`🎯 *${title}*`);lines.push(`*${dt.date}* | ${dt.day} | ${dt.time}`);
     if(setup.practiceType==='target')lines.push(`${resultDistanceText(setup)} | ${setup.target}cm | ${setup.matrix} | ${r78Format(setup)}`);
     else lines.push(`${r77GameHeading(h,setup)} | ${r78Distance(setup)} | ${setup.matrix} | ${r78Format(setup)}`);
-    if(o.has('lane') || o.has('group')){
-      ranking.forEach(item=>{
-        const name=item.archer.name;
-        const lane=String(h.lanes?.[name] ?? (ranking.length===1?h.lanes?.__personal__:undefined) ?? '').trim();
-        const group=String(h.groups?.[name] ?? (ranking.length===1?h.groups?.__personal__:undefined) ?? '').trim();
-        const parts=[];
-        if(o.has('lane')&&lane)parts.push('Lane: '+lane);
-        if(o.has('group')&&group)parts.push('Group: '+group);
-        if(parts.length)lines.push(name+': '+parts.join(' | '));
-      });
-    }
     lines.push('--------------------------------------------------');
     const [l1,l2]=r77HighestLabels(setup.matrix),rounds=Math.max(1,Number(setup.rounds)||1);
     ranking.forEach((item,i)=>{
       const a=item.archer,m=item.metrics,[c1,c2]=r77HighestCounts(a,setup.matrix),detail=[];
-      lines.push(`${i+1}. *${a.name}*: ${m.total}/${max} pts`);
+      const lane=String(h.lanes?.[a.name] ?? (ranking.length===1?h.lanes?.__personal__:undefined) ?? '').trim();
+      const group=String(h.groups?.[a.name] ?? (ranking.length===1?h.groups?.__personal__:undefined) ?? '').trim();
+      const tags=[];
+      if(o.has('lane')&&lane)tags.push('L'+lane);
+      if(o.has('group')&&group)tags.push('G'+group);
+      lines.push(`${i+1}. *${a.name}*: ${m.total}/${max} pts${tags.length?' ('+tags.join(', ')+')':''}`);
       if(rounds>1)for(let r=1;r<=rounds;r++)detail.push(`R${r}:${r78RoundTotal(a,r,setup)}`);
       if(o.has('highest')){detail.push(`${l1}:${c1}`);detail.push(`${l2}:${c2}`)}
       if(o.has('average'))detail.push(`${bm?'Purata':'Avg'}:${m.avg.toFixed(2)}`);
