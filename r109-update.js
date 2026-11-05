@@ -42,6 +42,13 @@
     const dist=typeof resultDistanceText==='function'?resultDistanceText(setup):String(setup.distance||'');
     const fmt=typeof r78Format==='function'?r78Format(setup):'';
     const meta=`<table class="meta"><tr><th>${T.date}</th><td>${dt.date} | ${dt.day} | ${dt.time}</td></tr>${h.location?`<tr><th>${T.loc}</th><td>${esc(h.location)}</td></tr>`:''}<tr><th>${T.dist}</th><td>${esc(dist)}</td></tr>${setup.practiceType==='target'?`<tr><th>${T.face}</th><td>${esc(setup.target)}cm</td></tr>`:''}<tr><th>${T.matrix}</th><td>${esc(setup.matrix)}</td></tr><tr><th>${T.format}</th><td>${esc(fmt)}</td></tr></table>`;
+    const laneGroupRows=(o.has('lane')||o.has('group'))?ranking.map(item=>{
+      const name=item.archer.name;
+      const lane=String(h.lanes?.[name] ?? (ranking.length===1?h.lanes?.__personal__:undefined) ?? '').trim();
+      const group=String(h.groups?.[name] ?? (ranking.length===1?h.groups?.__personal__:undefined) ?? '').trim();
+      return `<tr><td>${esc(name)}</td>${o.has('lane')?`<td>${esc(lane||'-')}</td>`:''}${o.has('group')?`<td>${esc(group||'-')}</td>`:''}</tr>`;
+    }).join(''):'';
+    const laneGroupTable=laneGroupRows?`<h2>${bm?'Maklumat Lorong / Kumpulan':'Lane / Group Details'}</h2><table><thead><tr><th>${T.archer}</th>${o.has('lane')?'<th>Lane</th>':''}${o.has('group')?'<th>Group</th>':''}</tr></thead><tbody>${laneGroupRows}</tbody></table>`:'';
     const details=o.has('summary')?`<h2>${T.summary}</h2><table><thead><tr>${th}</tr></thead><tbody>${rows}</tbody></table>`:'';
     const arrows=Math.max(1,Number(setup.arrows)||1),rounds=Math.max(1,Number(setup.rounds)||1);
     const arrowDetails=o.has('arrowdetails')?ranking.map(item=>{
@@ -54,7 +61,7 @@
     }).join(''):'';
     const breakdown=o.has('breakdown')?ranking.map(item=>`<h3>${esc(item.archer.name)} — ${bm?'Ketepatan & Pecahan Mata':'Accuracy & Point Breakdown'}</h3>${archerSessionBreakdownHTML(item.archer,setup.matrix)}`).join(''):'';
     const title=h.title&&h.title!=='Archery Detailed Results'?h.title:T.title;
-    w.document.write(`<!doctype html><html><head><title>${esc(title)}</title><style>body{font-family:Arial,sans-serif;padding:24px;color:#111}h1{text-align:center;font-size:24px}h2{font-size:18px;margin-top:22px}h3{margin-top:22px}h4{margin:18px 0 8px}table{width:100%;border-collapse:collapse;margin:10px 0 22px}th,td{border:1px solid #999;padding:7px;text-align:center}.meta th{text-align:left;width:34%}.meta td{text-align:left}tfoot td{background:#eef3f7}.breakdown-row{display:grid;grid-template-columns:90px 1fr 60px;gap:8px;margin:6px 0}.breakdown-track{background:#ddd}.breakdown-fill{height:18px;background:#555}.footer{text-align:center;margin-top:30px;font-weight:bold}@media print{button{display:none}}</style></head><body><h1>${esc(title)}</h1>${meta}${details}${arrowDetails}${breakdown}<div class="footer">PWA: SCOREBOARD</div><script>window.onload=()=>setTimeout(()=>window.print(),150)<\/script></body></html>`);w.document.close();
+    w.document.write(`<!doctype html><html><head><title>${esc(title)}</title><style>body{font-family:Arial,sans-serif;padding:24px;color:#111}h1{text-align:center;font-size:24px}h2{font-size:18px;margin-top:22px}h3{margin-top:22px}h4{margin:18px 0 8px}table{width:100%;border-collapse:collapse;margin:10px 0 22px}th,td{border:1px solid #999;padding:7px;text-align:center}.meta th{text-align:left;width:34%}.meta td{text-align:left}tfoot td{background:#eef3f7}.breakdown-row{display:grid;grid-template-columns:90px 1fr 60px;gap:8px;margin:6px 0}.breakdown-track{background:#ddd}.breakdown-fill{height:18px;background:#555}.footer{text-align:center;margin-top:30px;font-weight:bold}@media print{button{display:none}}</style></head><body><h1>${esc(title)}</h1>${meta}${laneGroupTable}${details}${arrowDetails}${breakdown}<div class="footer">PWA: SCOREBOARD</div><script>window.onload=()=>setTimeout(()=>window.print(),150)<\/script></body></html>`);w.document.close();
   };
 
   function enhanceUI(){
