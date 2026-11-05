@@ -849,6 +849,8 @@ function setDistanceMode(mode) {
 
 function setMultiCount(value) {
   const scrollBefore = window.scrollY;
+  const countAnchor = document.getElementById("multiCount");
+  const anchorBefore = countAnchor?.getBoundingClientRect().top;
   const nextCount = Math.max(2, Math.min(8, Math.trunc(Number(value) || 2)));
   const m = ensureMultiSetup();
   // Save visible values, but do not call syncSetup here: it reads the old count
@@ -912,9 +914,17 @@ function setMultiCount(value) {
         `<div>R${i+1}: ${multiSequence(i+1).map(x=>`${x.distance}m × ${m.endsByDistance[x.originalIndex]}E`).join(' → ')}</div>`).join('') +
       `<small>${S.setup.arrows} Arrows/End • Total ${totalEnds} Ends • ${totalArrows} Arrows</small>`;
   }
-  // Preserve viewport position while the distance grid grows/shrinks.
+  // Restore the count control to its exact visual position, including on
+  // mobile browsers that adjust scroll anchoring after a layout change.
+  const restoreCountPosition = () => {
+    const anchor = document.getElementById("multiCount");
+    if (!anchor || anchorBefore == null) return;
+    const delta = anchor.getBoundingClientRect().top - anchorBefore;
+    if (Math.abs(delta) > 0.5) window.scrollBy(0, delta);
+  };
   window.scrollTo(0, scrollBefore);
-  requestAnimationFrame(() => window.scrollTo(0, scrollBefore));
+  restoreCountPosition();
+  requestAnimationFrame(() => { restoreCountPosition(); requestAnimationFrame(restoreCountPosition); });
 }
 
 function setRoundOrder(index, value) {
