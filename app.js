@@ -848,6 +848,7 @@ function setDistanceMode(mode) {
 }
 
 function setMultiCount(value) {
+  const scrollBefore = window.scrollY;
   const nextCount = Math.max(2, Math.min(8, Math.trunc(Number(value) || 2)));
   const m = ensureMultiSetup();
   // Save visible values, but do not call syncSetup here: it reads the old count
@@ -896,6 +897,9 @@ function setMultiCount(value) {
         `<div>R${i+1}: ${multiSequence(i+1).map(x=>`${x.distance}m × ${m.endsByDistance[x.originalIndex]}E`).join(' → ')}</div>`).join('') +
       `<small>${S.setup.arrows} Arrows/End • Total ${totalEnds} Ends • ${totalArrows} Arrows</small>`;
   }
+  // Preserve viewport position while the distance grid grows/shrinks.
+  window.scrollTo(0, scrollBefore);
+  requestAnimationFrame(() => window.scrollTo(0, scrollBefore));
 }
 
 function setRoundOrder(index, value) {
