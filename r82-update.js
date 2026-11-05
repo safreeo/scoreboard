@@ -111,8 +111,8 @@
   }
   style();
   document.addEventListener('DOMContentLoaded',schedule,{once:true});
-  document.addEventListener('click',schedule,true);
-  document.addEventListener('change',schedule,true);
+  document.addEventListener('click',e=>{if(e.target.closest?.('.r82-step-controls'))return;schedule();},true);
+  document.addEventListener('change',e=>{if(e.target.closest?.('.r82-stepper-box'))return;schedule();},true);
   window.addEventListener('popstate',schedule);
   setTimeout(schedule,150);
 })();
