@@ -8986,6 +8986,15 @@ function settings() {
       </div>
 
 
+      <label class="field-label">Whistle Sound</label>
+      <div class="setting-choice" id="whistleSoundChoices">
+        <button type="button" class="${(timerDraft.whistleSound||'classic')==='classic'?'active':''}" onclick="selectWhistleSound('classic')">Classic Whistle</button>
+        <button type="button" class="${timerDraft.whistleSound==='sharp'?'active':''}" onclick="selectWhistleSound('sharp')">Sharp Whistle</button>
+      </div>
+      <div class="row">
+        <button class="btn soft" type="button" onclick="testWhistle()">PREVIEW SELECTED SOUND</button>
+      </div>
+
       <label class="field-label">
         Whistle Volume
       </label>
@@ -9149,11 +9158,20 @@ function readTimerDraftFromForm() {
   const volume = document.getElementById("whistleVolume");
   timerDraft = {
     ...S.timer,
+    whistleSound: timerDraft?.whistleSound || S.timer.whistleSound || 'classic',
     prep: Math.max(1, Number(prep?.value) || 10),
     shoot: Math.max(1, Number(shoot?.value) || 120),
     warn: Math.max(1, Number(warn?.value) || 10),
     volume: Math.max(0, Math.min(100, Number(volume?.value) || 0))
   };
+}
+
+function selectWhistleSound(sound) {
+  if (!timerDraft) timerDraft={...S.timer};
+  timerDraft.whistleSound=sound==='sharp'?'sharp':'classic';
+  timerDirty=true;
+  document.querySelectorAll('#whistleSoundChoices button').forEach((b,i)=>b.classList.toggle('active',i===(timerDraft.whistleSound==='sharp'?1:0)));
+  document.getElementById('timerSaveActions')?.classList.add('show');
 }
 
 function timerSettingChanged() {
@@ -9210,6 +9228,25 @@ function playWhistleOnce(
    * Use real whistle audio when
    * assets/referee-whistle.mp3 is available.
    */
+
+  const selectedSound = (timerDirty && timerDraft ? timerDraft.whistleSound : S.timer.whistleSound) || 'classic';
+  if (selectedSound === 'sharp') {
+    try {
+      audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+      if(audioCtx.state==='suspended') audioCtx.resume();
+      const osc=audioCtx.createOscillator(), gain=audioCtx.createGain(), now=audioCtx.currentTime;
+      const duration=Math.min(0.65,Math.max(0.12,(maxDurationMs||420)/1000));
+      osc.type='triangle';
+      osc.frequency.setValueAtTime(2350,now);
+      osc.frequency.linearRampToValueAtTime(2850,now+duration);
+      gain.gain.setValueAtTime(0.0001,now);
+      gain.gain.exponentialRampToValueAtTime(Math.max(0.0001,volume*0.15),now+0.018);
+      gain.gain.setValueAtTime(Math.max(0.0001,volume*0.15),now+Math.max(0.02,duration-0.05));
+      gain.gain.exponentialRampToValueAtTime(0.0001,now+duration);
+      osc.connect(gain);gain.connect(audioCtx.destination);osc.start(now);osc.stop(now+duration+0.01);
+    } catch(err) { console.warn('Sharp whistle preview unavailable',err); }
+    return;
+  }
 
   const audio =
     new Audio(
