@@ -848,15 +848,27 @@ function setDistanceMode(mode) {
 }
 
 function setMultiCount(value) {
-  syncSetup();
+  // Read all existing distance/ends fields before changing their count.
+  // Do not let syncSetup() overwrite the requested count prematurely.
+  const nextCount = Math.max(2, Math.min(8, Math.trunc(Number(value) || 2)));
   preserveNextScrollY = window.scrollY;
   const m = ensureMultiSetup();
-  m.count = Math.max(2, Math.min(8, Number(value) || 2));
-  m.distances = m.distances.slice(0, m.count);
-  m.endsByDistance = m.endsByDistance.slice(0, m.count);
-  while (m.distances.length < m.count) m.distances.push((m.distances.length + 1) * 10 + 20);
-  while (m.endsByDistance.length < m.count) m.endsByDistance.push(m.endsByDistance[0] || 5);
-  S.setup.ends = multiTotalEnds();
+  const oldCount = m.count;
+  const oldDistances = m.distances.slice();
+  const oldEnds = m.endsByDistance.slice();
+  for (let i = 0; i < oldCount; i++) {
+    const distanceInput = document.getElementById('multiDistance' + i);
+    const endsInput = document.getElementById('multiDistanceEnds' + i);
+    if (distanceInput && Number(distanceInput.value) > 0) oldDistances[i] = Number(distanceInput.value);
+    if (endsInput && Number(endsInput.value) > 0) oldEnds[i] = Number(endsInput.value);
+  }
+  syncSetup();
+  m.count = nextCount;
+  m.distances = oldDistances.slice(0, nextCount);
+  m.endsByDistance = oldEnds.slice(0, nextCount);
+  while (m.distances.length < nextCount) m.distances.push((m.distances.length + 1) * 10 + 20);
+  while (m.endsByDistance.length < nextCount) m.endsByDistance.push(oldEnds[0] || 5);
+  S.setup.ends = m.endsByDistance.reduce((sum, n) => sum + Math.max(1, Number(n) || 1), 0);
   setup();
 }
 
@@ -2090,10 +2102,11 @@ function applyPreset(i) {
   syncSetup();
 
 
-  Object.assign(
-    S.setup,
-    S.presets[i]
-  );
+  // Presets describe shooting format, not the user's selected practice mode.
+  const currentMode = S.setup.mode;
+  Object.assign(S.setup, S.presets[i]);
+  S.setup.mode = currentMode;
+
 
 
   editingPreset =
