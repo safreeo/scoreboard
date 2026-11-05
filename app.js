@@ -849,7 +849,6 @@ function setDistanceMode(mode) {
 
 function setMultiCount(value) {
   const scrollBefore = window.scrollY;
-  const heightBefore = document.documentElement.scrollHeight;
   const countAnchor = document.getElementById("multiCount");
   const anchorBefore = countAnchor?.getBoundingClientRect().top;
   const nextCount = Math.max(2, Math.min(8, Math.trunc(Number(value) || 2)));
@@ -874,6 +873,7 @@ function setMultiCount(value) {
   // re-triggers legacy stepper/change handlers and causes count/row mismatch.
   const grid = document.querySelector('.multi-distance-grid');
   if (grid) {
+    const oldGridHeight = grid.getBoundingClientRect().height;
     // Keep existing distance/ends inputs mounted. Replacing innerHTML caused
     // mobile browser scroll anchoring and repeated stepper enhancement.
     const rows = Array.from(grid.querySelectorAll('.multi-distance-item'));
@@ -892,6 +892,10 @@ function setMultiCount(value) {
       </div>`;
       grid.appendChild(holder.firstElementChild);
     }
+    // Keep grid height at least as large as previously rendered to prevent
+    // viewport scroll clamping when the final row is removed.
+    grid.style.minHeight = Math.max(oldGridHeight, Number(grid.dataset.maxHeight || 0)) + "px";
+    grid.dataset.maxHeight = String(Math.max(oldGridHeight, Number(grid.dataset.maxHeight || 0)));
     for (let i = 0; i < Math.min(rows.length, nextCount); i++) {
       const d = document.getElementById('multiDistance' + i);
       const e = document.getElementById('multiDistanceEnds' + i);
@@ -914,18 +918,6 @@ function setMultiCount(value) {
       Array.from({length:Math.max(1,Number(S.setup.rounds)||1)},(_,i)=>
         `<div>R${i+1}: ${multiSequence(i+1).map(x=>`${x.distance}m × ${m.endsByDistance[x.originalIndex]}E`).join(' → ')}</div>`).join('') +
       `<small>${S.setup.arrows} Arrows/End • Total ${totalEnds} Ends • ${totalArrows} Arrows</small>`;
-  }
-  // Keep the previous scroll range when removing the final distance row.
-  // Otherwise the browser clamps scrollY before a scroll restoration can run.
-  const pageEl = document.querySelector('.setup-page');
-  if (pageEl) {
-    const lostHeight = Math.max(0, heightBefore - document.documentElement.scrollHeight);
-    if (lostHeight > 0) {
-      const previous = Number(pageEl.dataset.distanceScrollReserve || 0);
-      const reserve = previous + lostHeight;
-      pageEl.style.paddingBottom = reserve + 'px';
-      pageEl.dataset.distanceScrollReserve = String(reserve);
-    }
   }
   // Restore the count control to its exact visual position, including on
   // mobile browsers that adjust scroll anchoring after a layout change.
