@@ -8989,7 +8989,7 @@ function settings() {
       <label class="field-label">Whistle Sound</label>
       <div class="setting-choice" id="whistleSoundChoices">
         <button type="button" class="${(timerDraft.whistleSound||'classic')==='classic'?'active':''}" onclick="selectWhistleSound('classic')">Classic Whistle</button>
-        <button type="button" class="${timerDraft.whistleSound==='modern'?'active':''}" onclick="selectWhistleSound('sharp')">Modern Whistle</button>
+        <button type="button" class="${timerDraft.whistleSound==='modern'?'active':''}" onclick="selectWhistleSound('modern')">Modern Whistle</button>
       </div>
       <div class="row">
         <button class="btn soft" type="button" onclick="testWhistle()">PREVIEW SELECTED SOUND</button>
