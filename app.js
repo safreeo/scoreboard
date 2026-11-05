@@ -776,7 +776,7 @@ function startPracticeSetup() {
 }
 
 function resetFormatOptions() {
-  S.setup.mode = "personal";
+  // Preserve the selected PERSONAL/TEAM mode across format changes.
   S.setup.timer = false;
   S.setup.lane = false;
   S.setup.group = false;
@@ -848,20 +848,20 @@ function setDistanceMode(mode) {
 }
 
 function setMultiCount(value) {
-  // Read all existing distance/ends fields before changing their count.
-  // Do not let syncSetup() overwrite the requested count prematurely.
   const nextCount = Math.max(2, Math.min(8, Math.trunc(Number(value) || 2)));
   preserveNextScrollY = window.scrollY;
   const m = ensureMultiSetup();
-  const oldCount = m.count;
   const oldDistances = m.distances.slice();
   const oldEnds = m.endsByDistance.slice();
-  for (let i = 0; i < oldCount; i++) {
-    const distanceInput = document.getElementById('multiDistance' + i);
-    const endsInput = document.getElementById('multiDistanceEnds' + i);
-    if (distanceInput && Number(distanceInput.value) > 0) oldDistances[i] = Number(distanceInput.value);
-    if (endsInput && Number(endsInput.value) > 0) oldEnds[i] = Number(endsInput.value);
+  for (let i = 0; i < m.count; i++) {
+    const d = document.getElementById('multiDistance' + i);
+    const e = document.getElementById('multiDistanceEnds' + i);
+    if (d && Number(d.value) > 0) oldDistances[i] = Number(d.value);
+    if (e && Number(e.value) > 0) oldEnds[i] = Number(e.value);
   }
+  // Sync other setup fields without letting the new count truncate existing values.
+  const countInput = document.getElementById('multiCount');
+  if (countInput) countInput.value = String(m.count);
   syncSetup();
   m.count = nextCount;
   m.distances = oldDistances.slice(0, nextCount);
@@ -967,7 +967,7 @@ function formatFieldsHTML() {
     <div class="multi-distance-panel">
       <div class="multi-top-grid multi-count-full">
         <div class="setup-field multi-count-field"><label>No. of Distances</label><div class="input-unit">
-          <input id="multiCount" type="number" min="2" max="8" value="${m.count}" onchange="setMultiCount(this.value)">
+          <input id="multiCount" type="number" min="2" max="8" value="${m.count}" oninput="setMultiCount(this.value)" onchange="setMultiCount(this.value)">
         </div></div>
       </div>
       <div class="multi-distance-grid">${distFields}</div>
