@@ -118,4 +118,4 @@ document.head.appendChild(r78Style);
 
 /* ---------- Application Info R79 ---------- */
 const r78Info=info;
-info=function(tab=null){r78Info(tab);const meta=document.querySelector('.info-meta');if(meta){const spans=meta.querySelectorAll('span'),bm=infoLang==='BM';if(spans[0])spans[0].innerHTML=`<b>${bm?'Versi Aplikasi':'App Version'}:</b> 1.1.82 (R149)`;if(spans[1])spans[1].innerHTML=`<b>${bm?'Kemas Kini Terakhir':'Last Updated'}:</b> 6 November 2026`}};
+info=function(tab=null){r78Info(tab);const meta=document.querySelector('.info-meta');if(meta){const spans=meta.querySelectorAll('span'),bm=infoLang==='BM';if(spans[0])spans[0].innerHTML=`<b>${bm?'Versi Aplikasi':'App Version'}:</b> 1.1.83 (R150)`;if(spans[1])spans[1].innerHTML=`<b>${bm?'Kemas Kini Terakhir':'Last Updated'}:</b> 6 November 2026`}};
