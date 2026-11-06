@@ -8,7 +8,7 @@
       if(/PAUSE SESSION|JEDA SESI/i.test(t)){
         b.classList.add('r124-pause');
         b.classList.remove('green','primary');
-      }else if(/CONTINUE SCORING|TERUSKAN SCORING/i.test(t)){
+      }else if(/CONTINUE SCORING|TERUSKAN SCORING/i.test(t) && !d.querySelector('.r109-exit-dialog')){
         b.classList.add('r124-continue');
         b.classList.remove('soft','primary');
       }
@@ -40,6 +40,6 @@
   requestAnimationFrame(styleSavedDialog);
   const s=document.createElement('style');s.textContent=`
     #exitDialog .r124-pause{background:#687684!important;color:#fff!important;border-color:#687684!important}
-    #exitDialog .r124-continue{background:#169b69!important;color:#fff!important;border-color:#169b69!important}
+    #exitDialog .r124-continue{background:#169b69!important;color:#fff!important;border-color:#169b69!important}\n    #exitDialog .r109-exit-dialog .r109-exit-actions button:last-child{background:#64748b!important;background-color:#64748b!important;color:#fff!important;border-color:#64748b!important}
   `;document.head.appendChild(s);
 })();
