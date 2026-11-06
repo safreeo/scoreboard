@@ -26,7 +26,7 @@
       <p>${bm?'Keputusan sesi ini telah disimpan. Anda boleh keluar ke Home tanpa membuang keputusan.':'This session has been saved. You can exit to Home without discarding the result.'}</p>
       <div class="modal-actions r109-exit-actions">
         <button class="btn green" type="button" onclick="exitSavedSession()">${bm?'SIMPAN & KELUAR KE HOME':'SAVED & EXIT TO HOME'}</button>
-        <button class="btn soft" type="button" onclick="closeExitDialog()">${bm?'TERUSKAN SCORING':'CONTINUE SCORING'}</button>
+        <button class="btn soft r109-saved-continue" type="button" style="background:#64748b;color:#fff;border-color:#64748b" onclick="closeExitDialog()">${bm?'TERUSKAN SCORING':'CONTINUE SCORING'}</button>
       </div>
     </div>`;
     document.body.appendChild(o);
