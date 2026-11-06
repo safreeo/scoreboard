@@ -52,6 +52,38 @@
       preview.innerHTML='<b>FORMAT PREVIEW</b>'+Array.from({length:n},(_,i)=>'<div>R'+(i+1)+': '+multiSequence(i+1).map(x=>x.distance+'m × '+m.endsByDistance[x.originalIndex]+'E').join(' → ')+'</div>').join('')+'<small>'+S.setup.arrows+' Arrows/End • Total '+totalEnds+' Ends • '+totalArrows+' Arrows</small>';
     }
   }
+  // Repair legacy preset labels after all earlier UI patches have run.
+  // Read the actual saved preset, not the currently selected format.
+  function refreshPresetLabels(){
+    const rows=document.querySelectorAll('.setup-page .preset-list .preset-row');
+    if(!rows.length||!Array.isArray(S.presets))return;
+    rows.forEach((row,i)=>{
+      const p=S.presets[i], label=row.querySelector('.preset-select small');
+      if(!p||!label)return;
+      const type=String(p.practiceType||'target').toLowerCase();
+      const game=type==='3d'||type==='2d';
+      const m=p.multi||{};
+      const ds=p.distanceMode==='multiple'&&!game&&Array.isArray(m.distances)
+        ?m.distances.slice(0,Math.max(1,Number(m.count)||m.distances.length)).filter(v=>Number(v)>0):[];
+      const dist=game?(Number(p.gameMinDistance)||5)+'~'+(Number(p.gameMaxDistance)||30)+'M'
+        :ds.length?ds.join('/')+'M':(Number(p.distance)||30)+'M';
+      const cp=game?(Number(p.checkPoints)||Number(p.ends)||20)+'CP'
+        :ds.length&&Array.isArray(m.endsByDistance)?m.endsByDistance.slice(0,ds.length).join('/')+'E'
+        :(Number(p.ends)||6)+'E';
+      const matrix=String(p.matrix||'');
+      const summary=(game?type.toUpperCase()+' • ':'')+dist+(game?'':' • '+(Number(p.target)||80)+'CM')
+        +' • '+(Number(p.arrows)||6)+'A × '+cp+' × '+(Number(p.rounds)||1)+'R'+(matrix?' • '+matrix:'');
+      if(label.textContent.trim()!==summary)label.textContent=summary;
+    });
+  }
+  let presetRefreshPending=false;
+  const presetObserver=new MutationObserver(()=>{
+    if(presetRefreshPending)return;
+    presetRefreshPending=true;
+    requestAnimationFrame(()=>{presetRefreshPending=false;refreshPresetLabels();});
+  });
+  presetObserver.observe(document.getElementById('app')||document.body,{childList:true,subtree:true,characterData:true});
+  refreshPresetLabels();
   window.r153EnhanceSteppers=enhance;
   window.r153RefreshRounds=refreshRounds;
   const observer=new MutationObserver(()=>enhance());
