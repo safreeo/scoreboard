@@ -37,39 +37,38 @@
       }
     }
   }
+  // Handle steppers before legacy document handlers. Do not fire onchange:
+  // onchange on multiple-distance fields rebuilds setup and shifts the viewport.
   function setupStepper(button){
     const box=button.closest('.r82-stepper-box');
     const input=box?.querySelector('input[type="number"]');
-    if(!input||!input.closest('.setup-page'))return false;
-    const buttons=[...box.querySelectorAll('.r82-step-controls button')];
-    const dir=button===buttons[0]?1:button===buttons[1]?-1:0;
-    if(!dir)return false;
-    const beforeY=window.scrollY;
+    if(!input||!input.closest('.setup-page'))return;
+    const controls=[...box.querySelectorAll('.r82-step-controls button')];
+    const dir=button===controls[0]?1:button===controls[1]?-1:0;
+    if(!dir)return;
     const step=Number(input.step)>0?Number(input.step):1;
     const min=input.min!==''?Number(input.min):-Infinity;
     const max=input.max!==''?Number(input.max):Infinity;
     const next=Math.max(min,Math.min(max,(Number(input.value)||0)+dir*step));
-    if(next!==Number(input.value)){
-      input.value=String(next);
-      if(input.id==='multiCount'&&typeof setMultiCount==='function'){
-        setMultiCount(next);
-      }else{
-        // Preserve the existing inline onchange logic for other setup fields.
-        input.dispatchEvent(new Event('change',{bubbles:true}));
-      }
+    if(next===Number(input.value))return;
+    input.value=String(next);
+    if(input.id==='multiCount'&&typeof setMultiCount==='function'){
+      setMultiCount(next);
+    }else if(typeof syncSetup==='function'){
+      // Persist values in the existing model without calling refreshSetupAt/setup.
+      syncSetup();
     }
-    // Browser scroll anchoring can shift the page when distance rows are removed.
-    if(input.id==='multiCount'&&Math.abs(window.scrollY-beforeY)>1)window.scrollTo({top:beforeY,behavior:'instant'});
-    return true;
+    try{if(typeof saveState==='function')saveState();}catch(_){}
   }
-  // Capture before legacy R82/R116 onclick handlers, so one tap means one step.
-  document.addEventListener('click',e=>{
-    const b=e.target.closest?.('.r82-step-controls button');
-    if(!b||!b.closest('.setup-page'))return;
+  window.addEventListener('click',e=>{
+    const b=e.target.closest?.('.setup-page .r82-step-controls button');
+    if(!b)return;
     e.preventDefault();e.stopImmediatePropagation();
+    const y=window.scrollY;
     setupStepper(b);
+    requestAnimationFrame(()=>{if(Math.abs(window.scrollY-y)>1)window.scrollTo(0,y);});
   },true);
-  document.addEventListener('pointerdown',e=>{
+  window.addEventListener('pointerdown',e=>{
     if(e.target.closest?.('.setup-page .r82-step-controls button'))e.preventDefault();
   },true);
   // Keep the viewport stable while a setup stepper is used on touch devices.
