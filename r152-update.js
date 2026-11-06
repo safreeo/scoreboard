@@ -2,6 +2,22 @@
 (function(){
   'use strict';
   const GREY='#64748b';
+  function versionInfo(){
+    const card=document.querySelector('.app-info-card');
+    if(!card)return;
+    const spans=card.querySelectorAll('span');
+    for(const s of spans){
+      const t=s.textContent||'';
+      if(/^(App Version|Versi Aplikasi)\s*:/i.test(t.trim())){
+        const b=s.querySelector('b');
+        if(b){while(b.nextSibling)b.nextSibling.remove();s.append(document.createTextNode(' 1.1.85 (R152)'));}
+      }
+      if(/^(Last Updated|Kemas Kini Terakhir)\s*:/i.test(t.trim())){
+        const b=s.querySelector('b');
+        if(b){while(b.nextSibling)b.nextSibling.remove();s.append(document.createTextNode(' 6 November 2026'));}
+      }
+    }
+  }
   function savedButton(){
     for(const b of document.querySelectorAll('button')){
       if(!/^(CONTINUE SCORING|TERUSKAN SCORING|SAMBUNG SKOR)$/i.test((b.textContent||'').trim()))continue;
@@ -56,7 +72,7 @@
     }
     .setup-page .r82-step-controls button{transform:none!important;transition:none!important;touch-action:manipulation!important}
   `;document.head.appendChild(css);
-  const observer=new MutationObserver(savedButton);
+  const observer=new MutationObserver(()=>{savedButton();versionInfo();});
   observer.observe(document.getElementById('app')||document.body,{childList:true,subtree:true});
-  savedButton();
+  savedButton();versionInfo();
 })();
