@@ -1276,11 +1276,7 @@ function setup() {
                     </b>
 
                     <small>
-                      ${p.distance}M •
-                      ${p.target}CM •
-                      ${p.arrows}A ×
-                      ${p.ends}E ×
-                      ${p.rounds}R
+                      ${presetDisplay(p)}
                     </small>
 
                   </button>
@@ -2133,6 +2129,14 @@ function groupHTML() {
    PRESETS
    ========================================================= */
 
+function presetDisplay(p) {
+ const type=String(p.practiceType||"target").toLowerCase(), game=type==="3d"||type==="2d";
+ const multi=!game&&p.distanceMode==="multiple"&&Array.isArray(p.multi?.distances);
+ const ds=multi?p.multi.distances.slice(0,Number(p.multi.count)||p.multi.distances.length):[];
+ const dist=multi&&ds.length?ds.join("/")+"M":game?(p.minDistance||p.distanceMin||5)+"~"+(p.maxDistance||p.distanceMax||30)+"M":p.distance+"M";
+ const cp=game?(p.checkPoints||p.ends)+"CP":(multi&&p.multi?.endsByDistance?.length?p.multi.endsByDistance.slice(0,ds.length).join("/")+"E":p.ends+"E");
+ return esc((game?type.toUpperCase()+" • ":"")+dist+(game?"":" • "+p.target+"CM")+" • "+p.arrows+"A × "+cp+" × "+p.rounds+"R • "+(p.matrix||""));
+}
 function presetMatch(p) {
 
   return [
@@ -10741,13 +10745,15 @@ function info(tab = null) {
   `,"info");
 }
 
+function toggleManual(open){document.querySelectorAll('.user-manual-card details.manual-accordion').forEach(x=>x.open=open);}
+function filterManual(q){const s=q.trim().toLowerCase();document.querySelectorAll('.user-manual-card details.manual-accordion').forEach(x=>{const match=x.textContent.toLowerCase().includes(s);x.hidden=!match;if(s&&match)x.open=true;});}
 function userManualHTML() {
   const bm = infoLang === "BM";
   if (!bm) return `
     <section class="card user-manual-card">
       <div class="section">USER MANUAL</div>
       <p><b>SCOREBOARD</b> is a practical archery score-tracking application for recording practice, monitoring progress and reviewing performance over time.</p>
-      <div class="quick-guide"><b>Quick Guide:</b><br>Setup → Score → Submit End → Summary → Finish → Detailed Results → Share</div>
+      <div class="manual-tools"><input type="search" placeholder="Search manual / Cari manual" oninput="filterManual(this.value)"><button type="button" onclick="toggleManual(true)">Expand All</button><button type="button" onclick="toggleManual(false)">Collapse All</button></div><div class="quick-guide"><b>Quick Guide:</b><br>Setup → Score → Submit End → Summary → Finish → Detailed Results → Share</div>
       <h3>1. Installing the Application</h3><p>• Android (Chrome): menu → Add to Home screen / Install App.<br>• iPhone (Safari): Share → Add to Home Screen.</p>
       <h3>2. Start Practice</h3><p>Select Personal or Team, archer, practice format, scoring matrix and optional Timer, Lane or Group. Use the FORMAT switch <b>Static | 3D | 2D</b>. Static is the default. 3D/2D uses Check Points (CP), Arrows/CP, Rounds and a Min/Max distance range instead of Ends/Target Face. Use <b>Single Distance</b> for one shooting distance. For <b>Multiple Distances</b>, set the number of distances, each distance and Ends, Target Face, Arrows/End, Time/End and Rounds. Each Round may use an Ascending or Descending sequence.</p>
       <h3>3. Scoring</h3><p>Tap score values in Arrow order. Submit End becomes active after all arrows are entered. A late-joining archer starts from their own End 1 and can complete the remaining Ends independently. In Multiple Distances mode, use <b>Distance</b> and <b>Round</b> navigation to move through the configured sequence.</p>
@@ -10758,7 +10764,7 @@ function userManualHTML() {
       <h3>8. Pause, Resume & Saved Sessions</h3><p>Use Pause Session during scoring to keep an unfinished session for later. On Home, select Resume Session to continue. For an already saved session, choose Saved & Exit to Home or Continue Scoring without discarding the result.</p>
       <h3>9. Multiple Distances & Round Sequence</h3><p>Use the up/down controls to add or remove distances and Rounds. Set the distance and Ends for each row. Round Sequence and Format Preview update with the selected Rounds; choose Ascending or Descending for each Round and review the preview before scoring.</p>
       <h3>10. Corrections & Review</h3><p>Use available Undo and score-editing controls to correct entries. Review the Summary before finishing, and open completed sessions from Practice History to inspect Detailed Results and share them.</p>
-      <h3>11. Language, Location & Backups</h3><p>Select ENG or BM on Home to change language. Automatic location detection requires browser permission and can be deselected when offered. Back up or export records in Settings before changing devices or clearing browser data.</p>
+      <h3>11. Language, Location & Backups</h3><p>Select ENG or BM on Home to change language. In Team mode, register archer names first as a reusable master Archer List. Select the archers for the current session, and delete names through Manage (Archer List) when needed. Automatic location detection requires browser permission and can be deselected when offered. Back up or export records in Settings before changing devices or clearing browser data.</p>
       <h3>12. Quick Presets</h3><p>Quick Presets let you reuse frequently used practice settings without entering the same setup each time. Select a saved preset to load its configuration. To create one, configure the practice format and settings, enable Save as Quick Preset, enter a preset name and save. Review the loaded settings before starting.</p>
       <h3>13. Manage Scoring Matrix</h3><p>Open Manage Scoring Matrix to review and select the scoring values used for a session. Use the available matrix management controls to configure scoring options. Check the selected matrix before starting because it determines the score buttons, totals and point breakdown.</p>
       <h3>14. Scoring Page Controls & Current Ranking</h3><p>The Scoring Page provides management controls for Round, End, Arrows/End, Check Points (CP), Lane, Group and Timer, depending on the active format and session. Use the relevant control to review or adjust an available setting. Select Summary to view scores and the current ranking during the session; rankings reflect scores recorded so far and may change as scoring continues.</p>
@@ -10768,7 +10774,7 @@ function userManualHTML() {
     <section class="card user-manual-card">
       <div class="section">MANUAL PENGGUNA</div>
       <p><b>SCOREBOARD</b> ialah aplikasi penjejakan skor memanah untuk merekod latihan, memantau kemajuan dan menyemak prestasi dari semasa ke semasa.</p>
-      <div class="quick-guide"><b>Panduan Ringkas:</b><br>Setup → Score → Submit End → Summary → Finish → Detailed Results → Share</div>
+      <div class="manual-tools"><input type="search" placeholder="Search manual / Cari manual" oninput="filterManual(this.value)"><button type="button" onclick="toggleManual(true)">Expand All</button><button type="button" onclick="toggleManual(false)">Collapse All</button></div><div class="quick-guide"><b>Panduan Ringkas:</b><br>Setup → Score → Submit End → Summary → Finish → Detailed Results → Share</div>
       <h3>1. Memasang Aplikasi</h3><p>• Android (Chrome): menu → Add to Home screen / Install App.<br>• iPhone (Safari): Share → Add to Home Screen.</p>
       <h3>2. Memulakan Latihan</h3><p>Pilih Peribadi atau Pasukan, pemanah, format latihan, matriks pemarkahan serta pilihan Timer, Lane atau Group jika diperlukan. Gunakan suis FORMAT <b>Static | 3D | 2D</b>. Static ialah tetapan asal. 3D/2D menggunakan Check Points (CP), Arrows/CP, Pusingan serta julat jarak Min/Max menggantikan End/Target Face. Gunakan <b>Single Distance</b> untuk satu jarak. Bagi <b>Multiple Distances</b>, tetapkan bilangan jarak, setiap jarak dan End, Target Face, Arrows/End, Time/End dan Pusingan. Setiap Pusingan boleh menggunakan turutan Ascending atau Descending.</p>
       <h3>3. Pemarkahan</h3><p>Tekan nilai skor mengikut turutan Arrow. Submit End aktif selepas semua arrow lengkap. Pemanah yang join lewat bermula dari End 1 sendiri dan boleh menghabiskan baki End secara berasingan. Dalam Multiple Distances, gunakan navigation <b>Distance</b> dan <b>Round</b> untuk bergerak mengikut susunan yang ditetapkan.</p>
@@ -10779,7 +10785,7 @@ function userManualHTML() {
       <h3>8. Jeda, Sambung & Sesi Disimpan</h3><p>Gunakan Jeda Sesi semasa pemarkahan untuk menyimpan sesi yang belum selesai. Pada Home, pilih Sambung Sesi untuk meneruskan. Bagi sesi yang sudah disimpan, pilih Simpan & Keluar ke Home atau Teruskan Scoring tanpa membuang keputusan.</p>
       <h3>9. Multiple Distances & Round Sequence</h3><p>Gunakan kawalan atas/bawah untuk menambah atau mengurangkan jarak dan Pusingan. Tetapkan Distance dan Ends bagi setiap baris. Round Sequence dan Format Preview berubah mengikut bilangan Pusingan; pilih Ascending atau Descending bagi setiap Pusingan dan semak pratonton sebelum bermula.</p>
       <h3>10. Pembetulan & Semakan Markah</h3><p>Gunakan fungsi Undo dan edit markah yang tersedia untuk membuat pembetulan. Semak Summary sebelum tamat sesi, kemudian buka sesi lengkap dalam Sejarah Latihan untuk melihat Keputusan Terperinci dan berkongsi.</p>
-      <h3>11. Bahasa, Lokasi & Sandaran</h3><p>Pilih ENG atau BM pada Home untuk menukar bahasa. Pengesanan lokasi automatik memerlukan kebenaran pelayar dan boleh dinyahpilih apabila tersedia. Buat sandaran atau eksport rekod dalam Tetapan sebelum bertukar peranti atau memadam data pelayar.</p>
+      <h3>11. Bahasa, Lokasi & Sandaran</h3><p>Pilih ENG atau BM pada Home untuk menukar bahasa. Dalam Team mode, daftar nama pemanah dahulu sebagai master Archer List. Pilih pemanah untuk sesi semasa dan padam nama melalui Manage (Archer List) apabila perlu. Pengesanan lokasi automatik memerlukan kebenaran pelayar dan boleh dinyahpilih apabila tersedia. Buat sandaran atau eksport rekod dalam Tetapan sebelum bertukar peranti atau memadam data pelayar.</p>
       <h3>12. Quick Presets</h3><p>Quick Presets membolehkan tetapan latihan yang kerap digunakan dipilih semula tanpa perlu mengisi semuanya dari awal. Pilih preset yang disimpan untuk memuatkan tetapan. Untuk mencipta preset, lengkapkan format dan tetapan latihan, aktifkan Save as Quick Preset, masukkan nama preset dan simpan. Semak tetapan yang dimuatkan sebelum memulakan sesi.</p>
       <h3>13. Manage Scoring Matrix</h3><p>Buka Manage Scoring Matrix untuk menyemak dan memilih nilai markah bagi sesi. Gunakan kawalan pengurusan matriks yang tersedia untuk menetapkan pilihan pemarkahan. Semak matriks sebelum bermula kerana ia menentukan butang markah, jumlah skor dan pecahan mata.</p>
       <h3>14. Kawalan Scoring Page & Kedudukan Semasa</h3><p>Scoring Page menyediakan kawalan pengurusan Round, End, Arrows/End, Check Points (CP), Lane, Group dan Timer mengikut format serta sesi yang aktif. Gunakan kawalan berkaitan untuk menyemak atau mengubah tetapan yang dibenarkan. Pilih Summary untuk melihat skor dan kedudukan semasa ketika sesi berlangsung; kedudukan berdasarkan markah yang sudah direkod dan boleh berubah sepanjang sesi.</p>
