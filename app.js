@@ -1275,9 +1275,7 @@ function setup() {
                       ${esc(p.name)}
                     </b>
 
-                    <small>
-                      ${presetDisplay(p)}
-                    </small>
+                    <small data-preset-summary="${i}">${presetDisplay(p)}</small>
 
                   </button>
 
