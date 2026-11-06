@@ -20,13 +20,20 @@
   }
   function savedButton(){
     for(const b of document.querySelectorAll('button')){
-      if(!/^(CONTINUE SCORING|TERUSKAN SCORING|SAMBUNG SKOR)$/i.test((b.textContent||'').trim()))continue;
+      const label=(b.textContent||'').trim();
+      if(!/^(CONTINUE SCORING|TERUSKAN SCORING|SAMBUNG SKOR)$/i.test(label))continue;
+      // Only the saved-result dialog; never the separate pause/exit dialog.
       if(b.closest('#exitDialog'))continue;
-      let p=b.parentElement;
-      for(let i=0;p&&i<7;i++,p=p.parentElement){
-        if(/Session Saved|Sesi Disimpan/i.test(p.querySelector('h1,h2,h3,h4')?.textContent||'')){
-          b.classList.add('r152-saved-continue');break;
-        }
+      let parent=b.parentElement,found=false;
+      for(let i=0;parent&&i<8;i++,parent=parent.parentElement){
+        const headings=[...parent.querySelectorAll('h1,h2,h3,h4')].map(x=>x.textContent||'').join(' ');
+        const buttons=[...parent.querySelectorAll('button')].map(x=>x.textContent||'').join(' ');
+        if(/Session Saved|Sesi Disimpan/i.test(headings)||/SAVED\s*&\s*EXIT TO HOME|DISIMPAN.*(?:UTAMA|HOME)/i.test(buttons)){found=true;break;}
+      }
+      if(found){
+        b.classList.add('r152-saved-continue');
+        for(const property of ['background','background-color','border-color'])b.style.setProperty(property,GREY,'important');
+        b.style.setProperty('color','#fff','important');
       }
     }
   }
