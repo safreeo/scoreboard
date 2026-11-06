@@ -10254,3 +10254,15 @@ html.font-large .page { font-size: 1.125rem; }
 
 /* R151: compact normal-weight whistle choice labels. */
 #whistleSoundChoices button{font-size:13px!important;font-weight:400!important;line-height:1.3!important}
+
+/* R154: mobile-friendly interactive manual */
+.user-manual-card .manual-tools{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}
+.user-manual-card .manual-tools input{flex:1 1 100%;min-width:0;padding:12px;border:1px solid #cbd5e1;border-radius:10px;font-size:16px}
+.user-manual-card .manual-tools button{flex:1;border:1px solid #cbd5e1;border-radius:9px;background:#eef2f7;color:#123451;font-weight:700;padding:10px 6px}
+.user-manual-card details.manual-accordion{border:1px solid #d7dfe8;border-radius:12px;margin:10px 0;overflow:hidden}
+.user-manual-card details.manual-accordion[hidden]{display:none}
+.user-manual-card details.manual-accordion summary{cursor:pointer;padding:15px 36px 15px 14px;position:relative;font-weight:700;color:#103451;list-style:none}
+.user-manual-card details.manual-accordion summary::-webkit-details-marker{display:none}
+.user-manual-card details.manual-accordion summary:after{content:'⌄';position:absolute;right:14px;top:12px;font-size:22px}
+.user-manual-card details.manual-accordion[open] summary:after{content:'⌃'}
+.user-manual-card .manual-accordion-body{padding:0 14px 14px;line-height:1.65}
