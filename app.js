@@ -2133,7 +2133,7 @@ function presetDisplay(p) {
  const type=String(p.practiceType||"target").toLowerCase(), game=type==="3d"||type==="2d";
  const multi=!game&&p.distanceMode==="multiple"&&Array.isArray(p.multi?.distances);
  const ds=multi?p.multi.distances.slice(0,Number(p.multi.count)||p.multi.distances.length):[];
- const dist=multi&&ds.length?ds.join("/")+"M":game?(p.minDistance||p.distanceMin||5)+"~"+(p.maxDistance||p.distanceMax||30)+"M":p.distance+"M";
+ const dist=multi&&ds.length?ds.join("/")+"M":game?(p.gameMinDistance||5)+"~"+(p.gameMaxDistance||30)+"M":p.distance+"M";
  const cp=game?(p.checkPoints||p.ends)+"CP":(multi&&p.multi?.endsByDistance?.length?p.multi.endsByDistance.slice(0,ds.length).join("/")+"E":p.ends+"E");
  return esc((game?type.toUpperCase()+" • ":"")+dist+(game?"":" • "+p.target+"CM")+" • "+p.arrows+"A × "+cp+" × "+p.rounds+"R • "+(p.matrix||""));
 }
