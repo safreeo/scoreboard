@@ -2130,12 +2130,16 @@ function groupHTML() {
    ========================================================= */
 
 function presetDisplay(p) {
- const type=String(p.practiceType||"target").toLowerCase(), game=type==="3d"||type==="2d";
- const multi=!game&&p.distanceMode==="multiple"&&Array.isArray(p.multi?.distances);
- const ds=multi?p.multi.distances.slice(0,Number(p.multi.count)||p.multi.distances.length):[];
- const dist=multi&&ds.length?ds.join("/")+"M":game?(p.gameMinDistance||5)+"~"+(p.gameMaxDistance||30)+"M":p.distance+"M";
- const cp=game?(p.checkPoints||p.ends)+"CP":(multi&&p.multi?.endsByDistance?.length?p.multi.endsByDistance.slice(0,ds.length).join("/")+"E":p.ends+"E");
- return esc((game?type.toUpperCase()+" • ":"")+dist+(game?"":" • "+p.target+"CM")+" • "+p.arrows+"A × "+cp+" × "+p.rounds+"R • "+(p.matrix||""));
+  const type=String(p.practiceType||"target").toLowerCase();
+  const game=type==="3d"||type==="2d";
+  const multi=!game&&p.distanceMode==="multiple"&&Array.isArray(p.multi?.distances);
+  const distances=multi?p.multi.distances.slice(0,Math.max(1,Number(p.multi.count)||p.multi.distances.length)).map(Number).filter(Number.isFinite):[];
+  const dist=game?`${p.gameMinDistance??5}~${p.gameMaxDistance??30}M`:distances.length?distances.join("/")+"M":String(p.distance??30)+"M";
+  const cp=game?String(p.checkPoints??p.ends??20)+"CP":multi&&p.multi?.endsByDistance?.length?p.multi.endsByDistance.slice(0,distances.length).join("/")+"E":String(p.ends??6)+"E";
+  const matrix=String(p.matrix||"");
+  const values=typeof matrices==="function"?matrices()[matrix]:null;
+  const matrixText=Array.isArray(values)?values.map(String).filter(x=>x!=="M").join(", "):matrix;
+  return esc((game?type.toUpperCase()+" • ":"")+dist+(game?"":" • "+(p.target??80)+"CM")+" • "+(p.arrows??6)+"A × "+cp+" × "+(p.rounds??1)+"R"+(matrixText?" • "+matrixText:""));
 }
 function presetMatch(p) {
 
@@ -2391,7 +2395,7 @@ function saveQuickPreset() {
 
 
   S.presets.push({
-    ...S.setup,
+    ...JSON.parse(JSON.stringify(S.setup)),
     name
   });
 
