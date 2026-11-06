@@ -72,12 +72,24 @@
   document.addEventListener('pointerdown',e=>{
     if(e.target.closest?.('.setup-page .r82-step-controls button'))e.preventDefault();
   },true);
+  // Keep the viewport stable while a setup stepper is used on touch devices.
+  let stepperTouchY=null;
+  document.addEventListener('touchstart',e=>{
+    if(e.target.closest?.('.setup-page .r82-step-controls button'))stepperTouchY=window.scrollY;
+  },{capture:true,passive:true});
+  document.addEventListener('touchend',e=>{
+    if(stepperTouchY===null)return;
+    const y=stepperTouchY;stepperTouchY=null;
+    if(e.target.closest?.('.setup-page .r82-step-controls button')){
+      requestAnimationFrame(()=>{if(Math.abs(window.scrollY-y)>2)window.scrollTo(0,y);});
+    }
+  },true);
   const css=document.createElement('style');css.id='r152-fixes';css.textContent=`
     .r152-saved-continue,.r152-saved-continue:hover,.r152-saved-continue:active{
       background:${GREY}!important;background-color:${GREY}!important;
       border-color:${GREY}!important;color:#fff!important;
     }
-    .setup-page .r82-step-controls button{transform:none!important;transition:none!important;touch-action:manipulation!important}
+    .setup-page .r82-step-controls button{transform:none!important;transition:none!important;touch-action:manipulation!important}\n    .setup-page .r82-stepper-box{position:relative!important;overflow:hidden!important;min-width:0!important;border-radius:10px!important;box-shadow:none!important}\n    .setup-page .r82-stepper-box > input[type=number]{border:0!important;outline:0!important;box-shadow:none!important;border-radius:0!important;min-width:0!important;appearance:textfield!important}\n    .setup-page .r82-stepper-box > .r82-step-controls{position:absolute!important;right:0!important;top:0!important;bottom:0!important;width:38px!important;min-width:38px!important;max-width:38px!important;padding:0!important;margin:0!important;border:0!important;border-left:1px solid #c7d0da!important;border-radius:0!important;box-shadow:none!important;display:flex!important;flex-direction:column!important}\n    .setup-page .r82-stepper-box > .r82-step-controls button{border:0!important;border-radius:0!important;box-shadow:none!important;padding:0!important;min-height:0!important;flex:1 1 0!important}\n    .setup-page .r82-stepper-box > .r82-step-controls button:first-child{border-bottom:1px solid #c7d0da!important}\n    .setup-page .multi-distance-grid,.setup-page .multi-common-grid{overflow-anchor:none!important}
   `;document.head.appendChild(css);
   const observer=new MutationObserver(()=>{savedButton();versionInfo();});
   observer.observe(document.getElementById('app')||document.body,{childList:true,subtree:true});
