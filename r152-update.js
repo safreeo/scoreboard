@@ -58,6 +58,8 @@
       // Persist values in the existing model without calling refreshSetupAt/setup.
       syncSetup();
     }
+    if(input.id==='rounds'&&typeof window.r153RefreshRounds==='function')window.r153RefreshRounds();
+    if(input.id==='multiCount'&&typeof window.r153EnhanceSteppers==='function')window.r153EnhanceSteppers();
     try{if(typeof saveState==='function')saveState();}catch(_){}
   }
   window.addEventListener('click',e=>{
