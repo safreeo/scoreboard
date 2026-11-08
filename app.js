@@ -7514,7 +7514,7 @@ function shareSummary(
 
       lines.push(
         `*${rank + 1}. ${a.name}*: ` +
-        `${m.total} pts`
+        `${m.total}/${m.max} pts`
       );
 
 
