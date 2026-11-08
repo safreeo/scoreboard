@@ -6734,6 +6734,22 @@ function resultDistanceText(setup) {
   return resultMultiConfig(setup).distances.map(d => `${d}m`).join('/');
 }
 
+function resultDistanceTotals(archer, setup) {
+  if (setup?.distanceMode !== "multiple") return [];
+  const config = resultMultiConfig(setup);
+  const totals = config.distances.map(() => 0);
+  for (let ri = 0; ri < Math.max(1, Number(setup.rounds) || 1); ri++) {
+    for (const block of resultMultiBlocks(setup, ri + 1)) {
+      for (let ei = block.start - 1; ei < block.end; ei++) {
+        for (const value of (archer.scores?.[ri]?.[ei] || [])) {
+          if (value !== "" && value !== null && value !== undefined) totals[block.originalIndex] += scoreValue(value);
+        }
+      }
+    }
+  }
+  return totals;
+}
+
 function scoreCountFor(archer, label) {
   let n = 0;
   archer?.scores?.flat(2).forEach(v => { if (String(v) === String(label)) n++; });
@@ -6934,6 +6950,8 @@ function detailedResult(
                     : ""
                 }
 
+                ${setup.distanceMode === "multiple" ? resultMultiConfig(setup).distances.map(d => `<th>${esc(d)}m</th>`).join("") : ""}
+
                 <th>
                   Total
                 </th>
@@ -6994,6 +7012,8 @@ function detailedResult(
                               ? `<td>${esc(h.groups?.[a.name] || h.groups?.["__personal__"] || "-")}</td>`
                               : ""
                           }
+
+                          ${setup.distanceMode === "multiple" ? resultDistanceTotals(a, setup).map(v => `<td><b>${v}</b></td>`).join("") : ""}
 
                           <td>
                             <b>
@@ -7185,7 +7205,7 @@ function archerSessionBreakdownHTML(archer, matrix) {
     const pct = count / totalArrows * 100;
     return `
       <div class="breakdown-row">
-        <div class="breakdown-label"><b>${group.label}</b><span>${count}</span></div>
+        <div class="breakdown-label"><b>${esc(group.label)}:</b> <span>${count}</span></div>
         <div class="breakdown-track"><div class="breakdown-fill" style="width:${pct}%;"></div></div>
         <div class="breakdown-pct">${pct.toFixed(1)}%</div>
       </div>`;
