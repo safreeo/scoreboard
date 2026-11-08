@@ -37,8 +37,18 @@
     const bm=isBM(),setup=h.setup||DEFAULT_SETUP,ranking=historyRanking(h),dt=(typeof shortDateTime==='function'?shortDateTime(h.completedAt||h.date):{date:'',day:'',time:''}),w=window.open('','_blank');if(!w)return;
     const T=bm?{title:'Keputusan Terperinci Memanah',date:'Tarikh / Hari / Masa',loc:'Lokasi',dist:'Jarak',face:'Muka Sasaran',matrix:'Matriks',format:'Format',summary:'Ringkasan Pemarkahan',rank:'Kedudukan',archer:'Pemanah',total:'Jumlah',score:'Markah %',avg:'Purata',round:'ROUND',end:'End'}:{title:'Archery Detailed Results',date:'Date / Day / Time',loc:'Location',dist:'Distance',face:'Target Face',matrix:'Matrix',format:'Format',summary:'Scoring Summary',rank:'Rank',archer:'Archer',total:'Total',score:'Score %',avg:'Average',round:'ROUND',end:'End'};
     const [l1,l2]=r77HighestLabels(setup.matrix);
-    const rows=ranking.map((item,i)=>{const a=item.archer,m=item.metrics,[c1,c2]=r77HighestCounts(a,setup.matrix);return `<tr><td>${i+1}</td><td>${esc(a.name)}${(o.has('lane')&&h.lanes?.[a.name]!==undefined)||(o.has('group')&&h.groups?.[a.name]!==undefined)?' ('+[o.has('lane')&&h.lanes?.[a.name]!==undefined?'Lane '+esc(h.lanes[a.name]):'',o.has('group')&&h.groups?.[a.name]!==undefined?'Group '+esc(h.groups[a.name]):''].filter(Boolean).join(', ')+')':''}</td><td>${m.total}</td>${o.has('highest')?`<td>${c1}</td><td>${c2}</td>`:''}${o.has('score')?`<td>${m.score.toFixed(1)}%</td>`:''}${o.has('average')?`<td>${m.avg.toFixed(2)}</td>`:''}</tr>`}).join('');
-    const th=`<th>${T.rank}</th><th>${T.archer}</th><th>${T.total}</th>${o.has('highest')?`<th>${esc(l1)}</th><th>${esc(l2)}</th>`:''}${o.has('score')?`<th>${T.score}</th>`:''}${o.has('average')?`<th>${T.avg}</th>`:''}`;
+    // Match the on-screen Ranking Summary: include one score column per distance.
+    const distanceColumns=setup.distanceMode==='multiple'&&typeof resultMultiConfig==='function'
+      ?resultMultiConfig(setup).distances:[];
+    const distanceScores=a=>distanceColumns.length&&typeof resultDistanceTotals==='function'
+      ?resultDistanceTotals(a,setup):[];
+    const rows=ranking.map((item,i)=>{
+      const a=item.archer,m=item.metrics,[c1,c2]=r77HighestCounts(a,setup.matrix);
+      const distanceCells=distanceScores(a).map(score=>`<td><b>${score}</b></td>`).join('');
+      return `<tr><td>${i+1}</td><td>${esc(a.name)}${(o.has('lane')&&h.lanes?.[a.name]!==undefined)||(o.has('group')&&h.groups?.[a.name]!==undefined)?' ('+[o.has('lane')&&h.lanes?.[a.name]!==undefined?'Lane '+esc(h.lanes[a.name]):'',o.has('group')&&h.groups?.[a.name]!==undefined?'Group '+esc(h.groups[a.name]):''].filter(Boolean).join(', ')+')':''}</td>${distanceCells}<td>${m.total}</td>${o.has('highest')?`<td>${c1}</td><td>${c2}</td>`:''}${o.has('score')?`<td>${m.score.toFixed(1)}%</td>`:''}${o.has('average')?`<td>${m.avg.toFixed(2)}</td>`:''}</tr>`;
+    }).join('');
+    const distanceHeaders=distanceColumns.map(d=>`<th>${esc(d)}m</th>`).join('');
+    const th=`<th>${T.rank}</th><th>${T.archer}</th>${distanceHeaders}<th>${T.total}</th>${o.has('highest')?`<th>${esc(l1)}</th><th>${esc(l2)}</th>`:''}${o.has('score')?`<th>${T.score}</th>`:''}${o.has('average')?`<th>${T.avg}</th>`:''}`;
     const dist=typeof resultDistanceText==='function'?resultDistanceText(setup):String(setup.distance||'');
     const fmt=typeof r78Format==='function'?r78Format(setup):'';
     const meta=`<table class="meta"><tr><th>${T.date}</th><td>${dt.date} | ${dt.day} | ${dt.time}</td></tr>${h.location?`<tr><th>${T.loc}</th><td>${esc(h.location)}</td></tr>`:''}<tr><th>${T.dist}</th><td>${esc(dist)}</td></tr>${setup.practiceType==='target'?`<tr><th>${T.face}</th><td>${esc(setup.target)}cm</td></tr>`:''}<tr><th>${T.matrix}</th><td>${esc(setup.matrix)}</td></tr><tr><th>${T.format}</th><td>${esc(fmt)}</td></tr></table>`;
