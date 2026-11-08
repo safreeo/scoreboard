@@ -52,7 +52,16 @@
       }
       return `<h3>${esc(a.name)}${[o.has('lane')&&h.lanes?.[a.name]!==undefined?'Lane '+esc(h.lanes[a.name]):'',o.has('group')&&h.groups?.[a.name]!==undefined?'Group '+esc(h.groups[a.name]):''].filter(Boolean).length?' ('+[o.has('lane')&&h.lanes?.[a.name]!==undefined?'Lane '+esc(h.lanes[a.name]):'',o.has('group')&&h.groups?.[a.name]!==undefined?'Group '+esc(h.groups[a.name]):''].filter(Boolean).join(', ')+')':''}</h3>${body}`;
     }).join(''):'';
-    const breakdown=o.has('breakdown')?ranking.map(item=>`<h3>${esc(item.archer.name)} — ${bm?'Ketepatan & Pecahan Mata':'Accuracy & Point Breakdown'}</h3>${archerSessionBreakdownHTML(item.archer,setup.matrix)}`).join(''):'';
+    // Print-safe vector bars: Android PDF printers may omit CSS background fills.
+    // Inline SVG rectangles are document content and remain visible in saved PDFs.
+    const printableBreakdown=(archer)=>{
+      const html=archerSessionBreakdownHTML(archer,setup.matrix);
+      return html.replace(/<div class="breakdown-track"><div class="breakdown-fill" style="width:([0-9.]+)%;"><\/div><\/div>/g,(_,percentage)=>{
+        const pct=Math.max(0,Math.min(100,Number(percentage)||0));
+        return '<div class="breakdown-track"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 18" preserveAspectRatio="none" width="100%" height="18" role="img" aria-label="'+pct.toFixed(1)+'%"><rect x="0" y="0" width="1000" height="18" fill="#e1e5eb"/><rect x="0" y="0" width="'+(pct*10)+'" height="18" fill="#4b5563"/></svg></div>';
+      });
+    };
+    const breakdown=o.has('breakdown')?ranking.map(item=>`<h3>${esc(item.archer.name)} — ${bm?'Ketepatan & Pecahan Mata':'Accuracy & Point Breakdown'}</h3>${printableBreakdown(item.archer)}`).join(''):'';
     const title=h.title&&h.title!=='Archery Detailed Results'?h.title:T.title;
     w.document.write(`<!doctype html><html><head><title>${esc(title)}</title><style>body{font-family:Arial,sans-serif;padding:24px;color:#111}h1{text-align:center;font-size:24px}h2{font-size:18px;margin-top:22px}h3{margin-top:22px}h4{margin:18px 0 8px}table{width:100%;border-collapse:collapse;margin:10px 0 22px}th,td{border:1px solid #999;padding:7px;text-align:center}.meta th{text-align:left;width:34%}.meta td{text-align:left}tfoot td{background:#eef3f7}.breakdown-row{display:grid;grid-template-columns:90px 1fr 60px;gap:8px;margin:6px 0}.breakdown-track{background:#ddd}.breakdown-fill{height:18px;background:#555}.footer{text-align:center;margin-top:30px;font-weight:bold}@media print{button{display:none}}</style></head><body><h1>${esc(title)}</h1>${meta}${details}${arrowDetails}${breakdown}<div class="footer">PWA: SCOREBOARD</div><script>window.onload=()=>setTimeout(()=>window.print(),150)<\/script></body></html>`);w.document.close();
   };
