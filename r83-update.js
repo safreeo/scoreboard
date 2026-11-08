@@ -27,7 +27,14 @@
       if(o.has('lane')&&lane)tags.push('L'+lane);
       if(o.has('group')&&group)tags.push('G'+group);
       lines.push(`${i+1}. *${a.name}*: ${m.total}/${max} pts${tags.length?' ('+tags.join(', ')+')':''}`);
-      if(rounds>1)for(let r=1;r<=rounds;r++)detail.push(`R${r}:${r78RoundTotal(a,r,setup)}`);
+      // Show per-distance totals in WhatsApp, matching Detailed Results and PDF.
+      if(setup.distanceMode==='multiple' && typeof resultMultiConfig==='function' && typeof resultDistanceTotals==='function'){
+        const distances=resultMultiConfig(setup).distances;
+        const totals=resultDistanceTotals(a,setup);
+        detail.push(distances.map((d,di)=>`${d}m: ${totals[di]||0}`).join(', '));
+      } else if(rounds>1) {
+        for(let r=1;r<=rounds;r++)detail.push(`R${r}:${r78RoundTotal(a,r,setup)}`);
+      }
       if(o.has('highest')){detail.push(`${l1}:${c1}`);detail.push(`${l2}:${c2}`)}
       if(o.has('average'))detail.push(`${bm?'Purata':'Avg'}:${m.avg.toFixed(2)}`);
       if(o.has('score'))detail.push(`${bm?'Markah':'Score'}: ${m.score.toFixed(1)}%`);
