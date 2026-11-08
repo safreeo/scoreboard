@@ -7531,15 +7531,12 @@ function shareSummary(
 
 
       const statLabels = resultStatLabels(setup);
+      // WhatsApp: aggregate each configured distance across all rounds,
+      // matching the Detailed Results ranking and PDF columns.
       const distanceText = setup.distanceMode === "multiple"
-        ? Array.from({length: Math.max(1, Number(setup.rounds)||1)}, (_,ri) => {
-            const rt = resultMultiBlocks(setup, ri+1).map(b => {
-              let t = 0;
-              for (let e=b.start-1; e<b.end; e++) (a.scores?.[ri]?.[e] || []).forEach(v => t += scoreValue(v));
-              return `${b.distance}m:${t}`;
-            }).join(" | ");
-            return `R${ri+1} [${rt}]`;
-          }).join(" | ")
+        ? resultMultiConfig(setup).distances.map((distance, di) =>
+            `${distance}m: ${resultDistanceTotals(a, setup)[di] || 0}`
+          ).join(", ")
         : roundText;
       let detail =
         `     └ ${distanceText}` +
