@@ -798,6 +798,11 @@ function ensureMultiSetup() {
   m.endsByDistance = m.endsByDistance.map(v => Math.max(1, Number(v) || fallbackEnds));
   m.endsPerDistance = m.endsByDistance[0] || fallbackEnds; // legacy compatibility
   m.timeEnd = Math.max(1, Number(m.timeEnd) || Number(S.timer?.shoot) || 120);
+  m.roundMode = m.roundMode === 'one' ? 'one' : 'all';
+  m.roundDistances = Array.isArray(m.roundDistances) ? m.roundDistances : [];
+  m.roundEnds = Array.isArray(m.roundEnds) ? m.roundEnds : [];
+  while (m.roundDistances.length < Math.max(2, Number(S.setup.rounds)||2)) m.roundDistances.push(Number(m.distances[(m.roundDistances.length)%m.distances.length])||30);
+  while (m.roundEnds.length < Math.max(2, Number(S.setup.rounds)||2)) m.roundEnds.push(Math.max(1, Number(m.endsByDistance[0])||5));
   m.orders = Array.isArray(m.orders) ? m.orders.slice() : [];
   while (m.orders.length < Math.max(1, Number(S.setup.rounds) || 1)) m.orders.push(m.orders.length % 2 === 0 ? "asc" : "desc");
   S.setup.distanceMode = S.setup.distanceMode === "multiple" ? "multiple" : "single";
@@ -806,7 +811,26 @@ function ensureMultiSetup() {
 
 function multiTotalEnds() {
   const m = ensureMultiSetup();
-  return m.endsByDistance.reduce((sum, v) => sum + Math.max(1, Number(v) || 1), 0);
+  return m.roundMode === 'one' ? Math.max(...m.roundEnds.slice(0, Math.max(2,Number(S.setup.rounds)||2)).map(v=>Math.max(1,Number(v)||1))) : m.endsByDistance.reduce((sum, v) => sum + Math.max(1, Number(v) || 1), 0);
+}
+
+function endsForRound(roundNo, setup=S.setup) {
+  const m=setup?.multi;
+  return setup?.distanceMode==='multiple' && setup?.practiceType==='target' && m?.roundMode==='one' ? Math.max(1,Number(m.roundEnds?.[roundNo-1])||1) : Math.max(1,Number(setup?.ends)||1);
+}
+
+function setMultiRoundMode(mode) {
+  syncSetup();
+  const m=ensureMultiSetup();m.roundMode=mode==='one'?'one':'all';
+  if(m.roundMode==='one')S.setup.rounds=Math.max(2,Number(S.setup.rounds)||2);
+  S.setup.ends=multiTotalEnds();
+  preserveNextScrollY=window.scrollY;setup();
+}
+
+function setMultiRoundCount(value) {
+  syncSetup();S.setup.rounds=Math.max(2,Math.min(30,Math.trunc(Number(value)||2)));
+  ensureMultiSetup();S.setup.ends=multiTotalEnds();
+  preserveNextScrollY=window.scrollY;setup();
 }
 
 function multiSequence(roundNo) {
@@ -818,6 +842,7 @@ function multiSequence(roundNo) {
 
 function multiBlocks(roundNo = currentRoundNo()) {
   const m = ensureMultiSetup();
+  if(m.roundMode==='one') {const ends=endsForRound(roundNo);return [{distance:Math.max(1,Number(m.roundDistances[roundNo-1])||30),originalIndex:roundNo-1,ends,start:1,end:ends}];}
   let cursor = 1;
   return multiSequence(roundNo).map(item => {
     const ends = Math.max(1, Number(m.endsByDistance[item.originalIndex]) || 1);
@@ -980,6 +1005,14 @@ function formatFieldsHTML() {
   }
 
   const m = ensureMultiSetup();
+  if(m.roundMode==='one') {
+    const n=Math.max(2,Number(S.setup.rounds)||2);
+    return `<div class="distance-mode-row"><button class="distance-mode-btn" onclick="setDistanceMode('single')">SINGLE DISTANCE</button><button class="distance-mode-btn active" onclick="setDistanceMode('multiple')">MULTIPLE DISTANCES</button></div>
+    <div class="distance-mode-row"><button class="distance-mode-btn" onclick="setMultiRoundMode('all')">ALL DISTANCES PER ROUND</button><button class="distance-mode-btn active" onclick="setMultiRoundMode('one')">ONE DISTANCE PER ROUND</button></div>
+    <div class="multi-common-layout"><div class="multi-common-left">${numField('Target Face (cm)','target',S.setup.target)}${numField('Arrows / End','arrows',S.setup.arrows)}</div><div class="multi-common-right"><div class="setup-field"><label>No. of Rounds</label><div class="input-unit"><input id="multiRoundCount" type="number" min="2" max="30" value="${n}" onchange="setMultiRoundCount(this.value)"></div></div>${numField('Time / End (sec)','multiTime',m.timeEnd)}</div></div>
+    <div class="multi-round-title">ROUND DISTANCES & ENDS</div><div class="multi-distance-grid">${Array.from({length:n},(_,i)=>`<div class="multi-distance-item"><b>ROUND ${i+1}</b><div class="setup-field"><label>Distance (m)</label><div class="input-unit"><input id="oneRoundDistance${i}" type="number" min="1" value="${m.roundDistances[i]}" onchange="syncSetup();refreshSetupAt('oneRoundDistance${i}')"></div></div><div class="setup-field"><label>Ends</label><div class="input-unit"><input id="oneRoundEnds${i}" type="number" min="1" value="${m.roundEnds[i]}" onchange="syncSetup();refreshSetupAt('oneRoundEnds${i}')"></div></div></div>`).join('')}</div>
+    <div class="multi-preview"><b>FORMAT PREVIEW</b>${Array.from({length:n},(_,i)=>`<div>R${i+1}: ${m.roundDistances[i]}m × ${m.roundEnds[i]}E</div>`).join('')}<small>${S.setup.arrows} Arrows/End • Total ${m.roundEnds.slice(0,n).reduce((a,b)=>a+Number(b),0)} Ends</small></div>`;
+  }
   const distFields = m.distances.map((d, i) => `
     <div class="multi-distance-item">
       <div class="setup-field"><label>Distance ${i + 1} (m)</label><div class="input-unit">
@@ -1006,6 +1039,7 @@ function formatFieldsHTML() {
   return `<div class="distance-mode-row">
       <button class="distance-mode-btn" onclick="setDistanceMode('single')">SINGLE DISTANCE</button>
       <button class="distance-mode-btn active" onclick="setDistanceMode('multiple')">MULTIPLE DISTANCES</button>
+      </div><div class="distance-mode-row"><button class="distance-mode-btn active" onclick="setMultiRoundMode('all')">ALL DISTANCES PER ROUND</button><button class="distance-mode-btn" onclick="setMultiRoundMode('one')">ONE DISTANCE PER ROUND</button>
     </div>
     <div class="multi-distance-panel">
       <div class="multi-top-grid multi-count-full">
@@ -1066,6 +1100,15 @@ function syncSetup() {
 
   if (S.setup.distanceMode === "multiple" && S.setup.practiceType === "target") {
     const m = ensureMultiSetup();
+    if(m.roundMode==='one') {
+      const countInput=document.getElementById('multiRoundCount');
+      if(countInput)S.setup.rounds=Math.max(2,Math.min(30,Number(countInput.value)||2));
+      for(let i=0;i<S.setup.rounds;i++) {
+        const d=document.getElementById('oneRoundDistance'+i),e=document.getElementById('oneRoundEnds'+i);
+        if(d)m.roundDistances[i]=Math.max(1,Number(d.value)||30);
+        if(e)m.roundEnds[i]=Math.max(1,Number(e.value)||1);
+      }
+    }
     const countEl = document.getElementById("multiCount");
     if (countEl) m.count = Math.max(2, Number(countEl.value) || m.count);
     for (let i = 0; i < m.count; i++) {
@@ -2132,8 +2175,8 @@ function presetDisplay(p) {
   const game=type==="3d"||type==="2d";
   const multi=!game&&p.distanceMode==="multiple"&&Array.isArray(p.multi?.distances);
   const distances=multi?p.multi.distances.slice(0,Math.max(1,Number(p.multi.count)||p.multi.distances.length)).map(Number).filter(Number.isFinite):[];
-  const dist=game?`${p.gameMinDistance??5}~${p.gameMaxDistance??30}M`:distances.length?distances.join("/")+"M":String(p.distance??30)+"M";
-  const cp=game?String(p.checkPoints??p.ends??20)+"CP":multi&&p.multi?.endsByDistance?.length?p.multi.endsByDistance.slice(0,distances.length).join("/")+"E":String(p.ends??6)+"E";
+  const dist=p.multi?.roundMode==='one'&&multi?p.multi.roundDistances.slice(0,p.rounds).join('/')+'M':game?`${p.gameMinDistance??5}~${p.gameMaxDistance??30}M`:distances.length?distances.join("/")+"M":String(p.distance??30)+"M";
+  const cp=p.multi?.roundMode==='one'&&multi?p.multi.roundEnds.slice(0,p.rounds).join('/')+'E':game?String(p.checkPoints??p.ends??20)+"CP":multi&&p.multi?.endsByDistance?.length?p.multi.endsByDistance.slice(0,distances.length).join("/")+"E":String(p.ends??6)+"E";
   const matrix=String(p.matrix||"");
   const values=typeof matrices==="function"?matrices()[matrix]:null;
   const matrixText=Array.isArray(values)?values.map(String).filter(x=>x!=="M").join(", "):matrix;
@@ -2879,10 +2922,10 @@ function makeScoreArray() {
     {
       length: S.setup.rounds
     },
-    () =>
+    (_,ri) =>
       Array.from(
         {
-          length: S.setup.ends
+          length: endsForRound(ri+1)
         },
         () =>
           Array(
@@ -2899,9 +2942,9 @@ function makeLockArray() {
     {
       length: S.setup.rounds
     },
-    () =>
+    (_,ri) =>
       Array(
-        S.setup.ends
+        endsForRound(ri+1)
       ).fill(false)
   );
 }
@@ -3214,7 +3257,7 @@ function normalizeSession() {
           Array.from(
             {
               length:
-                S.setup.ends
+                endsForRound(a.scores.length+1)
             },
             () =>
               Array(
@@ -3237,7 +3280,7 @@ function normalizeSession() {
 
       a.scores =
         a.scores.map(
-          round => {
+          (round,roundIndex) => {
 
             if (
               !Array.isArray(
@@ -3251,7 +3294,7 @@ function normalizeSession() {
 
             while (
               round.length <
-              S.setup.ends
+              endsForRound(roundIndex+1)
             ) {
 
               round.push(
@@ -3264,11 +3307,11 @@ function normalizeSession() {
 
             if (
               round.length >
-              S.setup.ends
+              endsForRound(roundIndex+1)
             ) {
 
               round.length =
-                S.setup.ends;
+                endsForRound(roundIndex+1);
             }
 
 
@@ -3328,7 +3371,7 @@ function normalizeSession() {
 
         a.locked.push(
           Array(
-            S.setup.ends
+            endsForRound(a.locked.length+1)
           ).fill(false)
         );
       }
@@ -3346,7 +3389,7 @@ function normalizeSession() {
 
       a.locked =
         a.locked.map(
-          round => {
+          (round,roundIndex) => {
 
             if (
               !Array.isArray(
@@ -3360,7 +3403,7 @@ function normalizeSession() {
 
             while (
               round.length <
-              S.setup.ends
+              endsForRound(roundIndex+1)
             ) {
 
               round.push(
@@ -3371,11 +3414,11 @@ function normalizeSession() {
 
             if (
               round.length >
-              S.setup.ends
+              endsForRound(roundIndex+1)
             ) {
 
               round.length =
-                S.setup.ends;
+                endsForRound(roundIndex+1);
             }
 
 
@@ -3399,7 +3442,7 @@ function normalizeSession() {
           1,
           Math.min(
             Number(a.e) || 1,
-            S.setup.ends
+            endsForRound(a.r)
           )
         );
     });
@@ -3559,7 +3602,7 @@ function archerRoundComplete(
 
   for (
     let e = 1;
-    e <= S.setup.ends;
+    e <= endsForRound(round);
     e++
   ) {
 
@@ -3679,7 +3722,7 @@ function scoreMetrics(
 
     for (
       let e = 0;
-      e < S.setup.ends;
+      e < endsForRound(r+1);
       e++
     ) {
 
@@ -3738,8 +3781,7 @@ function scoreMetrics(
 
 
   const max =
-    S.setup.rounds *
-    S.setup.ends *
+    Array.from({length:S.setup.rounds},(_,i)=>endsForRound(i+1)).reduce((a,b)=>a+b,0) *
     S.setup.arrows *
     maxPointForMatrix(
       S.setup.matrix
@@ -4297,7 +4339,7 @@ function nextSequentialEndForArcher(archer, round) {
   // An archer may only advance in sequence. This is especially important
   // for late joiners: they start from End 1 while the other archers keep
   // their own progress and do not have to wait for them to catch up.
-  for (let endNo = 1; endNo <= S.setup.ends; endNo++) {
+  for (let endNo = 1; endNo <= endsForRound(round); endNo++) {
     if (!endLocked(archer, round, endNo)) {
       const previousComplete =
         endNo === 1 || endLocked(archer, round, endNo - 1);
@@ -4351,7 +4393,7 @@ function moveAfterSubmit() {
   // is still completing End 1, End 2, etc.
   const submittedNextEnd = nextSequentialEndForArcher(submittedArcher, round);
   submittedArcher.r = round;
-  submittedArcher.e = submittedNextEnd || S.setup.ends;
+  submittedArcher.e = submittedNextEnd || endsForRound(round);
 
   // Continue normal team rotation, but send every archer to THEIR OWN
   // next sequential open End rather than forcing everyone onto one End.
@@ -4376,9 +4418,9 @@ function moveAfterSubmit() {
   // No open End remains in this round.
   S.session.idx = submittedIndex;
   S.session.currentRound = round;
-  S.session.currentEnd = S.setup.ends;
+  S.session.currentEnd = endsForRound(round);
   submittedArcher.r = round;
-  submittedArcher.e = S.setup.ends;
+  submittedArcher.e = endsForRound(round);
 
   saveUnfinished();
   scoring();
@@ -4397,7 +4439,7 @@ function beginEditEnd() {
   }
 
   const round = currentRoundNo();
-  const hasSubmittedEnd = Array.from({ length: S.setup.ends }, (_, i) => i + 1)
+  const hasSubmittedEnd = Array.from({ length: endsForRound(round) }, (_, i) => i + 1)
     .some(endNo => endLocked(a, round, endNo));
 
   if (!hasSubmittedEnd) return;
@@ -4414,7 +4456,7 @@ function beginEditEnd() {
 }
 
 function findNextOpenScoringPosition(round) {
-  for (let endNo = 1; endNo <= S.setup.ends; endNo++) {
+  for (let endNo = 1; endNo <= endsForRound(round); endNo++) {
     for (let i = 0; i < S.session.archers.length; i++) {
       const archer = S.session.archers[i];
 
@@ -4476,7 +4518,7 @@ function updateEditedEnd() {
   } else {
     S.session.idx = 0;
     S.session.currentRound = round;
-    S.session.currentEnd = S.setup.ends;
+    S.session.currentEnd = endsForRound(round);
   }
 
   saveUnfinished();
@@ -5293,7 +5335,7 @@ function selectRound(roundNo) {
   selectedScoreCell = null;
 
   let targetEnd = 1;
-  for (let e = 1; e <= S.setup.ends; e++) {
+  for (let e = 1; e <= endsForRound(r); e++) {
     if (!endLocked(a, r, e)) {
       targetEnd = e;
       break;
@@ -5360,7 +5402,7 @@ function applyRounds() {
 
       for (
         let e = 1;
-        e <= S.setup.ends;
+        e <= endsForRound(r);
         e++
       ) {
 
@@ -5651,7 +5693,7 @@ function summary() {
       return `<div class="summary-round-block"><div class="summary-round-heading">ROUND ${roundNo}</div><div class="responsive-scroll"><table class="summary-table live-summary-table multi-summary-table"><colgroup><col class="summary-col-rank"><col class="summary-col-archer">${blocks.map(()=>`<col class="summary-col-round">`).join("")}<col class="summary-col-points"></colgroup><thead><tr><th>Rank</th><th class="summary-archer">Archer</th>${blocks.map(b=>`<th>${b.distance}m</th>`).join("")}<th>Points</th></tr></thead><tbody>${ranking.map((item,rank)=>{const vals=blocks.map(b=>pointsRange(item.archer,roundNo,b.start,b.end)); const total=vals.reduce((a,b)=>a+b,0); return `<tr><td>${rank+1}</td><td class="summary-archer summary-archer-name"><b>${esc(item.archer.name)}</b></td>${vals.map(v=>`<td>${v}</td>`).join("")}<td><b>${total}</b></td></tr>`}).join("")}</tbody></table></div></div>`;
     }).join("");
   } else {
-    const roundPoints=(archer,roundNo)=>pointsRange(archer,roundNo,1,S.setup.ends);
+    const roundPoints=(archer,roundNo)=>pointsRange(archer,roundNo,1,endsForRound(roundNo));
     rankingHTML=`<div class="responsive-scroll"><table class="summary-table live-summary-table"><colgroup><col class="summary-col-rank"><col class="summary-col-archer">${Array.from({length:S.setup.rounds},()=>`<col class="summary-col-round">`).join("")}<col class="summary-col-points"></colgroup><thead><tr><th>Rank</th><th class="summary-archer">Archer</th>${Array.from({length:S.setup.rounds},(_,i)=>`<th>R${i+1}</th>`).join("")}<th>Points</th></tr></thead><tbody>${ranking.map((item,rank)=>`<tr><td>${rank+1}</td><td class="summary-archer summary-archer-name"><b>${esc(item.archer.name)}</b></td>${Array.from({length:S.setup.rounds},(_,i)=>`<td>${roundPoints(item.archer,i+1)}</td>`).join("")}<td><b>${item.metrics.total}</b></td></tr>`).join("")}</tbody></table></div>`;
   }
   const summaryFirstArcher = ranking[0]?.archer?.name || "";
@@ -5664,9 +5706,9 @@ function summary() {
   ).trim();
   const summaryGameTitle = S.setup.practiceType !== "target"
     ? `${S.setup.practiceType.toUpperCase()} GAME${S.setup.group && summaryGroupNo ? ` - GROUP ${esc(summaryGroupNo)}` : ""}`
-    : `${S.setup.distanceMode === "multiple" ? `${ensureMultiSetup().distances.join("/")}M` : `${S.setup.distance}M`} • TF ${S.setup.target}CM`;
+    : `${S.setup.distanceMode === "multiple" ? `${(ensureMultiSetup().roundMode==='one'?ensureMultiSetup().roundDistances.slice(0,S.setup.rounds):ensureMultiSetup().distances).join("/")}M` : `${S.setup.distance}M`} • TF ${S.setup.target}CM`;
 
-  page(`${head("LIVE SUMMARY")}<section class="card"><div class="summary-meta"><b>${summaryGameTitle}</b><span>${S.setup.practiceType !== "target" ? `${S.setup.arrows}A × ${S.setup.checkPoints || S.setup.ends}CP × ${S.setup.rounds}R` : `${S.setup.arrows}A × ${S.setup.ends}E × ${S.setup.rounds}R`}</span></div></section><section class="card"><div class="section">CURRENT RANKING</div>${rankingHTML}</section><button class="btn primary full" onclick="scoring()">BACK TO SCORING</button>`,"summary");
+  page(`${head("LIVE SUMMARY")}<section class="card"><div class="summary-meta"><b>${summaryGameTitle}</b><span>${S.setup.practiceType !== "target" ? `${S.setup.arrows}A × ${S.setup.checkPoints || S.setup.ends}CP × ${S.setup.rounds}R` : `${S.setup.arrows}A × ${S.setup.multi?.roundMode==='one'&&S.setup.distanceMode==='multiple'?S.setup.multi.roundEnds.slice(0,S.setup.rounds).join('/'):S.setup.ends}E × ${S.setup.rounds}R`}</span></div></section><section class="card"><div class="section">CURRENT RANKING</div>${rankingHTML}</section><button class="btn primary full" onclick="scoring()">BACK TO SCORING</button>`,"summary");
 }
 
 function finishSession() {
@@ -6421,7 +6463,7 @@ function historyMetrics(
 
     for (
       let e = 0;
-      e < endCount;
+      e < endsForRound(r+1,setup);
       e++
     ) {
 
@@ -6484,8 +6526,7 @@ function historyMetrics(
 
 
   const max =
-    roundCount *
-    endCount *
+    Array.from({length:roundCount},(_,i)=>endsForRound(i+1,setup)).reduce((a,b)=>a+b,0) *
     arrowCount *
     maxPointForMatrix(
       setup.matrix
@@ -6709,6 +6750,7 @@ function resultMultiConfig(setup) {
 
 function resultMultiBlocks(setup, roundNo) {
   const m = resultMultiConfig(setup);
+  if(m.roundMode==='one') {const ends=endsForRound(roundNo,setup);return [{distance:Math.max(1,Number(m.roundDistances?.[roundNo-1])||30),ends,start:1,end:ends,originalIndex:roundNo-1}];}
   let order = m.distances.map((_, i) => i);
   const mode = String(m.roundSequences?.[roundNo - 1] || (roundNo % 2 ? 'ascending' : 'descending')).toLowerCase();
   if (mode === 'descending') order = [...order].reverse();
@@ -6731,13 +6773,14 @@ function resultFormatLines(setup) {
 
 function resultDistanceText(setup) {
   if (setup?.distanceMode !== 'multiple') return `${setup.distance}m`;
-  return resultMultiConfig(setup).distances.map(d => `${d}m`).join('/');
+  const m=resultMultiConfig(setup);
+  return (m.roundMode==='one'?m.roundDistances.slice(0,Number(setup.rounds)||2):m.distances).map(d=>`${d}m`).join('/');
 }
 
 function resultDistanceTotals(archer, setup) {
   if (setup?.distanceMode !== "multiple") return [];
   const config = resultMultiConfig(setup);
-  const totals = config.distances.map(() => 0);
+  const totals = (config.roundMode==='one'?config.roundDistances.slice(0,Number(setup.rounds)||2):config.distances).map(() => 0);
   for (let ri = 0; ri < Math.max(1, Number(setup.rounds) || 1); ri++) {
     for (const block of resultMultiBlocks(setup, ri + 1)) {
       for (let ei = block.start - 1; ei < block.end; ei++) {
@@ -10131,6 +10174,7 @@ function csvEscape(value) {
 function currentPracticeDistanceForSetup(setup, round, end) {
   if (!setup || setup.distanceMode !== "multiple") return Number(setup?.distance) || 30;
   const m = setup.multi || {};
+  if(m.roundMode==='one')return Math.max(1,Number(m.roundDistances?.[round-1])||30);
   const distances = Array.isArray(m.distances) && m.distances.length ? m.distances.map(Number) : [30,40,50];
   const ends = Array.isArray(m.endsByDistance) && m.endsByDistance.length ? m.endsByDistance.map(Number) : distances.map(()=>Math.max(1, Number(m.endsPerDistance)||5));
   const order = Array.isArray(m.orders) ? (m.orders[Math.max(0, round-1)] || "asc") : "asc";
@@ -10196,7 +10240,7 @@ function exportSelectedExcel() {
       rows.push(tableHeader);
       let cumulative = 0;
       for (let r=0; r<Math.max(1, Number(setup.rounds)||1); r++) {
-        const endCount = Math.max(1, Number(setup.ends)||1);
+        const endCount = endsForRound(r+1,setup);
         for (let e=0; e<endCount; e++) {
           const vals = archer.scores?.[r]?.[e] || [];
           const endTotal = vals.reduce((sum,v)=>sum+scoreValue(v),0);

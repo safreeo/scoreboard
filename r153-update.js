@@ -1,10 +1,10 @@
 /* SCOREBOARD R153 — new distance steppers + round sequence synchronization */
 (function(){
   'use strict';
-  const active=()=>document.querySelector('.setup-page #multiCount') && S.setup?.distanceMode==='multiple' && S.setup?.practiceType==='target';
+  const active=()=>document.querySelector('.setup-page #multiCount, .setup-page #multiRoundCount') && S.setup?.distanceMode==='multiple' && S.setup?.practiceType==='target';
   function enhance(){
     if(!active())return;
-    document.querySelectorAll('.setup-page .multi-distance-grid input[type="number"]').forEach(input=>{
+    document.querySelectorAll('.setup-page .multi-distance-grid input[type="number"], .setup-page #multiRoundCount').forEach(input=>{
       const parent=input.parentElement;
       if(!parent||parent.querySelector('.r82-step-controls'))return;
       parent.classList.add('r82-stepper-box');
@@ -21,6 +21,7 @@
   }
   function refreshRounds(){
     if(!active())return;
+    if(S.setup?.multi?.roundMode==='one')return;
     const input=document.getElementById('rounds');
     if(!input)return;
     const n=Math.max(1,Math.trunc(Number(input.value)||1));
@@ -65,9 +66,9 @@
       const m=p.multi||{};
       const ds=p.distanceMode==='multiple'&&!game&&Array.isArray(m.distances)
         ?m.distances.slice(0,Math.max(1,Number(m.count)||m.distances.length)).filter(v=>Number(v)>0):[];
-      const dist=game?(Number(p.gameMinDistance)||5)+'~'+(Number(p.gameMaxDistance)||30)+'M'
+      const dist=m.roundMode==='one'&&p.distanceMode==='multiple'?m.roundDistances?.slice(0,p.rounds).join('/')+'M':game?(Number(p.gameMinDistance)||5)+'~'+(Number(p.gameMaxDistance)||30)+'M'
         :ds.length?ds.join('/')+'M':(Number(p.distance)||30)+'M';
-      const cp=game?(Number(p.checkPoints)||Number(p.ends)||20)+'CP'
+      const cp=m.roundMode==='one'&&p.distanceMode==='multiple'?m.roundEnds?.slice(0,p.rounds).join('/')+'E':game?(Number(p.checkPoints)||Number(p.ends)||20)+'CP'
         :ds.length&&Array.isArray(m.endsByDistance)?m.endsByDistance.slice(0,ds.length).join('/')+'E'
         :(Number(p.ends)||6)+'E';
       const matrix=String(p.matrix||'');

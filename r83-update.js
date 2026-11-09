@@ -29,9 +29,10 @@
       lines.push(`${i+1}. *${a.name}*: ${m.total}/${max} pts${tags.length?' ('+tags.join(', ')+')':''}`);
       // Show per-distance totals in WhatsApp, matching Detailed Results and PDF.
       if(setup.distanceMode==='multiple' && typeof resultMultiConfig==='function' && typeof resultDistanceTotals==='function'){
-        const distances=resultMultiConfig(setup).distances;
+        const config=resultMultiConfig(setup);
+        const distances=config.roundMode==='one'?config.roundDistances.slice(0,rounds):config.distances;
         const totals=resultDistanceTotals(a,setup);
-        detail.push(distances.map((d,di)=>`${d}m: ${totals[di]||0}`).join(', '));
+        detail.push(distances.map((d,di)=>`${config.roundMode==='one'?'R'+(di+1)+' ':''}${d}m: ${totals[di]||0}`).join(', '));
       } else if(rounds>1) {
         for(let r=1;r<=rounds;r++)detail.push(`R${r}:${r78RoundTotal(a,r,setup)}`);
       }
