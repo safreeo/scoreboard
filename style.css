@@ -10364,7 +10364,7 @@ html.font-large .page { font-size: 1.125rem; }
   border-radius:10px;padding:12px 30px;font-weight:900;font-size:.9rem;
   min-width:125px;cursor:pointer;
 }
-.setup-page .r155-apply-btn.r155-ready,.setup-page .r155-apply-btn.r155-applied{
+.setup-page .r155-apply-btn.r155-applied{
   background:#1473ef!important;border-color:#1473ef!important;
 }
 .r155-round-distance{display:block;font-size:.68em;line-height:1.35;font-weight:750;color:#6b7888;}
