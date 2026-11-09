@@ -54,6 +54,8 @@
     input.value=String(next);
     if(input.id==='multiCount'&&typeof setMultiCount==='function'){
       setMultiCount(next);
+    }else if(input.id==='multiRoundCount'&&typeof setMultiRoundCount==='function'){
+      setMultiRoundCount(next);
     }else if(typeof syncSetup==='function'){
       // Persist values in the existing model without calling refreshSetupAt/setup.
       syncSetup();
