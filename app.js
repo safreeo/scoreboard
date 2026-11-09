@@ -905,10 +905,10 @@ function setMultiCount(value) {
       const holder = document.createElement('div');
       holder.innerHTML = `<div class="multi-distance-item">
         <div class="setup-field"><label>Distance ${i+1} (m)</label><div class="input-unit">
-          <input id="multiDistance${i}" type="number" min="1" value="${m.distances[i]}" onchange="syncSetup(); refreshSetupAt('multiDistance${i}')">
+          <input id="multiDistance${i}" type="number" min="1" value="${m.distances[i]}" onchange="syncSetup(); r155MarkPreviewDirty()">
         </div></div>
         <div class="setup-field"><label>Ends</label><div class="input-unit">
-          <input id="multiDistanceEnds${i}" type="number" min="1" value="${m.endsByDistance[i]}" onchange="syncSetup(); refreshSetupAt('multiDistanceEnds${i}')">
+          <input id="multiDistanceEnds${i}" type="number" min="1" value="${m.endsByDistance[i]}" onchange="syncSetup(); r155MarkPreviewDirty()">
         </div></div>
       </div>`;
       grid.appendChild(holder.firstElementChild);
@@ -944,7 +944,7 @@ function setRoundOrder(index, value) {
   syncSetup();
   const m = ensureMultiSetup();
   m.orders[index] = value === "desc" ? "desc" : "asc";
-  refreshSetupAt(`roundOrder${index}`);
+  r155MarkPreviewDirty();
 }
 
 function setPracticeType(type) {
