@@ -4646,7 +4646,7 @@ function bottomNavHTML() {
   const multi = S.setup.distanceMode === "multiple";
   return `<nav class="score-bottom-nav compact-bottom-nav ${multi ? "six-items" : ""}">
     <button onclick="showExitDialog()"><span class="nav-icon nav-back">‹</span><small>Back</small></button>
-    ${multi ? `<button onclick="manageDistances()"><span class="nav-icon nav-distance">⇆</span><small>Distance</small></button>` : ""}
+    ${multi && S.setup.multi?.roundMode!=='one' ? `<button onclick="manageDistances()"><span class="nav-icon nav-distance">⇆</span><small>Distance</small></button>` : ""}
     <button onclick="manageRounds()"><span class="nav-icon nav-emoji">🔄</span><small>Round</small></button>
     <button onclick="manageEnds()"><span class="nav-icon nav-emoji">🎯</span><small>${S.setup.practiceType !== "target" ? "CP" : "End"}</small></button>
     <button onclick="summary()"><span class="nav-icon nav-emoji">📊</span><small>Summary</small></button>
@@ -5301,7 +5301,7 @@ function manageRounds() {
                   onclick="selectRound(${roundNo})"
                   aria-label="Select Round ${roundNo}${completed ? ', completed' : ''}"
                 >
-                  ROUND ${roundNo}
+                  ROUND ${roundNo}${S.setup.distanceMode==='multiple'&&S.setup.multi?.roundMode==='one'?`<small class="r155-round-distance">${S.setup.multi.roundDistances?.[roundNo-1]||30}m</small>`:'' }
                 </button>
               `;
             }
@@ -5708,7 +5708,7 @@ function summary() {
     ? `${S.setup.practiceType.toUpperCase()} GAME${S.setup.group && summaryGroupNo ? ` - GROUP ${esc(summaryGroupNo)}` : ""}`
     : `${S.setup.distanceMode === "multiple" ? `${(ensureMultiSetup().roundMode==='one'?ensureMultiSetup().roundDistances.slice(0,S.setup.rounds):ensureMultiSetup().distances).join("/")}M` : `${S.setup.distance}M`} • TF ${S.setup.target}CM`;
 
-  page(`${head("LIVE SUMMARY")}<section class="card"><div class="summary-meta"><b>${summaryGameTitle}</b><span>${S.setup.practiceType !== "target" ? `${S.setup.arrows}A × ${S.setup.checkPoints || S.setup.ends}CP × ${S.setup.rounds}R` : `${S.setup.arrows}A × ${S.setup.multi?.roundMode==='one'&&S.setup.distanceMode==='multiple'?S.setup.multi.roundEnds.slice(0,S.setup.rounds).join('/'):S.setup.ends}E × ${S.setup.rounds}R`}</span></div></section><section class="card"><div class="section">${ranking.length===1?"CURRENT SCORE":"CURRENT RANKING"}</div>${rankingHTML}</section><button class="btn primary full" onclick="scoring()">BACK TO SCORING</button>`,"summary");
+  page(`${head("LIVE SUMMARY")}<section class="card"><div class="summary-meta"><b>${summaryGameTitle}</b><span>${S.setup.practiceType !== "target" ? `${S.setup.arrows}A × ${S.setup.checkPoints || S.setup.ends}CP × ${S.setup.rounds}R` : `${S.setup.arrows}A × ${S.setup.multi?.roundMode==='one'&&S.setup.distanceMode==='multiple'?(new Set(S.setup.multi.roundEnds.slice(0,S.setup.rounds).map(Number)).size===1?S.setup.multi.roundEnds[0]:S.setup.multi.roundEnds.slice(0,S.setup.rounds).join('/')):S.setup.ends}E × ${S.setup.rounds}R`}</span></div></section><section class="card"><div class="section">${ranking.length===1?"CURRENT SCORE":"CURRENT RANKING"}</div>${rankingHTML}</section><button class="btn primary full" onclick="scoring()">BACK TO SCORING</button>`,"summary");
 }
 
 function finishSession() {
