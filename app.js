@@ -802,7 +802,7 @@ function ensureMultiSetup() {
   m.roundDistances = Array.isArray(m.roundDistances) ? m.roundDistances : [];
   m.roundEnds = Array.isArray(m.roundEnds) ? m.roundEnds : [];
   while (m.roundDistances.length < Math.max(2, Number(S.setup.rounds)||2)) m.roundDistances.push(Number(m.distances[(m.roundDistances.length)%m.distances.length])||30);
-  while (m.roundEnds.length < Math.max(2, Number(S.setup.rounds)||2)) m.roundEnds.push(Math.max(1, Number(m.endsByDistance[0])||5));
+  while (m.roundEnds.length < Math.max(2, Number(S.setup.rounds)||2)) m.roundEnds.push(6);
   m.orders = Array.isArray(m.orders) ? m.orders.slice() : [];
   while (m.orders.length < Math.max(1, Number(S.setup.rounds) || 1)) m.orders.push(m.orders.length % 2 === 0 ? "asc" : "desc");
   S.setup.distanceMode = S.setup.distanceMode === "multiple" ? "multiple" : "single";
@@ -822,7 +822,10 @@ function endsForRound(roundNo, setup=S.setup) {
 function setMultiRoundMode(mode) {
   syncSetup();
   const m=ensureMultiSetup();m.roundMode=mode==='one'?'one':'all';
-  if(m.roundMode==='one')S.setup.rounds=Math.max(2,Number(S.setup.rounds)||2);
+  if(m.roundMode==='one'){
+    S.setup.rounds=Math.max(2,Number(S.setup.rounds)||2);
+    if(!m.oneModeInitialized){m.roundEnds=Array.from({length:S.setup.rounds},()=>6);m.oneModeInitialized=true;}
+  }
   S.setup.ends=multiTotalEnds();
   preserveNextScrollY=window.scrollY;setup();
 }
@@ -4889,7 +4892,7 @@ function manageEnds() {
         <strong
           id="manageEndValue"
         >
-          ${S.setup.ends}
+          ${S.setup.multi?.roundMode==='one' && S.setup.distanceMode==='multiple' ? endsForRound(currentRoundNo()) : S.setup.ends}
         </strong>
 
 
@@ -5042,12 +5045,12 @@ function applyEnds() {
       1,
       Number(
         el?.textContent
-      ) || S.setup.ends
+      ) || endsForRound(currentRoundNo())
     );
 
 
   const oldEnds =
-    S.setup.ends;
+    S.setup.multi?.roundMode==='one' && S.setup.distanceMode==='multiple' ? endsForRound(currentRoundNo()) : S.setup.ends;
 
 
   if (
@@ -5181,6 +5184,10 @@ function applyEnds() {
     );
 
 
+  if(S.setup.distanceMode==='multiple' && S.setup.multi?.roundMode==='one'){
+    S.setup.multi.roundEnds=Array.from({length:S.setup.rounds},()=>newEnds);
+    S.session.setup.multi.roundEnds=[...S.setup.multi.roundEnds];
+  }
   S.setup.ends =
     newEnds;
 
@@ -5691,7 +5698,7 @@ function summary() {
   } else if (S.setup.distanceMode === "multiple") {
     rankingHTML = Array.from({length:S.setup.rounds},(_,ri)=>{
       const roundNo=ri+1, blocks=multiBlocks(roundNo);
-      return `<div class="summary-round-block"><div class="summary-round-heading">ROUND ${roundNo}${S.setup.multi?.roundMode==='one'?`<small class="r155-round-distance">${blocks[0]?.distance||0}m</small>`:''}</div><div class="responsive-scroll"><table class="summary-table live-summary-table multi-summary-table"><colgroup><col class="summary-col-rank"><col class="summary-col-archer">${blocks.map(()=>`<col class="summary-col-round">`).join("")}<col class="summary-col-points"></colgroup><thead><tr><th>Rank</th><th class="summary-archer">Archer</th>${blocks.map(b=>`<th>${b.distance}m</th>`).join("")}${S.setup.multi?.roundMode==='one'?topMatrixLabels(S.setup.matrix).map(label=>`<th>${esc(label)}</th>`).join(""):'' }<th>Points</th></tr></thead><tbody>${ranking.map((item,rank)=>{const vals=blocks.map(b=>pointsRange(item.archer,roundNo,b.start,b.end)); const total=vals.reduce((a,b)=>a+b,0); return `<tr><td>${rank+1}</td><td class="summary-archer summary-archer-name"><b>${esc(item.archer.name)}</b></td>${vals.map(v=>`<td>${v}</td>`).join("")}${S.setup.multi?.roundMode==='one'?topMatrixLabels(S.setup.matrix).map(label=>`<td>${(item.archer.scores?.[ri]||[]).flat().filter(v=>String(v)===String(label)).length}</td>`).join(""):'' }<td><b>${total}</b></td></tr>`}).join("")}</tbody></table></div></div>`;
+      return `<div class="summary-round-block"><div class="summary-round-heading">ROUND ${roundNo}${S.setup.multi?.roundMode==='one'?`: ${blocks[0]?.distance||0}m`:''}</div><div class="responsive-scroll"><table class="summary-table live-summary-table multi-summary-table"><colgroup><col class="summary-col-rank"><col class="summary-col-archer">${blocks.map(()=>`<col class="summary-col-round">`).join("")}<col class="summary-col-points"></colgroup><thead><tr><th>Rank</th><th class="summary-archer">Archer</th>${blocks.map(b=>`<th>${S.setup.multi?.roundMode==='one'?"Score":`${b.distance}m`}</th>`).join("")}${S.setup.multi?.roundMode==='one'?topMatrixLabels(S.setup.matrix).map(label=>`<th>${esc(label)}</th>`).join(""):'' }<th>Points</th></tr></thead><tbody>${ranking.map((item,rank)=>{const vals=blocks.map(b=>pointsRange(item.archer,roundNo,b.start,b.end)); const total=vals.reduce((a,b)=>a+b,0); return `<tr><td>${rank+1}</td><td class="summary-archer summary-archer-name"><b>${esc(item.archer.name)}</b></td>${vals.map(v=>`<td>${v}</td>`).join("")}${S.setup.multi?.roundMode==='one'?topMatrixLabels(S.setup.matrix).map(label=>`<td>${(item.archer.scores?.[ri]||[]).flat().filter(v=>String(v)===String(label)).length}</td>`).join(""):'' }<td><b>${total}</b></td></tr>`}).join("")}</tbody></table></div></div>`;
     }).join("");
   } else {
     const roundPoints=(archer,roundNo)=>pointsRange(archer,roundNo,1,endsForRound(roundNo));
