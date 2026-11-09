@@ -3257,7 +3257,7 @@ function normalizeSession() {
           Array.from(
             {
               length:
-                S.setup.ends
+                endsForRound(a.scores.length+1)
             },
             () =>
               Array(
@@ -3371,7 +3371,7 @@ function normalizeSession() {
 
         a.locked.push(
           Array(
-            S.setup.ends
+            endsForRound(a.locked.length+1)
           ).fill(false)
         );
       }
@@ -5402,7 +5402,7 @@ function applyRounds() {
 
       for (
         let e = 1;
-        e <= S.setup.ends;
+        e <= endsForRound(r);
         e++
       ) {
 
