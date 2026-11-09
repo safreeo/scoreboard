@@ -905,10 +905,10 @@ function setMultiCount(value) {
       const holder = document.createElement('div');
       holder.innerHTML = `<div class="multi-distance-item">
         <div class="setup-field"><label>Distance ${i+1} (m)</label><div class="input-unit">
-          <input id="multiDistance${i}" type="number" min="1" value="${m.distances[i]}" onchange="syncSetup(); refreshSetupAt('multiDistance${i}')">
+          <input id="multiDistance${i}" type="number" min="1" value="${m.distances[i]}" onchange="syncSetup(); r155MarkPreviewDirty()">
         </div></div>
         <div class="setup-field"><label>Ends</label><div class="input-unit">
-          <input id="multiDistanceEnds${i}" type="number" min="1" value="${m.endsByDistance[i]}" onchange="syncSetup(); refreshSetupAt('multiDistanceEnds${i}')">
+          <input id="multiDistanceEnds${i}" type="number" min="1" value="${m.endsByDistance[i]}" onchange="syncSetup(); r155MarkPreviewDirty()">
         </div></div>
       </div>`;
       grid.appendChild(holder.firstElementChild);
@@ -944,7 +944,7 @@ function setRoundOrder(index, value) {
   syncSetup();
   const m = ensureMultiSetup();
   m.orders[index] = value === "desc" ? "desc" : "asc";
-  refreshSetupAt(`roundOrder${index}`);
+  r155MarkPreviewDirty();
 }
 
 function setPracticeType(type) {
@@ -1009,9 +1009,9 @@ function formatFieldsHTML() {
     const n=Math.max(2,Number(S.setup.rounds)||2);
     return `<div class="distance-mode-row"><button class="distance-mode-btn" onclick="setDistanceMode('single')">SINGLE DISTANCE</button><button class="distance-mode-btn active" onclick="setDistanceMode('multiple')">MULTIPLE DISTANCES</button></div>
     <div class="distance-mode-row"><button class="distance-mode-btn" onclick="setMultiRoundMode('all')">ALL DISTANCES PER ROUND</button><button class="distance-mode-btn active" onclick="setMultiRoundMode('one')">ONE DISTANCE PER ROUND</button></div>
-    <div class="multi-common-layout"><div class="multi-common-left">${numField('Target Face (cm)','target',S.setup.target)}${numField('Arrows / End','arrows',S.setup.arrows)}</div><div class="multi-common-right"><div class="setup-field"><label>No. of Rounds</label><div class="input-unit"><input id="multiRoundCount" type="number" min="2" max="30" value="${n}" onchange="setMultiRoundCount(this.value)"></div></div>${numField('Time / End (sec)','multiTime',m.timeEnd)}</div></div>
-    <div class="multi-round-title">ROUND DISTANCES & ENDS</div><div class="multi-distance-grid">${Array.from({length:n},(_,i)=>`<div class="multi-distance-item"><b>ROUND ${i+1}</b><div class="setup-field"><label>Distance (m)</label><div class="input-unit"><input id="oneRoundDistance${i}" type="number" min="1" value="${m.roundDistances[i]}" onchange="syncSetup();refreshSetupAt('oneRoundDistance${i}')"></div></div><div class="setup-field"><label>Ends</label><div class="input-unit"><input id="oneRoundEnds${i}" type="number" min="1" value="${m.roundEnds[i]}" onchange="syncSetup();refreshSetupAt('oneRoundEnds${i}')"></div></div></div>`).join('')}</div>
-    <div class="multi-preview"><b>FORMAT PREVIEW</b>${Array.from({length:n},(_,i)=>`<div>R${i+1}: ${m.roundDistances[i]}m × ${m.roundEnds[i]}E</div>`).join('')}<small>${S.setup.arrows} Arrows/End • Total ${m.roundEnds.slice(0,n).reduce((a,b)=>a+Number(b),0)} Ends</small></div>`;
+    <div class="multi-common-layout r155-common"><div class="multi-common-left">${numField('Target Face (cm)','target',S.setup.target)}${numField('Arrows / End','arrows',S.setup.arrows)}</div><div class="multi-common-right"><div class="setup-field"><label>No. of Rounds</label><div class="input-unit"><input id="multiRoundCount" type="number" min="2" max="30" value="${n}" onchange="setMultiRoundCount(this.value)"></div></div>${numField('Time / End (sec)','multiTime',m.timeEnd)}</div></div>
+    <div class="multi-round-title">ROUND DISTANCES & ENDS</div><div class="multi-distance-grid r155-one-round-grid">${Array.from({length:n},(_,i)=>`<div class="multi-distance-item"><b>ROUND ${i+1}</b><div class="setup-field"><label>Distance (m)</label><div class="input-unit"><input id="oneRoundDistance${i}" type="number" min="1" value="${m.roundDistances[i]}" onchange="syncSetup();r155MarkPreviewDirty()"></div></div><div class="setup-field"><label>Ends</label><div class="input-unit"><input id="oneRoundEnds${i}" type="number" min="1" value="${m.roundEnds[i]}" onchange="syncSetup();r155MarkPreviewDirty()"></div></div></div>`).join('')}</div>
+    <div class="r155-apply-row"><button type="button" id="r155ApplyFormat" class="r155-apply-btn" onclick="r155ApplyPreview()">APPLY</button></div><div class="multi-preview" id="r155FormatPreview"><b>FORMAT PREVIEW</b>${Array.from({length:n},(_,i)=>`<div>R${i+1}: ${m.roundDistances[i]}m × ${m.roundEnds[i]}E</div>`).join('')}<small>${S.setup.arrows} Arrows/End • Total ${m.roundEnds.slice(0,n).reduce((a,b)=>a+Number(b),0)} Ends • ${m.roundEnds.slice(0,n).reduce((a,b)=>a+Number(b),0)*Number(S.setup.arrows)} Arrows</small></div>`;
   }
   const distFields = m.distances.map((d, i) => `
     <div class="multi-distance-item">
@@ -1060,7 +1060,8 @@ function formatFieldsHTML() {
       </div>
       <div class="multi-round-title">ROUND SEQUENCE</div>
       <div class="multi-round-list">${rounds}</div>
-      <div class="multi-preview">
+      <div class="r155-apply-row"><button type="button" id="r155ApplyFormat" class="r155-apply-btn" onclick="r155ApplyPreview()">APPLY</button></div>
+      <div class="multi-preview" id="r155FormatPreview">
         <b>FORMAT PREVIEW</b>
         ${Array.from({length: Math.max(1, Number(S.setup.rounds) || 1)}, (_,i) => `<div>R${i+1}: ${multiSequence(i+1).map(x => `${x.distance}m × ${m.endsByDistance[x.originalIndex]}E`).join(" → ")}</div>`).join("")}
         <small>${S.setup.arrows} Arrows/End • Total ${totalEnds} Ends • ${totalArrows} Arrows</small>
@@ -4646,7 +4647,7 @@ function bottomNavHTML() {
   const multi = S.setup.distanceMode === "multiple";
   return `<nav class="score-bottom-nav compact-bottom-nav ${multi ? "six-items" : ""}">
     <button onclick="showExitDialog()"><span class="nav-icon nav-back">‹</span><small>Back</small></button>
-    ${multi ? `<button onclick="manageDistances()"><span class="nav-icon nav-distance">⇆</span><small>Distance</small></button>` : ""}
+    ${multi && S.setup.multi?.roundMode!=='one' ? `<button onclick="manageDistances()"><span class="nav-icon nav-distance">⇆</span><small>Distance</small></button>` : ""}
     <button onclick="manageRounds()"><span class="nav-icon nav-emoji">🔄</span><small>Round</small></button>
     <button onclick="manageEnds()"><span class="nav-icon nav-emoji">🎯</span><small>${S.setup.practiceType !== "target" ? "CP" : "End"}</small></button>
     <button onclick="summary()"><span class="nav-icon nav-emoji">📊</span><small>Summary</small></button>
@@ -5301,7 +5302,7 @@ function manageRounds() {
                   onclick="selectRound(${roundNo})"
                   aria-label="Select Round ${roundNo}${completed ? ', completed' : ''}"
                 >
-                  ROUND ${roundNo}
+                  ROUND ${roundNo}${S.setup.distanceMode==='multiple'&&S.setup.multi?.roundMode==='one'?`<small class="r155-round-distance">${S.setup.multi.roundDistances?.[roundNo-1]||30}m</small>`:'' }
                 </button>
               `;
             }
@@ -5690,7 +5691,7 @@ function summary() {
   } else if (S.setup.distanceMode === "multiple") {
     rankingHTML = Array.from({length:S.setup.rounds},(_,ri)=>{
       const roundNo=ri+1, blocks=multiBlocks(roundNo);
-      return `<div class="summary-round-block"><div class="summary-round-heading">ROUND ${roundNo}</div><div class="responsive-scroll"><table class="summary-table live-summary-table multi-summary-table"><colgroup><col class="summary-col-rank"><col class="summary-col-archer">${blocks.map(()=>`<col class="summary-col-round">`).join("")}<col class="summary-col-points"></colgroup><thead><tr><th>Rank</th><th class="summary-archer">Archer</th>${blocks.map(b=>`<th>${b.distance}m</th>`).join("")}<th>Points</th></tr></thead><tbody>${ranking.map((item,rank)=>{const vals=blocks.map(b=>pointsRange(item.archer,roundNo,b.start,b.end)); const total=vals.reduce((a,b)=>a+b,0); return `<tr><td>${rank+1}</td><td class="summary-archer summary-archer-name"><b>${esc(item.archer.name)}</b></td>${vals.map(v=>`<td>${v}</td>`).join("")}<td><b>${total}</b></td></tr>`}).join("")}</tbody></table></div></div>`;
+      return `<div class="summary-round-block"><div class="summary-round-heading">ROUND ${roundNo}${S.setup.multi?.roundMode==='one'?`<small class="r155-round-distance">${blocks[0]?.distance||0}m</small>`:''}</div><div class="responsive-scroll"><table class="summary-table live-summary-table multi-summary-table"><colgroup><col class="summary-col-rank"><col class="summary-col-archer">${blocks.map(()=>`<col class="summary-col-round">`).join("")}<col class="summary-col-points"></colgroup><thead><tr><th>Rank</th><th class="summary-archer">Archer</th>${blocks.map(b=>`<th>${b.distance}m</th>`).join("")}${S.setup.multi?.roundMode==='one'?topMatrixLabels(S.setup.matrix).map(label=>`<th>${esc(label)}</th>`).join(""):'' }<th>Points</th></tr></thead><tbody>${ranking.map((item,rank)=>{const vals=blocks.map(b=>pointsRange(item.archer,roundNo,b.start,b.end)); const total=vals.reduce((a,b)=>a+b,0); return `<tr><td>${rank+1}</td><td class="summary-archer summary-archer-name"><b>${esc(item.archer.name)}</b></td>${vals.map(v=>`<td>${v}</td>`).join("")}${S.setup.multi?.roundMode==='one'?topMatrixLabels(S.setup.matrix).map(label=>`<td>${(item.archer.scores?.[ri]||[]).flat().filter(v=>String(v)===String(label)).length}</td>`).join(""):'' }<td><b>${total}</b></td></tr>`}).join("")}</tbody></table></div></div>`;
     }).join("");
   } else {
     const roundPoints=(archer,roundNo)=>pointsRange(archer,roundNo,1,endsForRound(roundNo));
@@ -5708,7 +5709,7 @@ function summary() {
     ? `${S.setup.practiceType.toUpperCase()} GAME${S.setup.group && summaryGroupNo ? ` - GROUP ${esc(summaryGroupNo)}` : ""}`
     : `${S.setup.distanceMode === "multiple" ? `${(ensureMultiSetup().roundMode==='one'?ensureMultiSetup().roundDistances.slice(0,S.setup.rounds):ensureMultiSetup().distances).join("/")}M` : `${S.setup.distance}M`} • TF ${S.setup.target}CM`;
 
-  page(`${head("LIVE SUMMARY")}<section class="card"><div class="summary-meta"><b>${summaryGameTitle}</b><span>${S.setup.practiceType !== "target" ? `${S.setup.arrows}A × ${S.setup.checkPoints || S.setup.ends}CP × ${S.setup.rounds}R` : `${S.setup.arrows}A × ${S.setup.multi?.roundMode==='one'&&S.setup.distanceMode==='multiple'?S.setup.multi.roundEnds.slice(0,S.setup.rounds).join('/'):S.setup.ends}E × ${S.setup.rounds}R`}</span></div></section><section class="card"><div class="section">CURRENT RANKING</div>${rankingHTML}</section><button class="btn primary full" onclick="scoring()">BACK TO SCORING</button>`,"summary");
+  page(`${head("LIVE SUMMARY")}<section class="card"><div class="summary-meta"><b>${summaryGameTitle}</b><span>${S.setup.practiceType !== "target" ? `${S.setup.arrows}A × ${S.setup.checkPoints || S.setup.ends}CP × ${S.setup.rounds}R` : `${S.setup.arrows}A × ${S.setup.multi?.roundMode==='one'&&S.setup.distanceMode==='multiple'?(new Set(S.setup.multi.roundEnds.slice(0,S.setup.rounds).map(Number)).size===1?S.setup.multi.roundEnds[0]:S.setup.multi.roundEnds.slice(0,S.setup.rounds).join('/')):S.setup.ends}E × ${S.setup.rounds}R`}</span></div></section><section class="card"><div class="section">${ranking.length===1?"CURRENT SCORE":"CURRENT RANKING"}</div>${rankingHTML}</section><button class="btn primary full" onclick="scoring()">BACK TO SCORING</button>`,"summary");
 }
 
 function finishSession() {

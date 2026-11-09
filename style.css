@@ -10321,3 +10321,52 @@ html.font-large .page { font-size: 1.125rem; }
   .result-ranking-table { font-size: 7.5pt !important; }
   .result-ranking-table th, .result-ranking-table td { padding: 5px 4px !important; }
 }
+
+/* R155 - consistent numeric steppers, per-round alignment and Apply preview */
+.setup-page .multi-common-layout .input-unit:has(.r82-stepper-box),
+.setup-page .multi-distance-grid .input-unit:has(.r82-stepper-box),
+.setup-page .multi-count-full .input-unit:has(.r82-stepper-box),
+.setup-page .multi-common-grid .input-unit:has(.r82-stepper-box){
+  border:0!important;box-shadow:none!important;background:transparent!important;
+}
+.setup-page .multi-common-layout .r82-stepper-box,
+.setup-page .multi-distance-grid .r82-stepper-box,
+.setup-page .multi-count-full .r82-stepper-box,
+.setup-page .multi-common-grid .r82-stepper-box{
+  border:1px solid #b7c4cf!important;border-radius:11px!important;
+  box-sizing:border-box!important;height:56px!important;min-height:56px!important;
+  width:100%!important;background:#fff!important;
+}
+.setup-page .multi-common-layout .r82-stepper-box>input,
+.setup-page .multi-distance-grid .r82-stepper-box>input,
+.setup-page .multi-count-full .r82-stepper-box>input,
+.setup-page .multi-common-grid .r82-stepper-box>input{
+  height:54px!important;min-height:54px!important;
+}
+.setup-page .r155-one-round-grid .multi-distance-item{
+  display:grid!important;grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;
+  align-items:end!important;gap:10px 12px!important;padding:12px 0!important;
+  border-bottom:1px solid #e4eaf0;
+}
+.setup-page .r155-one-round-grid .multi-distance-item>b{
+  grid-column:1/-1!important;font-weight:900!important;color:#123a59!important;
+  font-size:.92rem!important;
+}
+.setup-page .r155-one-round-grid .multi-distance-item .setup-field{
+  min-width:0!important;width:100%!important;
+}
+.setup-page .r155-one-round-grid .multi-distance-item .setup-field>label{
+  min-height:1.5em!important;display:block!important;
+}
+.setup-page .r155-apply-row{display:flex;justify-content:flex-end;margin:16px 0 8px;}
+.setup-page .r155-apply-btn{
+  background:#94a3b8!important;border:1px solid #94a3b8!important;color:#fff!important;
+  border-radius:10px;padding:12px 30px;font-weight:900;font-size:.9rem;
+  min-width:125px;cursor:pointer;
+}
+.setup-page .r155-apply-btn.r155-applied{
+  background:#1473ef!important;border-color:#1473ef!important;
+}
+.r155-round-distance{display:block;font-size:.68em;line-height:1.35;font-weight:750;color:#6b7888;}
+.round-select-btn.active .r155-round-distance{color:#45596d;}
+.summary-round-heading .r155-round-distance{font-size:.7em;}
