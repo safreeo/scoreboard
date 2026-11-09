@@ -10370,3 +10370,32 @@ html.font-large .page { font-size: 1.125rem; }
 .r155-round-distance{display:block;font-size:.68em;line-height:1.35;font-weight:750;color:#6b7888;}
 .round-select-btn.active .r155-round-distance{color:#45596d;}
 .summary-round-heading .r155-round-distance{font-size:.7em;}
+
+/* R156: compact distance mode tabs, aligned steppers, readable summary */
+.setup-page .distance-mode-row:nth-of-type(2) .distance-mode-btn{
+  font-size:clamp(.62rem,2.5vw,.86rem)!important;
+  line-height:1.15!important;white-space:nowrap!important;
+  padding:9px 5px!important;letter-spacing:-.015em!important;
+  min-width:0!important;
+}
+.setup-page .distance-mode-row:nth-of-type(2) .distance-mode-btn.active{
+  background:#075c9b!important;border-color:#075c9b!important;color:#fff!important;
+}
+.setup-page .multi-common-layout .r82-stepper-box,
+.setup-page .multi-distance-grid .r82-stepper-box{
+  background:#eaf3fd!important;border-color:#98b9d9!important;
+}
+.setup-page .multi-common-layout .r82-step-controls,
+.setup-page .multi-distance-grid .r82-step-controls{
+  background:#dcefff!important;
+}
+.live-summary-table .summary-col-archer,
+.live-summary-table .summary-archer,
+.live-summary-table .summary-archer-name{
+  width:clamp(125px,28vw,220px)!important;
+  min-width:125px!important;
+}
+.live-summary-table .summary-col-round{width:55px!important;}
+.live-summary-table .summary-col-rank{width:47px!important;}
+.live-summary-table .summary-col-points{width:65px!important;}
+.round-mini-select-btn .r155-round-distance{font-size:.85em!important;font-weight:850!important;}
