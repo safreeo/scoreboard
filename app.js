@@ -2922,10 +2922,10 @@ function makeScoreArray() {
     {
       length: S.setup.rounds
     },
-    () =>
+    (_,ri) =>
       Array.from(
         {
-          length: S.setup.ends
+          length: endsForRound(ri+1)
         },
         () =>
           Array(
@@ -2942,9 +2942,9 @@ function makeLockArray() {
     {
       length: S.setup.rounds
     },
-    () =>
+    (_,ri) =>
       Array(
-        S.setup.ends
+        endsForRound(ri+1)
       ).fill(false)
   );
 }
@@ -3280,7 +3280,7 @@ function normalizeSession() {
 
       a.scores =
         a.scores.map(
-          round => {
+          (round,roundIndex) => {
 
             if (
               !Array.isArray(
@@ -3294,7 +3294,7 @@ function normalizeSession() {
 
             while (
               round.length <
-              S.setup.ends
+              endsForRound(roundIndex+1)
             ) {
 
               round.push(
@@ -3307,7 +3307,7 @@ function normalizeSession() {
 
             if (
               round.length >
-              S.setup.ends
+              endsForRound(roundIndex+1)
             ) {
 
               round.length =
@@ -3389,7 +3389,7 @@ function normalizeSession() {
 
       a.locked =
         a.locked.map(
-          round => {
+          (round,roundIndex) => {
 
             if (
               !Array.isArray(
@@ -3403,7 +3403,7 @@ function normalizeSession() {
 
             while (
               round.length <
-              S.setup.ends
+              endsForRound(roundIndex+1)
             ) {
 
               round.push(
@@ -3414,7 +3414,7 @@ function normalizeSession() {
 
             if (
               round.length >
-              S.setup.ends
+              endsForRound(roundIndex+1)
             ) {
 
               round.length =
@@ -3442,7 +3442,7 @@ function normalizeSession() {
           1,
           Math.min(
             Number(a.e) || 1,
-            S.setup.ends
+            endsForRound(a.r)
           )
         );
     });
@@ -4339,7 +4339,7 @@ function nextSequentialEndForArcher(archer, round) {
   // An archer may only advance in sequence. This is especially important
   // for late joiners: they start from End 1 while the other archers keep
   // their own progress and do not have to wait for them to catch up.
-  for (let endNo = 1; endNo <= S.setup.ends; endNo++) {
+  for (let endNo = 1; endNo <= endsForRound(round); endNo++) {
     if (!endLocked(archer, round, endNo)) {
       const previousComplete =
         endNo === 1 || endLocked(archer, round, endNo - 1);
@@ -4393,7 +4393,7 @@ function moveAfterSubmit() {
   // is still completing End 1, End 2, etc.
   const submittedNextEnd = nextSequentialEndForArcher(submittedArcher, round);
   submittedArcher.r = round;
-  submittedArcher.e = submittedNextEnd || S.setup.ends;
+  submittedArcher.e = submittedNextEnd || endsForRound(round);
 
   // Continue normal team rotation, but send every archer to THEIR OWN
   // next sequential open End rather than forcing everyone onto one End.
@@ -4418,9 +4418,9 @@ function moveAfterSubmit() {
   // No open End remains in this round.
   S.session.idx = submittedIndex;
   S.session.currentRound = round;
-  S.session.currentEnd = S.setup.ends;
+  S.session.currentEnd = endsForRound(round);
   submittedArcher.r = round;
-  submittedArcher.e = S.setup.ends;
+  submittedArcher.e = endsForRound(round);
 
   saveUnfinished();
   scoring();
@@ -4439,7 +4439,7 @@ function beginEditEnd() {
   }
 
   const round = currentRoundNo();
-  const hasSubmittedEnd = Array.from({ length: S.setup.ends }, (_, i) => i + 1)
+  const hasSubmittedEnd = Array.from({ length: endsForRound(round) }, (_, i) => i + 1)
     .some(endNo => endLocked(a, round, endNo));
 
   if (!hasSubmittedEnd) return;
@@ -4456,7 +4456,7 @@ function beginEditEnd() {
 }
 
 function findNextOpenScoringPosition(round) {
-  for (let endNo = 1; endNo <= S.setup.ends; endNo++) {
+  for (let endNo = 1; endNo <= endsForRound(round); endNo++) {
     for (let i = 0; i < S.session.archers.length; i++) {
       const archer = S.session.archers[i];
 
@@ -4518,7 +4518,7 @@ function updateEditedEnd() {
   } else {
     S.session.idx = 0;
     S.session.currentRound = round;
-    S.session.currentEnd = S.setup.ends;
+    S.session.currentEnd = endsForRound(round);
   }
 
   saveUnfinished();
@@ -5335,7 +5335,7 @@ function selectRound(roundNo) {
   selectedScoreCell = null;
 
   let targetEnd = 1;
-  for (let e = 1; e <= S.setup.ends; e++) {
+  for (let e = 1; e <= endsForRound(r); e++) {
     if (!endLocked(a, r, e)) {
       targetEnd = e;
       break;
@@ -5693,7 +5693,7 @@ function summary() {
       return `<div class="summary-round-block"><div class="summary-round-heading">ROUND ${roundNo}</div><div class="responsive-scroll"><table class="summary-table live-summary-table multi-summary-table"><colgroup><col class="summary-col-rank"><col class="summary-col-archer">${blocks.map(()=>`<col class="summary-col-round">`).join("")}<col class="summary-col-points"></colgroup><thead><tr><th>Rank</th><th class="summary-archer">Archer</th>${blocks.map(b=>`<th>${b.distance}m</th>`).join("")}<th>Points</th></tr></thead><tbody>${ranking.map((item,rank)=>{const vals=blocks.map(b=>pointsRange(item.archer,roundNo,b.start,b.end)); const total=vals.reduce((a,b)=>a+b,0); return `<tr><td>${rank+1}</td><td class="summary-archer summary-archer-name"><b>${esc(item.archer.name)}</b></td>${vals.map(v=>`<td>${v}</td>`).join("")}<td><b>${total}</b></td></tr>`}).join("")}</tbody></table></div></div>`;
     }).join("");
   } else {
-    const roundPoints=(archer,roundNo)=>pointsRange(archer,roundNo,1,S.setup.ends);
+    const roundPoints=(archer,roundNo)=>pointsRange(archer,roundNo,1,endsForRound(roundNo));
     rankingHTML=`<div class="responsive-scroll"><table class="summary-table live-summary-table"><colgroup><col class="summary-col-rank"><col class="summary-col-archer">${Array.from({length:S.setup.rounds},()=>`<col class="summary-col-round">`).join("")}<col class="summary-col-points"></colgroup><thead><tr><th>Rank</th><th class="summary-archer">Archer</th>${Array.from({length:S.setup.rounds},(_,i)=>`<th>R${i+1}</th>`).join("")}<th>Points</th></tr></thead><tbody>${ranking.map((item,rank)=>`<tr><td>${rank+1}</td><td class="summary-archer summary-archer-name"><b>${esc(item.archer.name)}</b></td>${Array.from({length:S.setup.rounds},(_,i)=>`<td>${roundPoints(item.archer,i+1)}</td>`).join("")}<td><b>${item.metrics.total}</b></td></tr>`).join("")}</tbody></table></div>`;
   }
   const summaryFirstArcher = ranking[0]?.archer?.name || "";
@@ -5706,9 +5706,9 @@ function summary() {
   ).trim();
   const summaryGameTitle = S.setup.practiceType !== "target"
     ? `${S.setup.practiceType.toUpperCase()} GAME${S.setup.group && summaryGroupNo ? ` - GROUP ${esc(summaryGroupNo)}` : ""}`
-    : `${S.setup.distanceMode === "multiple" ? `${ensureMultiSetup().distances.join("/")}M` : `${S.setup.distance}M`} • TF ${S.setup.target}CM`;
+    : `${S.setup.distanceMode === "multiple" ? `${(ensureMultiSetup().roundMode==='one'?ensureMultiSetup().roundDistances.slice(0,S.setup.rounds):ensureMultiSetup().distances).join("/")}M` : `${S.setup.distance}M`} • TF ${S.setup.target}CM`;
 
-  page(`${head("LIVE SUMMARY")}<section class="card"><div class="summary-meta"><b>${summaryGameTitle}</b><span>${S.setup.practiceType !== "target" ? `${S.setup.arrows}A × ${S.setup.checkPoints || S.setup.ends}CP × ${S.setup.rounds}R` : `${S.setup.arrows}A × ${S.setup.ends}E × ${S.setup.rounds}R`}</span></div></section><section class="card"><div class="section">CURRENT RANKING</div>${rankingHTML}</section><button class="btn primary full" onclick="scoring()">BACK TO SCORING</button>`,"summary");
+  page(`${head("LIVE SUMMARY")}<section class="card"><div class="summary-meta"><b>${summaryGameTitle}</b><span>${S.setup.practiceType !== "target" ? `${S.setup.arrows}A × ${S.setup.checkPoints || S.setup.ends}CP × ${S.setup.rounds}R` : `${S.setup.arrows}A × ${S.setup.multi?.roundMode==='one'&&S.setup.distanceMode==='multiple'?S.setup.multi.roundEnds.slice(0,S.setup.rounds).join('/'):S.setup.ends}E × ${S.setup.rounds}R`}</span></div></section><section class="card"><div class="section">CURRENT RANKING</div>${rankingHTML}</section><button class="btn primary full" onclick="scoring()">BACK TO SCORING</button>`,"summary");
 }
 
 function finishSession() {
@@ -6526,8 +6526,7 @@ function historyMetrics(
 
 
   const max =
-    roundCount *
-    endCount *
+    Array.from({length:roundCount},(_,i)=>endsForRound(i+1,setup)).reduce((a,b)=>a+b,0) *
     arrowCount *
     maxPointForMatrix(
       setup.matrix
