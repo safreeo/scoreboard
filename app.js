@@ -1060,7 +1060,8 @@ function formatFieldsHTML() {
       </div>
       <div class="multi-round-title">ROUND SEQUENCE</div>
       <div class="multi-round-list">${rounds}</div>
-      <div class="multi-preview">
+      <div class="r155-apply-row"><button type="button" id="r155ApplyFormat" class="r155-apply-btn" onclick="r155ApplyPreview()">APPLY</button></div>
+      <div class="multi-preview" id="r155FormatPreview">
         <b>FORMAT PREVIEW</b>
         ${Array.from({length: Math.max(1, Number(S.setup.rounds) || 1)}, (_,i) => `<div>R${i+1}: ${multiSequence(i+1).map(x => `${x.distance}m × ${m.endsByDistance[x.originalIndex]}E`).join(" → ")}</div>`).join("")}
         <small>${S.setup.arrows} Arrows/End • Total ${totalEnds} Ends • ${totalArrows} Arrows</small>
