@@ -798,6 +798,11 @@ function ensureMultiSetup() {
   m.endsByDistance = m.endsByDistance.map(v => Math.max(1, Number(v) || fallbackEnds));
   m.endsPerDistance = m.endsByDistance[0] || fallbackEnds; // legacy compatibility
   m.timeEnd = Math.max(1, Number(m.timeEnd) || Number(S.timer?.shoot) || 120);
+  m.roundMode = m.roundMode === 'one' ? 'one' : 'all';
+  m.roundDistances = Array.isArray(m.roundDistances) ? m.roundDistances : [];
+  m.roundEnds = Array.isArray(m.roundEnds) ? m.roundEnds : [];
+  while (m.roundDistances.length < Math.max(2, Number(S.setup.rounds)||2)) m.roundDistances.push(Number(m.distances[(m.roundDistances.length)%m.distances.length])||30);
+  while (m.roundEnds.length < Math.max(2, Number(S.setup.rounds)||2)) m.roundEnds.push(Math.max(1, Number(m.endsByDistance[0])||5));
   m.orders = Array.isArray(m.orders) ? m.orders.slice() : [];
   while (m.orders.length < Math.max(1, Number(S.setup.rounds) || 1)) m.orders.push(m.orders.length % 2 === 0 ? "asc" : "desc");
   S.setup.distanceMode = S.setup.distanceMode === "multiple" ? "multiple" : "single";
@@ -806,7 +811,26 @@ function ensureMultiSetup() {
 
 function multiTotalEnds() {
   const m = ensureMultiSetup();
-  return m.endsByDistance.reduce((sum, v) => sum + Math.max(1, Number(v) || 1), 0);
+  return m.roundMode === 'one' ? Math.max(...m.roundEnds.slice(0, Math.max(2,Number(S.setup.rounds)||2)).map(v=>Math.max(1,Number(v)||1))) : m.endsByDistance.reduce((sum, v) => sum + Math.max(1, Number(v) || 1), 0);
+}
+
+function endsForRound(roundNo, setup=S.setup) {
+  const m=setup?.multi;
+  return setup?.distanceMode==='multiple' && setup?.practiceType==='target' && m?.roundMode==='one' ? Math.max(1,Number(m.roundEnds?.[roundNo-1])||1) : Math.max(1,Number(setup?.ends)||1);
+}
+
+function setMultiRoundMode(mode) {
+  syncSetup();
+  const m=ensureMultiSetup();m.roundMode=mode==='one'?'one':'all';
+  if(m.roundMode==='one')S.setup.rounds=Math.max(2,Number(S.setup.rounds)||2);
+  S.setup.ends=multiTotalEnds();
+  preserveNextScrollY=window.scrollY;setup();
+}
+
+function setMultiRoundCount(value) {
+  syncSetup();S.setup.rounds=Math.max(2,Math.min(30,Math.trunc(Number(value)||2)));
+  ensureMultiSetup();S.setup.ends=multiTotalEnds();
+  preserveNextScrollY=window.scrollY;setup();
 }
 
 function multiSequence(roundNo) {
@@ -818,6 +842,7 @@ function multiSequence(roundNo) {
 
 function multiBlocks(roundNo = currentRoundNo()) {
   const m = ensureMultiSetup();
+  if(m.roundMode==='one') {const ends=endsForRound(roundNo);return [{distance:Math.max(1,Number(m.roundDistances[roundNo-1])||30),originalIndex:roundNo-1,ends,start:1,end:ends}];}
   let cursor = 1;
   return multiSequence(roundNo).map(item => {
     const ends = Math.max(1, Number(m.endsByDistance[item.originalIndex]) || 1);
@@ -980,6 +1005,14 @@ function formatFieldsHTML() {
   }
 
   const m = ensureMultiSetup();
+  if(m.roundMode==='one') {
+    const n=Math.max(2,Number(S.setup.rounds)||2);
+    return `<div class="distance-mode-row"><button class="distance-mode-btn" onclick="setDistanceMode('single')">SINGLE DISTANCE</button><button class="distance-mode-btn active" onclick="setDistanceMode('multiple')">MULTIPLE DISTANCES</button></div>
+    <div class="distance-mode-row"><button class="distance-mode-btn" onclick="setMultiRoundMode('all')">ALL DISTANCES PER ROUND</button><button class="distance-mode-btn active" onclick="setMultiRoundMode('one')">ONE DISTANCE PER ROUND</button></div>
+    <div class="multi-common-layout"><div class="multi-common-left">${numField('Target Face (cm)','target',S.setup.target)}${numField('Arrows / End','arrows',S.setup.arrows)}</div><div class="multi-common-right"><div class="setup-field"><label>No. of Rounds</label><div class="input-unit"><input id="multiRoundCount" type="number" min="2" max="30" value="${n}" onchange="setMultiRoundCount(this.value)"></div></div>${numField('Time / End (sec)','multiTime',m.timeEnd)}</div></div>
+    <div class="multi-round-title">ROUND DISTANCES & ENDS</div><div class="multi-distance-grid">${Array.from({length:n},(_,i)=>`<div class="multi-distance-item"><b>ROUND ${i+1}</b><div class="setup-field"><label>Distance (m)</label><div class="input-unit"><input id="oneRoundDistance${i}" type="number" min="1" value="${m.roundDistances[i]}" onchange="syncSetup();refreshSetupAt('oneRoundDistance${i}')"></div></div><div class="setup-field"><label>Ends</label><div class="input-unit"><input id="oneRoundEnds${i}" type="number" min="1" value="${m.roundEnds[i]}" onchange="syncSetup();refreshSetupAt('oneRoundEnds${i}')"></div></div></div>`).join('')}</div>
+    <div class="multi-preview"><b>FORMAT PREVIEW</b>${Array.from({length:n},(_,i)=>`<div>R${i+1}: ${m.roundDistances[i]}m × ${m.roundEnds[i]}E</div>`).join('')}<small>${S.setup.arrows} Arrows/End • Total ${m.roundEnds.slice(0,n).reduce((a,b)=>a+Number(b),0)} Ends</small></div>`;
+  }
   const distFields = m.distances.map((d, i) => `
     <div class="multi-distance-item">
       <div class="setup-field"><label>Distance ${i + 1} (m)</label><div class="input-unit">
@@ -1006,6 +1039,7 @@ function formatFieldsHTML() {
   return `<div class="distance-mode-row">
       <button class="distance-mode-btn" onclick="setDistanceMode('single')">SINGLE DISTANCE</button>
       <button class="distance-mode-btn active" onclick="setDistanceMode('multiple')">MULTIPLE DISTANCES</button>
+      </div><div class="distance-mode-row"><button class="distance-mode-btn active" onclick="setMultiRoundMode('all')">ALL DISTANCES PER ROUND</button><button class="distance-mode-btn" onclick="setMultiRoundMode('one')">ONE DISTANCE PER ROUND</button>
     </div>
     <div class="multi-distance-panel">
       <div class="multi-top-grid multi-count-full">
@@ -1066,6 +1100,15 @@ function syncSetup() {
 
   if (S.setup.distanceMode === "multiple" && S.setup.practiceType === "target") {
     const m = ensureMultiSetup();
+    if(m.roundMode==='one') {
+      const countInput=document.getElementById('multiRoundCount');
+      if(countInput)S.setup.rounds=Math.max(2,Math.min(30,Number(countInput.value)||2));
+      for(let i=0;i<S.setup.rounds;i++) {
+        const d=document.getElementById('oneRoundDistance'+i),e=document.getElementById('oneRoundEnds'+i);
+        if(d)m.roundDistances[i]=Math.max(1,Number(d.value)||30);
+        if(e)m.roundEnds[i]=Math.max(1,Number(e.value)||1);
+      }
+    }
     const countEl = document.getElementById("multiCount");
     if (countEl) m.count = Math.max(2, Number(countEl.value) || m.count);
     for (let i = 0; i < m.count; i++) {
@@ -3559,7 +3602,7 @@ function archerRoundComplete(
 
   for (
     let e = 1;
-    e <= S.setup.ends;
+    e <= endsForRound(round);
     e++
   ) {
 
@@ -3679,7 +3722,7 @@ function scoreMetrics(
 
     for (
       let e = 0;
-      e < S.setup.ends;
+      e < endsForRound(r+1);
       e++
     ) {
 
@@ -3738,8 +3781,7 @@ function scoreMetrics(
 
 
   const max =
-    S.setup.rounds *
-    S.setup.ends *
+    Array.from({length:S.setup.rounds},(_,i)=>endsForRound(i+1)).reduce((a,b)=>a+b,0) *
     S.setup.arrows *
     maxPointForMatrix(
       S.setup.matrix
@@ -6421,7 +6463,7 @@ function historyMetrics(
 
     for (
       let e = 0;
-      e < endCount;
+      e < endsForRound(r+1,setup);
       e++
     ) {
 
@@ -6709,6 +6751,7 @@ function resultMultiConfig(setup) {
 
 function resultMultiBlocks(setup, roundNo) {
   const m = resultMultiConfig(setup);
+  if(m.roundMode==='one') {const ends=endsForRound(roundNo,setup);return [{distance:Math.max(1,Number(m.roundDistances?.[roundNo-1])||30),ends,start:1,end:ends,originalIndex:roundNo-1}];}
   let order = m.distances.map((_, i) => i);
   const mode = String(m.roundSequences?.[roundNo - 1] || (roundNo % 2 ? 'ascending' : 'descending')).toLowerCase();
   if (mode === 'descending') order = [...order].reverse();
@@ -6731,13 +6774,14 @@ function resultFormatLines(setup) {
 
 function resultDistanceText(setup) {
   if (setup?.distanceMode !== 'multiple') return `${setup.distance}m`;
-  return resultMultiConfig(setup).distances.map(d => `${d}m`).join('/');
+  const m=resultMultiConfig(setup);
+  return (m.roundMode==='one'?m.roundDistances.slice(0,Number(setup.rounds)||2):m.distances).map(d=>`${d}m`).join('/');
 }
 
 function resultDistanceTotals(archer, setup) {
   if (setup?.distanceMode !== "multiple") return [];
   const config = resultMultiConfig(setup);
-  const totals = config.distances.map(() => 0);
+  const totals = (config.roundMode==='one'?config.roundDistances.slice(0,Number(setup.rounds)||2):config.distances).map(() => 0);
   for (let ri = 0; ri < Math.max(1, Number(setup.rounds) || 1); ri++) {
     for (const block of resultMultiBlocks(setup, ri + 1)) {
       for (let ei = block.start - 1; ei < block.end; ei++) {
