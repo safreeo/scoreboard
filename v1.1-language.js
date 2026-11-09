@@ -6,6 +6,12 @@
   let lang=localStorage.getItem(KEY)==="bm"?"bm":"en";
 
   const BM={
+    "ALL DISTANCES PER ROUND":"SEMUA JARAK SETIAP ROUND",
+    "ONE DISTANCE PER ROUND":"SATU JARAK SETIAP ROUND",
+    "No. of Rounds":"Bil. Round",
+    "ROUND DISTANCES & ENDS":"JARAK & END SETIAP ROUND",
+    "CURRENT SCORE":"MARKAH SEMASA",
+    "Score":"Markah",
     "START PRACTICE":"MULA LATIHAN","PRACTICE HISTORY":"SEJARAH LATIHAN","ARCHER PROFILE":"PROFIL PEMANAH","SETTINGS":"TETAPAN","APPLICATION INFO":"INFO APLIKASI",
     "PRACTICE SETUP":"TETAPAN LATIHAN","Practice Setup":"Tetapan Latihan","PRACTICE MODE":"MOD LATIHAN","Practice Mode":"Mod Latihan","PRACTICE FORMAT":"FORMAT LATIHAN","Practice Format":"Format Latihan",
     "Static":"Statik","Personal":"Individu","PERSONAL":"INDIVIDU","Team":"Pasukan","TEAM":"PASUKAN","Group":"Kumpulan","Individual":"Individu","Target":"Sasaran","Target Practice":"Latihan Sasaran","Game":"Permainan",
