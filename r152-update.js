@@ -59,6 +59,7 @@
     }else if(typeof syncSetup==='function'){
       // Persist values in the existing model without calling refreshSetupAt/setup.
       syncSetup();
+      if(typeof window.r155MarkPreviewDirty==='function')window.r155MarkPreviewDirty();
     }
     if(input.id==='rounds'&&typeof window.r153RefreshRounds==='function')window.r153RefreshRounds();
     if(input.id==='multiCount'&&typeof window.r153EnhanceSteppers==='function')window.r153EnhanceSteppers();
