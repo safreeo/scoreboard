@@ -10399,3 +10399,13 @@ html.font-large .page { font-size: 1.125rem; }
 .live-summary-table .summary-col-rank{width:47px!important;}
 .live-summary-table .summary-col-points{width:65px!important;}
 .round-mini-select-btn .r155-round-distance{font-size:.85em!important;font-weight:850!important;}
+
+.setup-page .multi-common-layout .r82-step-controls button,
+.setup-page .multi-distance-grid .r82-step-controls button,
+.setup-page .multi-count-full .r82-step-controls button{
+  background:#dcefff!important;color:#064b85!important;
+}
+.setup-page .multi-common-layout .r82-stepper-box,
+.setup-page .multi-distance-grid .r82-stepper-box{
+  border:1px solid #8eb5db!important;
+}
