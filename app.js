@@ -10174,6 +10174,7 @@ function csvEscape(value) {
 function currentPracticeDistanceForSetup(setup, round, end) {
   if (!setup || setup.distanceMode !== "multiple") return Number(setup?.distance) || 30;
   const m = setup.multi || {};
+  if(m.roundMode==='one')return Math.max(1,Number(m.roundDistances?.[round-1])||30);
   const distances = Array.isArray(m.distances) && m.distances.length ? m.distances.map(Number) : [30,40,50];
   const ends = Array.isArray(m.endsByDistance) && m.endsByDistance.length ? m.endsByDistance.map(Number) : distances.map(()=>Math.max(1, Number(m.endsPerDistance)||5));
   const order = Array.isArray(m.orders) ? (m.orders[Math.max(0, round-1)] || "asc") : "asc";
