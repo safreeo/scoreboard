@@ -2175,8 +2175,8 @@ function presetDisplay(p) {
   const game=type==="3d"||type==="2d";
   const multi=!game&&p.distanceMode==="multiple"&&Array.isArray(p.multi?.distances);
   const distances=multi?p.multi.distances.slice(0,Math.max(1,Number(p.multi.count)||p.multi.distances.length)).map(Number).filter(Number.isFinite):[];
-  const dist=game?`${p.gameMinDistance??5}~${p.gameMaxDistance??30}M`:distances.length?distances.join("/")+"M":String(p.distance??30)+"M";
-  const cp=game?String(p.checkPoints??p.ends??20)+"CP":multi&&p.multi?.endsByDistance?.length?p.multi.endsByDistance.slice(0,distances.length).join("/")+"E":String(p.ends??6)+"E";
+  const dist=p.multi?.roundMode==='one'&&multi?p.multi.roundDistances.slice(0,p.rounds).join('/')+'M':game?`${p.gameMinDistance??5}~${p.gameMaxDistance??30}M`:distances.length?distances.join("/")+"M":String(p.distance??30)+"M";
+  const cp=p.multi?.roundMode==='one'&&multi?p.multi.roundEnds.slice(0,p.rounds).join('/')+'E':game?String(p.checkPoints??p.ends??20)+"CP":multi&&p.multi?.endsByDistance?.length?p.multi.endsByDistance.slice(0,distances.length).join("/")+"E":String(p.ends??6)+"E";
   const matrix=String(p.matrix||"");
   const values=typeof matrices==="function"?matrices()[matrix]:null;
   const matrixText=Array.isArray(values)?values.map(String).filter(x=>x!=="M").join(", "):matrix;
@@ -3311,7 +3311,7 @@ function normalizeSession() {
             ) {
 
               round.length =
-                S.setup.ends;
+                endsForRound(roundIndex+1);
             }
 
 
@@ -3418,7 +3418,7 @@ function normalizeSession() {
             ) {
 
               round.length =
-                S.setup.ends;
+                endsForRound(roundIndex+1);
             }
 
 
@@ -10239,7 +10239,7 @@ function exportSelectedExcel() {
       rows.push(tableHeader);
       let cumulative = 0;
       for (let r=0; r<Math.max(1, Number(setup.rounds)||1); r++) {
-        const endCount = Math.max(1, Number(setup.ends)||1);
+        const endCount = endsForRound(r+1,setup);
         for (let e=0; e<endCount; e++) {
           const vals = archer.scores?.[r]?.[e] || [];
           const endTotal = vals.reduce((sum,v)=>sum+scoreValue(v),0);
