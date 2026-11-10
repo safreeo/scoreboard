@@ -10429,3 +10429,7 @@ html.font-large .page { font-size: 1.125rem; }
  padding:9px 3px!important;overflow-wrap:anywhere!important;text-align:center!important;
 }
 .live-summary-table.multi-summary-table .summary-archer{text-align:left!important;padding-left:7px!important;}
+
+/* R157: fixed order and large readable labels for both round mode buttons */
+.setup-page .r157-round-mode{display:grid!important;grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;gap:12px!important;}
+.setup-page .r157-round-mode .distance-mode-btn{font-size:clamp(.82rem,3.15vw,1.05rem)!important;line-height:1.2!important;white-space:normal!important;overflow-wrap:normal!important;min-height:76px!important;padding:10px 7px!important;font-weight:850!important;letter-spacing:0!important;}
