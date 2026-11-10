@@ -10469,3 +10469,25 @@ html.font-large .page { font-size: 1.125rem; }
 .setup-page .r155-one-round-grid .r82-stepper-box > input:focus {
   border:0!important;outline:0!important;box-shadow:none!important;
 }
+
+/* R160: fix the actual double vertical line.
+   .setup-format-grid .input-unit span adds 8px horizontal padding to
+   .r82-step-controls, making its left border sit outside the arrow column.
+   Remove that inherited padding and enforce a single, fixed-width control. */
+.setup-page .setup-format-grid .input-unit.r82-stepper-box > span.r82-step-controls,
+.setup-page .input-unit.r82-stepper-box > span.r82-step-controls {
+  padding:0!important;
+  margin:0!important;
+  box-sizing:border-box!important;
+  width:38px!important;
+  min-width:38px!important;
+  max-width:38px!important;
+  flex:0 0 38px!important;
+  border-left:1px solid #c7d0da!important;
+  right:0!important;
+}
+.setup-page .input-unit.r82-stepper-box > span.r82-step-controls > button {
+  box-sizing:border-box!important;
+  width:100%!important;
+  margin:0!important;
+}
