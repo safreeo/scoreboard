@@ -10491,3 +10491,71 @@ html.font-large .page { font-size: 1.125rem; }
   width:100%!important;
   margin:0!important;
 }
+
+
+/* R161: identical single-divider numeric control for every multiple-distance field.
+   The numeric input occupies only the left portion; arrows occupy a real flex
+   column, rather than overlaying the input's right padding and border. */
+.setup-page .multi-common-layout .input-unit.r82-stepper-box,
+.setup-page .multi-common-grid .input-unit.r82-stepper-box,
+.setup-page .multi-distance-grid .input-unit.r82-stepper-box,
+.setup-page .multi-count-full .input-unit.r82-stepper-box,
+.setup-page .r155-one-round-grid .input-unit.r82-stepper-box {
+  display:flex!important;
+  align-items:stretch!important;
+  padding:0!important;
+  position:relative!important;
+  overflow:hidden!important;
+  border:1px solid #98b9d9!important;
+  border-radius:11px!important;
+  background:#fff!important;
+  box-shadow:none!important;
+}
+.setup-page .multi-common-layout .input-unit.r82-stepper-box > input[type="number"],
+.setup-page .multi-common-grid .input-unit.r82-stepper-box > input[type="number"],
+.setup-page .multi-distance-grid .input-unit.r82-stepper-box > input[type="number"],
+.setup-page .multi-count-full .input-unit.r82-stepper-box > input[type="number"],
+.setup-page .r155-one-round-grid .input-unit.r82-stepper-box > input[type="number"] {
+  flex:1 1 0!important;
+  width:0!important;
+  min-width:0!important;
+  max-width:none!important;
+  height:100%!important;
+  min-height:0!important;
+  padding:0 4px!important;
+  margin:0!important;
+  border:0!important;
+  outline:0!important;
+  border-radius:0!important;
+  box-shadow:none!important;
+  background:#fff!important;
+  box-sizing:border-box!important;
+  text-align:center!important;
+}
+.setup-page .multi-common-layout .input-unit.r82-stepper-box > span.r82-step-controls,
+.setup-page .multi-common-grid .input-unit.r82-stepper-box > span.r82-step-controls,
+.setup-page .multi-distance-grid .input-unit.r82-stepper-box > span.r82-step-controls,
+.setup-page .multi-count-full .input-unit.r82-stepper-box > span.r82-step-controls,
+.setup-page .r155-one-round-grid .input-unit.r82-stepper-box > span.r82-step-controls {
+  position:relative!important;
+  inset:auto!important;
+  top:auto!important;
+  bottom:auto!important;
+  right:auto!important;
+  left:auto!important;
+  flex:0 0 38px!important;
+  width:38px!important;
+  min-width:38px!important;
+  max-width:38px!important;
+  height:auto!important;
+  padding:0!important;
+  margin:0!important;
+  border:0!important;
+  border-left:1px solid #98b9d9!important;
+  border-radius:0!important;
+  box-shadow:none!important;
+  box-sizing:border-box!important;
+  background:#dcefff!important;
+  display:flex!important;
+  flex-direction:column!important;
+}
