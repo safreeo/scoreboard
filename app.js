@@ -39,6 +39,9 @@ const DEFAULT_SETUP = {
     distances: [30, 40, 50],
     endsPerDistance: 5,
     timeEnd: 120,
+    roundMode: "one",
+    roundDistances: [30, 40],
+    roundEnds: [6, 6],
     orders: ["asc", "desc"]
   }
 };
