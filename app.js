@@ -11135,3 +11135,5 @@ if (
    ========================================================= */
 
 initialiseApp();
+/* R157: preserve the native per-distance End resize handler before legacy overrides. */
+window.r157NativeApplyEnds = applyEnds;
