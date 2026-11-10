@@ -3,7 +3,7 @@
   'use strict';
   const previousApply=window.applyEnds;
   window.applyEnds=function(){
-    if(window.S?.setup?.practiceType==='target' && S.setup.distanceMode==='multiple' && typeof window.r157NativeApplyEnds==='function'){
+    if(typeof S!=='undefined' && S.setup?.practiceType==='target' && S.setup.distanceMode==='multiple' && typeof window.r157NativeApplyEnds==='function'){
       return window.r157NativeApplyEnds();
     }
     return previousApply?.();
@@ -11,7 +11,7 @@
   const previousManage=window.manageEnds;
   window.manageEnds=function(){
     const result=previousManage?.();
-    if(window.S?.setup?.practiceType==='target' && S.setup.distanceMode==='multiple'){
+    if(typeof S!=='undefined' && S.setup?.practiceType==='target' && S.setup.distanceMode==='multiple'){
       const value=document.getElementById('manageEndValue');
       if(value){
         const m=S.setup.multi||{};
