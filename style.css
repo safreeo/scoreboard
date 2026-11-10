@@ -10559,3 +10559,24 @@ html.font-large .page { font-size: 1.125rem; }
   display:flex!important;
   flex-direction:column!important;
 }
+
+
+/* R162: intentional, consistent double vertical divider on all numeric steppers
+   in both multiple-distance layouts. The second line is drawn INSIDE the
+   input, so no width or alignment changes are needed. */
+.setup-page .multi-common-layout .input-unit.r82-stepper-box > input[type="number"],
+.setup-page .multi-common-grid .input-unit.r82-stepper-box > input[type="number"],
+.setup-page .multi-distance-grid .input-unit.r82-stepper-box > input[type="number"],
+.setup-page .multi-count-full .input-unit.r82-stepper-box > input[type="number"],
+.setup-page .r155-one-round-grid .input-unit.r82-stepper-box > input[type="number"] {
+  box-shadow:inset -5px 0 0 #fff,inset -6px 0 0 #a8b9ca!important;
+  border:0!important;
+  border-radius:0!important;
+}
+.setup-page .multi-common-layout .input-unit.r82-stepper-box > span.r82-step-controls,
+.setup-page .multi-common-grid .input-unit.r82-stepper-box > span.r82-step-controls,
+.setup-page .multi-distance-grid .input-unit.r82-stepper-box > span.r82-step-controls,
+.setup-page .multi-count-full .input-unit.r82-stepper-box > span.r82-step-controls,
+.setup-page .r155-one-round-grid .input-unit.r82-stepper-box > span.r82-step-controls {
+  border-left:1px solid #a8b9ca!important;
+}
