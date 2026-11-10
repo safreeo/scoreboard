@@ -10436,3 +10436,36 @@ html.font-large .page { font-size: 1.125rem; }
 
 /* R158: compact round-mode selector height */
 .setup-page .r157-round-mode .distance-mode-btn{min-height:62px!important;padding:8px 7px!important;}
+
+/* R159: one outline only for numeric steppers in both multiple-distance layouts.
+   Previous common-grid input borders were visible inside the stepper wrapper. */
+.setup-page .multi-common-layout .r82-stepper-box,
+.setup-page .multi-common-grid .r82-stepper-box,
+.setup-page .multi-distance-grid .r82-stepper-box,
+.setup-page .multi-count-full .r82-stepper-box,
+.setup-page .r155-one-round-grid .r82-stepper-box {
+  border:1px solid #98b9d9!important;
+  border-radius:11px!important;
+  overflow:hidden!important;
+  background:#fff!important;
+  box-shadow:none!important;
+}
+.setup-page .multi-common-layout .r82-stepper-box > input,
+.setup-page .multi-common-grid .r82-stepper-box > input,
+.setup-page .multi-distance-grid .r82-stepper-box > input,
+.setup-page .multi-count-full .r82-stepper-box > input,
+.setup-page .r155-one-round-grid .r82-stepper-box > input {
+  border:0!important;
+  outline:0!important;
+  border-radius:0!important;
+  box-shadow:none!important;
+  background:transparent!important;
+  min-width:0!important;
+}
+.setup-page .multi-common-layout .r82-stepper-box > input:focus,
+.setup-page .multi-common-grid .r82-stepper-box > input:focus,
+.setup-page .multi-distance-grid .r82-stepper-box > input:focus,
+.setup-page .multi-count-full .r82-stepper-box > input:focus,
+.setup-page .r155-one-round-grid .r82-stepper-box > input:focus {
+  border:0!important;outline:0!important;box-shadow:none!important;
+}
