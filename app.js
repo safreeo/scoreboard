@@ -9311,6 +9311,50 @@ function cancelTimerDraft() {
    WHISTLE
    ========================================================= */
 
+// R164: Unlock Web Audio during the user's START gesture, then reuse decoded
+// whistle samples for timer-triggered transitions (iOS Safari/PWA).
+const iosWhistleBuffers = Object.create(null);
+const iosWhistleLoading = Object.create(null);
+
+function prepareTimerWhistleAudio() {
+  try {
+    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+    if (!AudioContextClass) return;
+    audioCtx = audioCtx || new AudioContextClass();
+    if (audioCtx.state === "suspended") audioCtx.resume().catch(() => {});
+    for (const source of [whistleAsset(), 'assets/modern-whistle.mp3?v=151']) {
+      if (iosWhistleBuffers[source] || iosWhistleLoading[source]) continue;
+      iosWhistleLoading[source] = fetch(source)
+        .then(response => {
+          if (!response.ok) throw new Error("Whistle audio unavailable");
+          return response.arrayBuffer();
+        })
+        .then(data => audioCtx.decodeAudioData(data))
+        .then(buffer => { iosWhistleBuffers[source] = buffer; })
+        .catch(() => {})
+        .finally(() => { delete iosWhistleLoading[source]; });
+    }
+  } catch {}
+}
+
+function playPreparedTimerWhistle(source, volume, maxDurationMs) {
+  const buffer = iosWhistleBuffers[source];
+  if (!buffer || !audioCtx || audioCtx.state !== "running") return false;
+  try {
+    const node = audioCtx.createBufferSource();
+    const gain = audioCtx.createGain();
+    node.buffer = buffer;
+    gain.gain.value = volume;
+    node.connect(gain);
+    gain.connect(audioCtx.destination);
+    node.start(0);
+    if (Number.isFinite(maxDurationMs) && maxDurationMs > 0)
+      node.stop(audioCtx.currentTime + Math.min(buffer.duration, maxDurationMs / 1000));
+    node.onended = () => { try { node.disconnect(); gain.disconnect(); } catch {} };
+    return true;
+  } catch { return false; }
+}
+
 function whistleAsset() {
 
   return "assets/referee-whistle.mp3?v=32";
@@ -9344,6 +9388,9 @@ function playWhistleOnce(
   const audioSource = selectedSound === 'modern' || selectedSound === 'sharp'
     ? 'assets/modern-whistle.mp3?v=151'
     : whistleAsset();
+
+  // Timer transitions have no user gesture; use the unlocked Web Audio buffer.
+  if (playPreparedTimerWhistle(audioSource, volume, maxDurationMs)) return;
 
   const audio =
     new Audio(
@@ -9735,6 +9782,8 @@ function timerRender(
 
 
 function startArcheryTimer() {
+
+  prepareTimerWhistleAudio();
 
   clearInterval(
     timerInt
