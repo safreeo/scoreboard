@@ -1042,7 +1042,7 @@ function formatFieldsHTML() {
   return `<div class="distance-mode-row">
       <button class="distance-mode-btn" onclick="setDistanceMode('single')">SINGLE DISTANCE</button>
       <button class="distance-mode-btn active" onclick="setDistanceMode('multiple')">MULTIPLE DISTANCES</button>
-      </div><div class="distance-mode-row"><button class="distance-mode-btn active" onclick="setMultiRoundMode('all')">ALL DISTANCES PER ROUND</button><button class="distance-mode-btn" onclick="setMultiRoundMode('one')">ONE DISTANCE PER ROUND</button>
+      </div><div class="distance-mode-row r157-round-mode"><button class="distance-mode-btn" onclick="setMultiRoundMode('one')">ONE DISTANCE PER ROUND</button><button class="distance-mode-btn active" onclick="setMultiRoundMode('all')">ALL DISTANCES PER ROUND</button>
     </div>
     <div class="multi-distance-panel">
       <div class="multi-top-grid multi-count-full">
