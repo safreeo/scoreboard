@@ -10580,3 +10580,9 @@ html.font-large .page { font-size: 1.125rem; }
 .setup-page .r155-one-round-grid .input-unit.r82-stepper-box > span.r82-step-controls {
   border-left:1px solid #a8b9ca!important;
 }
+
+/* R166: readable distance labels on completed Manage Rounds tiles only. */
+.round-mini-select-btn.complete .r155-round-distance,
+.round-mini-select-btn.complete.active .r155-round-distance {
+  color: #fff !important;
+}
