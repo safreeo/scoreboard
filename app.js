@@ -4651,7 +4651,7 @@ function undoArrow() {
 
 function bottomNavHTML() {
   const multi = S.setup.distanceMode === "multiple";
-  return `<nav class="score-bottom-nav compact-bottom-nav ${multi ? "six-items" : ""}">
+  return `<nav class="score-bottom-nav compact-bottom-nav ${multi && S.setup.multi?.roundMode !== "one" ? "six-items" : ""}">
     <button onclick="showExitDialog()"><span class="nav-icon nav-back">‹</span><small>Back</small></button>
     ${multi && S.setup.multi?.roundMode!=='one' ? `<button onclick="manageDistances()"><span class="nav-icon nav-distance">⇆</span><small>Distance</small></button>` : ""}
     <button onclick="manageRounds()"><span class="nav-icon nav-emoji">🔄</span><small>Round</small></button>
