@@ -10879,7 +10879,7 @@ function info(tab = null) {
         </div>
       </div>
       <div class="info-meta">
-        <span><b>${bm?'Versi Aplikasi':'App Version'}:</b> 1.1.0</span>
+        <span><b>${bm?'Versi Aplikasi':'App Version'}:</b> 1.1.89</span>
         <span><b>${bm?'Kemas Kini Terakhir':'Last Updated'}:</b> 11 November 2026</span>
       </div>
       <div class="info-tab-row">
