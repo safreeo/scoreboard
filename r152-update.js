@@ -10,7 +10,7 @@
       const t=s.textContent||'';
       if(/^(App Version|Versi Aplikasi)\s*:/i.test(t.trim())){
         const b=s.querySelector('b');
-        if(b&&!t.includes('1.1.90')){while(b.nextSibling)b.nextSibling.remove();s.append(document.createTextNode(' 1.1.90'));}
+        if(b&&!t.includes('1.1.91')){while(b.nextSibling)b.nextSibling.remove();s.append(document.createTextNode(' 1.1.91'));}
       }
       if(/^(Last Updated|Kemas Kini Terakhir)\s*:/i.test(t.trim())){
         const b=s.querySelector('b');
