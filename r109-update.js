@@ -54,16 +54,21 @@
     const maxPoint=typeof maxPointForMatrix==='function'?maxPointForMatrix(setup.matrix):10;
     const arrowCount=Math.max(1,Number(setup.arrows)||1);
     const roundCount=Math.max(1,Number(setup.rounds)||1);
-    let totalEnds=0;
+    const perEnd=maxPoint*arrowCount;
+    const endsPerRound=[];
     for(let round=1;round<=roundCount;round++){
       if(setup.distanceMode==='multiple'&&typeof resultMultiBlocks==='function'){
-        totalEnds+=resultMultiBlocks(setup,round).reduce((sum,block)=>sum+Math.max(0,Number(block.ends)||0),0);
+        endsPerRound.push(resultMultiBlocks(setup,round).reduce((sum,block)=>sum+Math.max(0,Number(block.ends)||0),0));
       }else{
-        totalEnds+=Math.max(1,Number(setup.practiceType!=='target'?(setup.checkPoints||setup.ends):setup.ends)||1);
+        endsPerRound.push(Math.max(1,Number(setup.practiceType!=='target'?(setup.checkPoints||setup.ends):setup.ends)||1));
       }
     }
-    const maximumScore=maxPoint*arrowCount*totalEnds;
-    const meta=`<table class="meta"><tr><th>${T.date}</th><td>${dt.date} | ${dt.day} | ${dt.time}</td></tr>${h.location?`<tr><th>${T.loc}</th><td>${esc(h.location)}</td></tr>`:''}<tr><th>${T.dist}</th><td>${esc(dist)}</td></tr>${setup.practiceType==='target'?`<tr><th>${T.face}</th><td>${esc(setup.target)}cm</td></tr>`:''}<tr><th>${T.matrix}</th><td>${esc(setup.matrix)}</td></tr><tr><th>${T.format}</th><td>${esc(fmt)}</td></tr><tr><th>${bm?'Skor Maksimum':'Maximum Score'}</th><td>${maximumScore}</td></tr></table>`;
+    const roundScores=endsPerRound.map(ends=>ends*perEnd);
+    const maximumScore=roundScores.reduce((sum,score)=>sum+score,0);
+    const sameRoundScore=roundScores.every(score=>score===roundScores[0]);
+    const perRoundText=sameRoundScore?String(roundScores[0]):roundScores.map((score,i)=>'R'+(i+1)+': '+score).join(', ');
+    const maximumScoreDetail=perEnd+' ('+(bm?'setiap end':'per end')+'), '+perRoundText+' ('+(bm?'setiap pusingan':'per round')+'), '+maximumScore+' ('+(bm?'jumlah':'total')+')';
+    const meta=`<table class="meta"><tr><th>${T.date}</th><td>${dt.date} | ${dt.day} | ${dt.time}</td></tr>${h.location?`<tr><th>${T.loc}</th><td>${esc(h.location)}</td></tr>`:''}<tr><th>${T.dist}</th><td>${esc(dist)}</td></tr>${setup.practiceType==='target'?`<tr><th>${T.face}</th><td>${esc(setup.target)}cm</td></tr>`:''}<tr><th>${T.matrix}</th><td>${esc(setup.matrix)}</td></tr><tr><th>${T.format}</th><td>${esc(fmt)}</td></tr><tr><th>${bm?'Skor Maksimum':'Maximum Score'}</th><td>${esc(maximumScoreDetail)}</td></tr></table>`;
     const details=o.has('summary')?`<h2>${T.summary}</h2><table><thead><tr>${th}</tr></thead><tbody>${rows}</tbody></table>`:'';
     const arrows=Math.max(1,Number(setup.arrows)||1),rounds=Math.max(1,Number(setup.rounds)||1);
     const arrowDetails=o.has('arrowdetails')?ranking.map(item=>{
