@@ -21,6 +21,24 @@
       : Math.max(1,Number(setup.ends)||1);
     return maxPoint*arrows*ends*rounds;
   }
+  // Shared maximum-score breakdown for Detailed Results and printable PDF.
+  window.scoreboardMaximumScoreDetail=function(setup,bm){
+    if(!setup)return null;
+    const perEnd=matrixMax(setup.matrix)*Math.max(1,Number(setup.arrows)||1);
+    const rounds=Math.max(1,Number(setup.rounds)||1),roundScores=[];
+    for(let r=1;r<=rounds;r++){
+      const ends=setup.distanceMode==='multiple'&&typeof resultMultiBlocks==='function'
+        ?resultMultiBlocks(setup,r).reduce((sum,block)=>sum+Math.max(0,Number(block.ends)||0),0)
+        :Math.max(1,Number(setup.practiceType!=='target'?(setup.checkPoints||setup.ends):setup.ends)||1);
+      roundScores.push(perEnd*ends);
+    }
+    const total=roundScores.reduce((sum,n)=>sum+n,0);
+    const same=roundScores.every(n=>n===roundScores[0]);
+    const parts=[perEnd+' ('+(bm?'setiap end':'per end')+')'];
+    if(rounds>1)parts.push((same?String(roundScores[0]):roundScores.map((n,i)=>'R'+(i+1)+': '+n).join(', '))+' ('+(bm?'setiap pusingan':'per round')+')');
+    parts.push(total+' ('+(bm?'jumlah':'total')+')');
+    return {total,text:parts.join(', ')};
+  };
   function currentHistory(){
     if(typeof S==='undefined'||!Array.isArray(S.history)) return null;
     if(typeof viewHistoryIndex!=='undefined'&&S.history[viewHistoryIndex]) return S.history[viewHistoryIndex];
@@ -56,7 +74,7 @@
       maxMeta=document.createElement('span'); maxMeta.className='r82-max-score-meta';
       format.insertAdjacentElement('afterend',maxMeta);
     }
-    if(maxMeta) maxMeta.innerHTML=`<b>${isBM()?'Skor Maksimum':'Maximum Score'}</b> ${max}`;
+    if(maxMeta) maxMeta.innerHTML=`<b>${isBM()?'Skor Maksimum':'Maximum Score'}</b> ${window.scoreboardMaximumScoreDetail(setup,isBM())?.text||max}`;
     document.querySelectorAll('.result-archer').forEach(block=>{
       const name=block.querySelector('h3')?.textContent.trim();
       const archer=h.archers?.find(a=>a.name===name); if(!archer)return;
