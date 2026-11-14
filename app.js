@@ -9315,6 +9315,23 @@ function cancelTimerDraft() {
 // whistle samples for timer-triggered transitions (iOS Safari/PWA).
 const iosWhistleBuffers = Object.create(null);
 const iosWhistleLoading = Object.create(null);
+const timerAudioDiagnostics = [];
+function timerAudioLog(message) {
+  const entry = new Date().toLocaleTimeString() + ' ' + message;
+  timerAudioDiagnostics.push(entry);
+  if (timerAudioDiagnostics.length > 16) timerAudioDiagnostics.shift();
+  const el = document.getElementById('timerAudioDiagnostics');
+  if (el) el.textContent = timerAudioDiagnostics.join('\\n');
+}
+function copyTimerAudioDiagnostics() {
+  const report = 'SCOREBOARD iOS Timer Audio Diagnostics\\n' +
+    'User agent: ' + navigator.userAgent + '\\n' +
+    timerAudioDiagnostics.join('\\n');
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(report).then(() => alert('Audio diagnostics copied.')).catch(() => prompt('Copy audio diagnostics:', report));
+  } else prompt('Copy audio diagnostics:', report);
+}
+
 let iosTimerKeepAlive = null;
 function keepTimerAudioActive() {
   try {
@@ -9343,9 +9360,10 @@ function stopTimerAudioKeepAlive() {
 function prepareTimerWhistleAudio() {
   try {
     const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-    if (!AudioContextClass) return;
+    if (!AudioContextClass) { timerAudioLog('AudioContext unavailable'); return; }
     audioCtx = audioCtx || new AudioContextClass();
-    if (audioCtx.state === "suspended") audioCtx.resume().catch(() => {});
+    timerAudioLog('Prepare: context=' + audioCtx.state);
+    if (audioCtx.state === "suspended") audioCtx.resume().then(() => timerAudioLog('Context resumed: ' + audioCtx.state)).catch(e => timerAudioLog('Resume failed: ' + e.name));
     keepTimerAudioActive();
     for (const source of [whistleAsset(), 'assets/modern-whistle.mp3?v=151']) {
       if (iosWhistleBuffers[source] || iosWhistleLoading[source]) continue;
@@ -9355,8 +9373,8 @@ function prepareTimerWhistleAudio() {
           return response.arrayBuffer();
         })
         .then(data => audioCtx.decodeAudioData(data))
-        .then(buffer => { iosWhistleBuffers[source] = buffer; })
-        .catch(() => {})
+        .then(buffer => { iosWhistleBuffers[source] = buffer; timerAudioLog('Decoded: ' + source.split('/').pop()); })
+        .catch(e => { timerAudioLog('Decode failed: ' + source.split('/').pop() + ' ' + e.message); })
         .finally(() => { delete iosWhistleLoading[source]; });
     }
   } catch {}
@@ -9364,8 +9382,8 @@ function prepareTimerWhistleAudio() {
 
 function playPreparedTimerWhistle(source, volume, maxDurationMs) {
   const buffer = iosWhistleBuffers[source];
-  if (!buffer || !audioCtx) return false;
-  if (audioCtx.state !== 'running') { audioCtx.resume().catch(() => {}); return false; }
+  if (!buffer || !audioCtx) { timerAudioLog('Buffer unavailable: ' + source.split('/').pop()); return false; }
+  if (audioCtx.state !== 'running') { timerAudioLog('Playback blocked: context=' + audioCtx.state); audioCtx.resume().catch(e => timerAudioLog('Resume failed: ' + e.name)); return false; }
   try {
     const node = audioCtx.createBufferSource();
     const gain = audioCtx.createGain();
@@ -9374,11 +9392,12 @@ function playPreparedTimerWhistle(source, volume, maxDurationMs) {
     node.connect(gain);
     gain.connect(audioCtx.destination);
     node.start(0);
+    timerAudioLog('WebAudio started: ' + source.split('/').pop());
     if (Number.isFinite(maxDurationMs) && maxDurationMs > 0)
       node.stop(audioCtx.currentTime + Math.min(buffer.duration, maxDurationMs / 1000));
     node.onended = () => { try { node.disconnect(); gain.disconnect(); } catch {} };
     return true;
-  } catch { return false; }
+  } catch (e) { timerAudioLog('WebAudio error: ' + e.message); return false; }
 }
 
 function whistleAsset() {
@@ -9418,6 +9437,7 @@ function playWhistleOnce(
   // Timer transitions have no user gesture; use the unlocked Web Audio buffer.
   if (playPreparedTimerWhistle(audioSource, volume, maxDurationMs)) return;
 
+  timerAudioLog('HTMLAudio fallback: ' + audioSource.split('/').pop());
   const audio =
     new Audio(
       audioSource
@@ -9449,7 +9469,8 @@ function playWhistleOnce(
       }
     )
     .catch(
-      () => {
+      (error) => {
+        timerAudioLog('HTMLAudio failed: ' + (error && error.name));
 
         /*
          * Fallback tone only when the
@@ -9686,6 +9707,12 @@ function timerPage() {
       </div>
 
 
+      <details class="card" style="margin-top:12px">
+        <summary>iPhone Audio Diagnostics (R168)</summary>
+        <pre id="timerAudioDiagnostics" style="white-space:pre-wrap;overflow-wrap:anywhere;font-size:11px;max-height:240px;overflow:auto"></pre>
+        <button class="btn soft" onclick="copyTimerAudioDiagnostics()">COPY DIAGNOSTICS</button>
+      </details>
+
       <section class="card">
 
         <div class="timer-legend">
@@ -9809,6 +9836,7 @@ function timerRender(
 
 function startArcheryTimer() {
 
+  timerAudioLog('START pressed');
   prepareTimerWhistleAudio();
 
   clearInterval(
@@ -9890,6 +9918,7 @@ function startArcheryTimer() {
           remaining <= 0
         ) {
 
+          timerAudioLog("Transition: SHOOTING");
           stage =
             "shoot";
 
@@ -9966,6 +9995,7 @@ function startArcheryTimer() {
               null;
 
 
+            timerAudioLog("Transition: STOP");
             whistle(
               2,
               null,
