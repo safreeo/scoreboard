@@ -9315,6 +9315,30 @@ function cancelTimerDraft() {
 // whistle samples for timer-triggered transitions (iOS Safari/PWA).
 const iosWhistleBuffers = Object.create(null);
 const iosWhistleLoading = Object.create(null);
+let iosTimerKeepAlive = null;
+function keepTimerAudioActive() {
+  try {
+    if (!audioCtx || audioCtx.state === 'closed') return;
+    if (audioCtx.state !== 'running') audioCtx.resume().catch(() => {});
+    if (iosTimerKeepAlive) return;
+    // A silent active graph helps WebKit keep the user-unlocked context
+    // available for subsequent timer transitions without new gestures.
+    const oscillator = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    gain.gain.value = 0;
+    oscillator.connect(gain);
+    gain.connect(audioCtx.destination);
+    oscillator.start();
+    iosTimerKeepAlive = {oscillator,gain};
+  } catch (error) { console.warn('Timer audio activation:',error); }
+}
+function stopTimerAudioKeepAlive() {
+  if (!iosTimerKeepAlive) return;
+  try { iosTimerKeepAlive.oscillator.stop(); } catch {}
+  try { iosTimerKeepAlive.oscillator.disconnect(); iosTimerKeepAlive.gain.disconnect(); } catch {}
+  iosTimerKeepAlive = null;
+}
+
 
 function prepareTimerWhistleAudio() {
   try {
@@ -9322,6 +9346,7 @@ function prepareTimerWhistleAudio() {
     if (!AudioContextClass) return;
     audioCtx = audioCtx || new AudioContextClass();
     if (audioCtx.state === "suspended") audioCtx.resume().catch(() => {});
+    keepTimerAudioActive();
     for (const source of [whistleAsset(), 'assets/modern-whistle.mp3?v=151']) {
       if (iosWhistleBuffers[source] || iosWhistleLoading[source]) continue;
       iosWhistleLoading[source] = fetch(source)
@@ -9339,7 +9364,8 @@ function prepareTimerWhistleAudio() {
 
 function playPreparedTimerWhistle(source, volume, maxDurationMs) {
   const buffer = iosWhistleBuffers[source];
-  if (!buffer || !audioCtx || audioCtx.state !== "running") return false;
+  if (!buffer || !audioCtx) return false;
+  if (audioCtx.state !== 'running') { audioCtx.resume().catch(() => {}); return false; }
   try {
     const node = audioCtx.createBufferSource();
     const gain = audioCtx.createGain();
@@ -10032,6 +10058,8 @@ function resetArcheryTimer() {
   timerPaused =
     false;
 
+
+  stopTimerAudioKeepAlive();
 
   timerRender(
     "READY",
