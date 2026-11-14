@@ -10,11 +10,11 @@
       const t=s.textContent||'';
       if(/^(App Version|Versi Aplikasi)\s*:/i.test(t.trim())){
         const b=s.querySelector('b');
-        if(b&&!t.includes('1.1.92')){while(b.nextSibling)b.nextSibling.remove();s.append(document.createTextNode(' 1.1.92'));}
+        if(b&&!t.includes('1.1.93')){while(b.nextSibling)b.nextSibling.remove();s.append(document.createTextNode(' 1.1.93'));}
       }
       if(/^(Last Updated|Kemas Kini Terakhir)\s*:/i.test(t.trim())){
         const b=s.querySelector('b');
-        if(b&&!t.includes('12 November 2026')){while(b.nextSibling)b.nextSibling.remove();s.append(document.createTextNode(' 12 November 2026'));}
+        if(b&&!t.includes('14 November 2026')){while(b.nextSibling)b.nextSibling.remove();s.append(document.createTextNode(' 14 November 2026'));}
       }
     }
   }
