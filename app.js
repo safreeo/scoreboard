@@ -2219,7 +2219,7 @@ function applyPreset(i) {
 
   // Presets describe shooting format, not the user's selected practice mode.
   const currentMode = S.setup.mode;
-  Object.assign(S.setup, S.presets[i]);
+  Object.assign(S.setup, JSON.parse(JSON.stringify(S.presets[i])));
   S.setup.mode = currentMode;
 
 
@@ -2243,7 +2243,7 @@ function editPreset(i) {
 
   Object.assign(
     S.setup,
-    S.presets[i]
+    JSON.parse(JSON.stringify(S.presets[i]))
   );
 
 
@@ -2361,9 +2361,7 @@ function updatePreset() {
   S.presets[
     editingPreset
   ] = {
-
-    ...S.setup,
-
+    ...JSON.parse(JSON.stringify(S.setup)),
     name
   };
 
