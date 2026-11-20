@@ -10586,3 +10586,20 @@ html.font-large .page { font-size: 1.125rem; }
 .round-mini-select-btn.complete.active .r155-round-distance {
   color: #fff !important;
 }
+
+/* R172 Elimination Round Guide — isolated styles */
+.el-guide{max-width:100%;overflow:hidden}
+.el-guide h2{margin:18px 0 8px}
+.el-guide h3{margin:18px 0 8px;font-size:15px}
+.el-note{font-size:13px;color:#66768c;line-height:1.5}
+.el-stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:14px 0}
+.el-stats>div{background:#edf2f8;border-radius:10px;padding:12px;text-align:center}
+.el-stats b{display:block;font-size:21px;color:#0b2f5b}
+.el-stats small{display:block;font-size:11px;color:#50657c}
+.el-switch{display:flex;gap:8px;margin:16px 0}
+.el-switch button{flex:1;min-width:0;font-size:12px;padding:10px 5px}
+.el-match{display:flex;align-items:center;justify-content:space-between;gap:12px;border-bottom:1px solid #e2e8f0;padding:10px 4px;font-size:13px}
+.el-match b{color:#0b2f5b;white-space:nowrap}
+.el-match span{text-align:right;overflow-wrap:anywhere}
+.el-scroll{width:100%;overflow-x:auto;overflow-y:auto;border:1px solid #d6e0eb;border-radius:12px;background:#f7f9fc;touch-action:pan-x pan-y;-webkit-overflow-scrolling:touch;margin-bottom:16px}
+.el-scroll svg{display:block;max-width:none}
