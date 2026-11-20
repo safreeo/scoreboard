@@ -10946,6 +10946,10 @@ function info(tab = null) {
     ${manualActive ? userManualHTML() : ""}
     ${feedbackActive ? feedbackHTML() : ""}
     <section class="card info-legal-card">
+      <button class="btn blue" style="width:100%;text-align:center" onclick="eliminationGuide()">🏹 ${bm?'PANDUAN PUSINGAN PENYINGKIRAN':'ELIMINATION ROUND GUIDE'}</button>
+      <p style="margin:8px 0 0;font-size:13px">${bm?'Kalkulator Bye • Senarai Perlawanan • Carta Penuh':'Bye Calculator • Match List • Full Bracket'}</p>
+    </section>
+    <section class="card info-legal-card">
       <div class="section">${bm?'PENAFIAN & KEBENARAN':'DISCLAIMER & PERMISSION'}</div>
       <p>${bm?'Aplikasi ini disediakan secara percuma. Penjualan, pengedaran semula atau pengubahsuaian tanpa kebenaran pemilik adalah dilarang.':'This application is provided free of charge. Unauthorized sale, redistribution, or modification is prohibited without permission from the owner.'}</p>
     </section>
