@@ -106,7 +106,7 @@ function draw(){
  root.innerHTML=h;
 }
 window.elView=v=>{view=v;draw();};
-window.elCount=v=>{count=v;namesOpen=false;pdfOpen=false;applied=false;names={};winners={};draw();};
+window.elCount=v=>{count=v;namesOpen=false;pdfOpen=false;applied=false;names={};winners={};const total=document.getElementById('el-input-total');if(total)total.textContent=v;draw();};
 window.elName=(seed,value)=>{names[seed]=value;applied=false;};
 window.elToggleNames=()=>{namesOpen=!namesOpen;draw();};
 window.elApplyNames=()=>{applied=true;namesOpen=false;draw();};
