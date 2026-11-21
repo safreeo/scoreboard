@@ -10641,3 +10641,11 @@ html.font-large .page { font-size: 1.125rem; }
 .el-round-actions .el-completed{background:#168653!important;color:#fff!important;border-color:#168653!important}
 #el-graph{scroll-margin-top:15px}
 .el-guide{margin-top:24px}
+
+/* R177 elimination guide spacing and metadata */
+.el-guide{margin-top:34px!important}
+.el-meta-inputs{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0}
+.el-meta-inputs label{display:flex;flex-direction:column;gap:5px;font-size:13px;font-weight:600}
+.el-meta-inputs label:last-child{grid-column:1/-1}
+.el-meta-inputs input{width:100%;min-width:0;box-sizing:border-box;padding:9px;border:1px solid #9eafc3;border-radius:8px;font-size:14px}
+.el-pdf-name{display:flex;align-items:center;gap:8px;margin:8px 0 20px;font-size:13px}
