@@ -63,7 +63,7 @@ function svg(m,withNames=true){
  const positions=[];
  stages.forEach((stage,k)=>{
   const x=12+k*cw,isPre=pre&&k===0,mainIdx=k-(pre?1:0);
-  const ys=stage.matches.map((match,i)=>isPre?top+i*step:top+(Math.pow(2,mainIdx)*step-step)/2+i*Math.pow(2,mainIdx)*step);
+  const ys=stage.matches.map((match,i)=>isPre?top+(orderFor(m.size).indexOf(match.a.seed)>=0?Math.floor(orderFor(m.size).indexOf(match.a.seed)/2)*step: i*step):top+(Math.pow(2,mainIdx)*step-step)/2+i*Math.pow(2,mainIdx)*step);
   positions.push(ys);
   out+='<text x="'+x+'" y="30" font-size="14" font-weight="700" fill="#14345b">'+esc(stage.label)+'</text>';
   stage.matches.forEach((match,i)=>{
@@ -139,7 +139,7 @@ window.elPrint=()=>{
  const result=finalResultsHtml(m,pdfNames);
  // Crop only unused bottom SVG canvas; keep its native aspect ratio and text proportions.
  const firstStage=m.rounds.filter(r=>r.label!=='3rd / 4th Place')[0];
- const visibleBottom=75+(firstStage.matches.length-1)*58+48+12;
+ const visibleBottom=Math.max(...stagesForPrint.map((stage,k)=>{const mainIdx=k-(m.preCount>0?1:0);return 75+(mainIdx<0?(stage.matches.length-1)*58:(Math.pow(2,mainIdx)*58-58)/2+(stage.matches.length-1)*Math.pow(2,mainIdx)*58)+48;}),75+(Math.pow(2,stagesForPrint.length-(m.preCount>0?2:1))*58-58)/2+72+62)+12;
  const stagesForPrint=m.rounds.filter(r=>r.label!=='3rd / 4th Place');
  const printWidth=stagesForPrint.length*225+22;
  const lastBoxRight=12+(stagesForPrint.length-1)*225+196;
