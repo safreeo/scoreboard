@@ -10649,3 +10649,11 @@ html.font-large .page { font-size: 1.125rem; }
 .el-meta-inputs label:last-child{grid-column:1/-1}
 .el-meta-inputs input{width:100%;min-width:0;box-sizing:border-box;padding:9px;border:1px solid #9eafc3;border-radius:8px;font-size:14px}
 .el-pdf-name{display:flex;align-items:center;gap:8px;margin:8px 0 20px;font-size:13px}
+
+/* R178: stronger separation from the page header and compact final results */
+.el-guide.card{margin-top:54px!important}
+.el-final-results{background:#e3f3e9;border:1px solid #80ae94;border-radius:12px;padding:16px;margin:20px 0 12px;color:#14345b}
+.el-final-results h3{text-align:center;margin:0 0 12px;font-size:18px}
+.el-final-results div{margin:7px 0;font-size:14px}
+.el-title-toggle{display:flex;align-items:center;gap:8px;margin:8px 0;font-size:14px;font-weight:600}
+.el-custom-title{width:100%;box-sizing:border-box;border:1px solid #9eafc3;border-radius:8px;padding:12px;font-size:15px;text-transform:uppercase}
