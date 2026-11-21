@@ -139,8 +139,9 @@ window.elPrint=()=>{
  const result=finalResultsHtml(m,pdfNames);
  // Crop only unused bottom SVG canvas; keep its native aspect ratio and text proportions.
  const firstStage=m.rounds.filter(r=>r.label!=='3rd / 4th Place')[0];
- const visibleBottom=Math.max(...stagesForPrint.map((stage,k)=>{const mainIdx=k-(m.preCount>0?1:0);return 75+(mainIdx<0?(stage.matches.length-1)*58:(Math.pow(2,mainIdx)*58-58)/2+(stage.matches.length-1)*Math.pow(2,mainIdx)*58)+48;}),75+(Math.pow(2,stagesForPrint.length-(m.preCount>0?2:1))*58-58)/2+72+62)+12;
  const stagesForPrint=m.rounds.filter(r=>r.label!=='3rd / 4th Place');
+ const visibleBottom=Math.max(...stagesForPrint.map((stage,k)=>{const mainIdx=k-(m.preCount>0?1:0);return 75+(mainIdx<0?(stage.matches.length-1)*58:(Math.pow(2,mainIdx)*58-58)/2+(stage.matches.length-1)*Math.pow(2,mainIdx)*58)+48;}),75+(Math.pow(2,stagesForPrint.length-(m.preCount>0?2:1))*58-58)/2+72+62)+12;
+
  const printWidth=stagesForPrint.length*225+22;
  const lastBoxRight=12+(stagesForPrint.length-1)*225+196;
  const resultsY=visibleBottom+7, resultsHeight=82, printHeight=resultsY+resultsHeight+18;
