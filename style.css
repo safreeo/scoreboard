@@ -10607,3 +10607,24 @@ html.font-large .page { font-size: 1.125rem; }
 /* R173: SCOREBOARD dark navy selection for elimination controls */
 .el-entry,.el-switch .el-active{background:#0b2f5b !important;color:#fff !important;border-color:#0b2f5b !important}
 .el-entry:hover,.el-switch .el-active:hover{background:#103c70 !important;color:#fff !important}
+
+/* R174 Elimination Bracket Planner */
+.el-input-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;align-items:end;margin:14px 0}
+.el-input-row label{font-size:13px;font-weight:600;line-height:1.4}
+.el-input-row input{display:block;width:100%;box-sizing:border-box;padding:12px;border:1px solid #9eafc3;border-radius:9px;font-size:18px;margin-top:7px}
+.el-input-summary{background:#edf2f8;border-radius:10px;padding:10px;text-align:center;min-height:55px;display:flex;flex-direction:column;justify-content:center}
+.el-input-summary strong{font-size:22px;color:#0b2f5b}
+.el-input-summary small{font-size:12px;color:#50657c}
+.el-stats-r174{grid-template-columns:repeat(2,minmax(0,1fr))}
+.el-stats-r174>div:last-child{grid-column:1/-1}
+.el-actions{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:15px 0}
+.el-actions button{min-width:0;font-size:12px;padding:11px 5px}
+.el-editor{padding:13px;border:1px solid #d6e0eb;border-radius:12px;margin:14px 0;display:flex;flex-direction:column;gap:11px}
+.el-name-list{max-height:310px;overflow-y:auto;display:flex;flex-direction:column;gap:9px}
+.el-name-row{display:grid;grid-template-columns:40px minmax(0,1fr);gap:8px;align-items:center;font-size:13px}
+.el-name-row input{min-width:0;width:100%;box-sizing:border-box;border:1px solid #9eafc3;border-radius:7px;padding:9px;font-size:14px}
+.el-match-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,190px),1fr));gap:9px}
+.el-match-card{border:1px solid #d5e0eb;border-radius:9px;padding:9px;display:flex;flex-direction:column;gap:6px;font-size:12px;min-width:0}
+.el-match-card>b{font-size:11px;color:#346194}
+.el-participant{overflow-wrap:anywhere;padding:5px 0;border-bottom:1px solid #e5ebf2}
+.el-winner{width:100%;min-width:0;padding:8px;border:1px solid #9eafc3;border-radius:7px;background:#fff;color:#14345b;font-size:12px}
