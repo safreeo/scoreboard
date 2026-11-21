@@ -68,7 +68,7 @@ function svg(m,withNames=true){
   stage.matches.forEach((match,i)=>{
    const y=ys[i],a=slotResolve(m,match.a),b=slotResolve(m,match.b);
    const label=(s)=>{let txt=withNames?s.text:(s.seed?'#'+s.seed:s.text);return txt.length>30?txt.slice(0,29)+'…':txt;};
-   out+='<rect x="'+x+'" y="'+y+'" width="'+boxW+'" height="48" rx="7" fill="#fff" stroke="#9aafc8"/><text x="'+(x+7)+'" y="'+(y+13)+'" font-size="10" font-weight="700" fill="#346194">'+esc(match.id)+'</text><text x="'+(x+7)+'" y="'+(y+28)+'" font-size="11" fill="#18324e">'+esc(label(a))+'</text><text x="'+(x+7)+'" y="'+(y+42)+'" font-size="11" fill="#18324e">'+esc(label(b))+'</text>';
+   out+='<rect x="'+x+'" y="'+y+'" width="'+boxW+'" height="48" rx="7" fill="#fff" stroke="#9aafc8"/><text x="'+(x+7)+'" y="'+(y+13)+'" font-size="11" font-weight="700" fill="#346194">'+esc(match.id)+'</text><text x="'+(x+7)+'" y="'+(y+28)+'" font-size="11" fill="#18324e">'+esc(label(a))+'</text><text x="'+(x+7)+'" y="'+(y+42)+'" font-size="11" fill="#18324e">'+esc(label(b))+'</text>';
   });
  });
  for(let k=(pre?1:0);k<stages.length-1;k++)positions[k].forEach((y,i)=>{
@@ -121,7 +121,7 @@ function finalStandings(m){
  return [first,second,thirdPlace,fourth];
 }
 function finalResultsHtml(m,includeNames=true){
- const labels=['1st Place','2nd Place','3rd Place','4th Place'];
+ const labels=['1st','2nd','3rd','4th'];
  return '<section class="el-final-results"><h3>FINAL RESULTS</h3>'+finalStandings(m).map((v,i)=>'<div><b>'+labels[i]+':</b> '+(v?esc(includeNames?v.text:'#'+v.seed):'—')+'</div>').join('')+'</section>';
 }
 window.elTitleToggle=enabled=>{titleEnabled=enabled;draw();};
@@ -131,13 +131,18 @@ window.elPrint=()=>{
  const m=build(n),chart=svg(m,pdfNames),now=new Date();
  const date=now.toLocaleDateString('en-GB',{day:'2-digit',month:'long',year:'numeric'});
  const time=now.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
- const location=(typeof S!=='undefined'&&S&&typeof S.location==='string'&&S.location.trim())?S.location.trim():'';
+ const gpsEnabled=typeof S!=='undefined'&&S&&S.gps===true;
  const extraTitle=titleEnabled&&customTitle.trim()?'<h2>'+esc(customTitle.trim().toUpperCase())+'</h2>':'';
  const result=finalResultsHtml(m,pdfNames);
  const win=window.open('','_blank');if(!win){alert(t('Please allow pop-ups to print.','Sila benarkan pop-up untuk mencetak.'));return;}
- win.document.open();
- win.document.write('<!doctype html><html><head><meta charset="utf-8"><title>ELIMINATION ROUND</title><style>@page{size:A3 landscape;margin:0}*{box-sizing:border-box}html,body{margin:0;padding:0;font-family:Arial,sans-serif;color:#14345b}body{width:420mm;height:297mm;padding:8mm;overflow:hidden}.sheet{height:281mm;display:flex;flex-direction:column;align-items:stretch;break-inside:avoid;page-break-inside:avoid}h1,h2{text-align:center;font-size:23pt;margin:0 0 2mm;font-weight:800}h2{font-size:20pt}.info{text-align:center;font-size:10pt;margin:1mm 0}.chart{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;margin:2mm 0}.chart svg{display:block;width:100%;height:100%;object-fit:contain}.el-final-results{background:#e3f3e9;border:1px solid #80ae94;border-radius:7px;padding:3mm 5mm;min-width:50%;font-size:10pt}.el-final-results h3{text-align:center;margin:0 0 2mm;font-size:12pt}.el-final-results div{margin:1mm 0}.footer{display:flex;align-items:flex-end;justify-content:space-between;gap:12mm;min-height:25mm}.brand{font-size:12pt;font-weight:700;white-space:nowrap;text-align:left}@media print{html,body{width:420mm;height:297mm}body{padding:8mm}svg{max-height:100%}}</style></head><body><main class="sheet"><h1>ELIMINATION ROUND</h1>'+extraTitle+'<p class="info">Participants: '+n+' | Bye: '+m.bye+' | Preliminary: '+m.preCount+' | Total Matches: '+n+'</p><p class="info">Date: '+esc(date)+' | Time: '+esc(time)+(location?' | Location: '+esc(location):'')+'</p><div class="chart">'+chart+'</div><footer class="footer"><div class="brand">PWA: SCOREBOARD</div>'+result+'</footer></main><script>window.addEventListener("load",function(){setTimeout(function(){window.print()},400)});<\/script></body></html>');
- win.document.close();
+ const writePrint=location=>{win.document.open();
+ win.document.write('<!doctype html><html><head><meta charset="utf-8"><title>ELIMINATION ROUND</title><style>@page{size:A3 landscape;margin:0}*{box-sizing:border-box}html,body{margin:0;padding:0;font-family:Arial,sans-serif;color:#14345b}body{width:420mm;height:297mm;padding:8mm;overflow:hidden}.sheet{height:281mm;display:flex;flex-direction:column;align-items:stretch;break-inside:avoid;page-break-inside:avoid}h1,h2{text-align:center;font-size:23pt;margin:0 0 2mm;font-weight:800}h2{font-size:20pt}.info{text-align:center;font-size:10pt;margin:1mm 0}.chart{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;margin:2mm 0}.chart svg{display:block;width:100%;height:100%;object-fit:contain}.el-final-results{background:#e3f3e9;border:1px solid #80ae94;border-radius:7px;padding:3mm 5mm;min-width:50%;font-size:10pt}.el-final-results h3{text-align:center;margin:0 0 2mm;font-size:12pt}.el-final-results div{margin:1mm 0}.footer{display:flex;align-items:flex-end;justify-content:space-between;gap:12mm;min-height:25mm}.brand{font-size:12pt;font-weight:700;white-space:nowrap;text-align:right}@media print{html,body{width:420mm;height:297mm}body{padding:8mm}svg{max-height:100%}}</style></head><body><main class="sheet"><h1>ELIMINATION ROUND</h1>'+extraTitle+'<p class="info">Participants: '+n+' | Bye: '+m.bye+' | Preliminary: '+m.preCount+' | Total Matches: '+n+'</p><p class="info">Date: '+esc(date)+' | Time: '+esc(time)+(location?' | Location: '+esc(location):'')+'</p><div class="chart">'+chart+'</div><footer class="footer">'+result+'<div class="brand">PWA: SCOREBOARD</div></footer></main><script>window.addEventListener("load",function(){setTimeout(function(){window.print()},400)});<\/script></body></html>');
+ win.document.close();};
+ if(!gpsEnabled||!navigator.geolocation){writePrint('');return;}
+ navigator.geolocation.getCurrentPosition(position=>{
+ const lat=position.coords.latitude,lon=position.coords.longitude;
+ writePrint(Number.isFinite(lat)&&Number.isFinite(lon)?lat.toFixed(5)+', '+lon.toFixed(5):'');
+ },()=>writePrint(''),{enableHighAccuracy:true,timeout:8000,maximumAge:300000});
 };
 window.eliminationGuide=()=>{
  const bm=typeof infoLang!=='undefined'&&infoLang==='BM';
