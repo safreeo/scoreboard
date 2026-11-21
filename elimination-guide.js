@@ -1,79 +1,127 @@
+/* R174 Elimination Bracket Planner: independent of practice scoring */
 (function(){
 'use strict';
-let current=15, mode='list';
+let count=20,view='bracket',namesOpen=false,pdfOpen=false,pdfNames=true,applied=false;
+let names={},winners={};
 const t=(en,bm)=>typeof infoLang!=='undefined'&&infoLang==='BM'?bm:en;
-const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-function model(n){
- const size=2**Math.floor(Math.log2(n)),bye=2*size-n;
- const prelim=Array.from({length:n-size},(_,i)=>({id:'P'+(i+1),a:bye+i+1,b:n-i}));
- const map=new Map(prelim.map(p=>[p.a,p.id]));
- let order=[1,2];while(order.length<size){const sum=order.length*2+1;order=order.flatMap(x=>[x,sum-x]);}
- let names=order.map(s=>s<=bye?'#'+s:'Winner '+map.get(s));
- const rounds=[];
- while(names.length>1){
-  const label=names.length===2?'FINAL':names.length===4?'SF':names.length===8?'QF':'R'+names.length;
-  const matches=Array.from({length:names.length/2},(_,i)=>({id:label+(label==='FINAL'?'':i+1),a:names[i*2],b:names[i*2+1]}));
-  rounds.push({label,matches});names=matches.map(m=>'Winner '+m.id);
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const orderFor=size=>{let a=[1,2];while(a.length<size){const k=a.length*2+1;a=a.flatMap(v=>[v,k-v]);}return a;};
+function build(n){
+ const size=2**Math.floor(Math.log2(n)),bye=2*size-n,preCount=n-size;
+ let id=1,rounds=[],all=[];
+ const pre=Array.from({length:preCount},(_,i)=>({id:'M'+id++,round:'Preliminary',a:{seed:bye+i+1},b:{seed:n-i}}));
+ if(pre.length){rounds.push({label:'Preliminary',matches:pre});all.push(...pre);}
+ const preBySeed=new Map(pre.map(m=>[m.a.seed,m.id]));
+ let slots=orderFor(size).map(s=>s<=bye?{seed:s}:{winner:preBySeed.get(s)});
+ while(slots.length>1){
+  const len=slots.length,label=len===2?'Final':len===4?'Semi Final':len===8?'Quarter Final':'Round of '+len;
+  const matches=Array.from({length:len/2},(_,i)=>({id:'M'+id++,round:label,a:slots[2*i],b:slots[2*i+1]}));
+  rounds.push({label,matches});all.push(...matches);slots=matches.map(m=>({winner:m.id}));
  }
- return {n,size,bye,prelim,rounds};
+ const semis=rounds.find(r=>r.label==='Semi Final');
+ const third={id:'M'+id++,round:'3rd / 4th Place',a:{loser:semis.matches[0].id},b:{loser:semis.matches[1].id}};
+ rounds.push({label:'3rd / 4th Place',matches:[third]});all.push(third);
+ return {n,size,bye,preCount,rounds,all,third,map:new Map(all.map(m=>[m.id,m]))};
 }
-function report(m){
- const out=['ELIMINATION ROUND','Participants: '+m.n,'Bye: '+m.bye,'Bye seeds: '+(m.bye?'#1–#'+m.bye:'None'),'Main bracket: Top '+m.size,'','PRELIMINARY'];
- m.prelim.forEach(p=>out.push(p.id+': #'+p.a+' vs #'+p.b));
- m.rounds.forEach(r=>{out.push('',r.label);r.matches.forEach(p=>out.push(p.id+': '+p.a+' vs '+p.b));});
- out.push('','3RD / 4TH PLACE','Loser SF1 vs Loser SF2');return out.join('\n');
+function slotResolve(m,slot,seen=[]){
+ if(slot.seed)return {key:'s'+slot.seed,seed:slot.seed,text:'#'+slot.seed+(applied&&names[slot.seed]?' '+names[slot.seed]:'')};
+ const src=slot.winner||slot.loser,match=m.map.get(src);
+ const unresolved={key:null,text:(slot.loser?'Loser ':'Winner ')+src};
+ if(!match||seen.includes(src))return unresolved;
+ const a=slotResolve(m,match.a,[...seen,src]),b=slotResolve(m,match.b,[...seen,src]);
+ const winner=winners[src];
+ if(!winner||!a.key||!b.key)return unresolved;
+ const selected=winner===a.key?a:winner===b.key?b:null;
+ if(!selected)return unresolved;
+ return slot.loser?(winner===a.key?b:a):selected;
 }
-function svg(m){
- const stages=(m.prelim.length?[{label:'PRELIM',matches:m.prelim.map(p=>({id:p.id,a:'#'+p.a,b:'#'+p.b}))}]:[]).concat(m.rounds);
- const width=stages.length*205+24,top=70,unit=58,first=Math.max(m.prelim.length,m.size/2),height=Math.max(440,top+first*unit+115);
- let s='<svg xmlns="http://www.w3.org/2000/svg" width="'+width+'" height="'+height+'" viewBox="0 0 '+width+' '+height+'" role="img" aria-label="Elimination bracket"><rect width="100%" height="100%" fill="#f7f9fc"/>';
+function sanitize(){
+ const n=Number(count);if(!Number.isInteger(n)||n<4||n>40)return;
+ const m=build(n);
+ for(let pass=0;pass<m.all.length;pass++){
+  let changed=false;
+  for(const match of m.all){
+   const a=slotResolve(m,match.a),b=slotResolve(m,match.b),chosen=winners[match.id];
+   if(chosen&&(!a.key||!b.key||(chosen!==a.key&&chosen!==b.key))){delete winners[match.id];changed=true;}
+  }
+  if(!changed)break;
+ }
+}
+function row(m,match,controls){
+ const a=slotResolve(m,match.a),b=slotResolve(m,match.b),selected=winners[match.id]||'';
+ const canSelect=a.key&&b.key;
+ return '<div class="el-match-card"><b>'+esc(match.id)+'</b><div class="el-participant">'+esc(a.text)+'</div><div class="el-participant">'+esc(b.text)+'</div>'+
+ (controls&&canSelect?'<select class="el-winner" aria-label="'+esc(t('Winner of','Pemenang'))+' '+esc(match.id)+'" onchange="elWinner(\''+esc(match.id)+'\',this.value)"><option value="">'+esc(t('Select winner','Pilih pemenang'))+'</option><option value="'+esc(a.key)+'"'+(selected===a.key?' selected':'')+'>'+esc(a.text)+'</option><option value="'+esc(b.key)+'"'+(selected===b.key?' selected':'')+'>'+esc(b.text)+'</option></select>':'')+'</div>';
+}
+function svg(m,withNames=true){
+ const stages=m.rounds.filter(r=>r.label!=='3rd / 4th Place');
+ const pre=m.preCount>0,top=75,step=58,cw=225,boxW=196;
+ const maxSlots=Math.max(m.preCount,m.size/2);
+ const height=Math.max(400,top+maxSlots*step+90),width=stages.length*cw+22;
+ let out='<svg xmlns="http://www.w3.org/2000/svg" width="'+width+'" height="'+height+'" viewBox="0 0 '+width+' '+height+'" role="img" aria-label="Full elimination bracket"><rect width="100%" height="100%" fill="#f7f9fc"/>';
  const positions=[];
  stages.forEach((stage,k)=>{
-  const x=12+k*205,prelim=k===0&&m.prelim.length>0,mainIndex=k-(m.prelim.length?1:0);
-  s+='<text x="'+x+'" y="28" font-size="13" font-weight="700" fill="#14345b">'+esc(stage.label)+'</text>';
-  const ys=stage.matches.map((p,i)=>prelim?top+i*unit:top+(Math.pow(2,mainIndex)*unit-unit)/2+i*Math.pow(2,mainIndex)*unit);
+  const x=12+k*cw,isPre=pre&&k===0,mainIdx=k-(pre?1:0);
+  const ys=stage.matches.map((match,i)=>isPre?top+i*step:top+(Math.pow(2,mainIdx)*step-step)/2+i*Math.pow(2,mainIdx)*step);
   positions.push(ys);
-  stage.matches.forEach((p,i)=>{
-   const y=ys[i];
-   s+='<rect x="'+x+'" y="'+y+'" width="180" height="47" rx="7" fill="#fff" stroke="#9aafc8"/><text x="'+(x+7)+'" y="'+(y+13)+'" font-size="10" font-weight="700" fill="#346194">'+esc(p.id)+'</text>';
-   s+='<text x="'+(x+7)+'" y="'+(y+27)+'" font-size="10" fill="#18324e">'+esc(p.a)+'</text><text x="'+(x+7)+'" y="'+(y+41)+'" font-size="10" fill="#18324e">'+esc(p.b)+'</text>';
+  out+='<text x="'+x+'" y="30" font-size="14" font-weight="700" fill="#14345b">'+esc(stage.label)+'</text>';
+  stage.matches.forEach((match,i)=>{
+   const y=ys[i],a=slotResolve(m,match.a),b=slotResolve(m,match.b);
+   const label=(s)=>{let txt=withNames?s.text:(s.seed?'#'+s.seed:s.text);return txt.length>30?txt.slice(0,29)+'…':txt;};
+   out+='<rect x="'+x+'" y="'+y+'" width="'+boxW+'" height="48" rx="7" fill="#fff" stroke="#9aafc8"/><text x="'+(x+7)+'" y="'+(y+13)+'" font-size="10" font-weight="700" fill="#346194">'+esc(match.id)+'</text><text x="'+(x+7)+'" y="'+(y+28)+'" font-size="11" fill="#18324e">'+esc(label(a))+'</text><text x="'+(x+7)+'" y="'+(y+42)+'" font-size="11" fill="#18324e">'+esc(label(b))+'</text>';
   });
  });
- const offset=m.prelim.length?1:0;
- for(let k=offset;k<stages.length-1;k++){
-  positions[k].forEach((y,i)=>{
-   const x=12+k*205+180,mid=positions[k+1][Math.floor(i/2)]+23;
-   s+='<path d="M '+x+' '+(y+23)+' H '+(x+10)+' V '+mid+' H '+(x+23)+'" stroke="#7691ac" fill="none" stroke-width="1.5"/>';
-  });
- }
- const tx=12+(stages.length-1)*205,ty=positions[stages.length-1][0]+70;
- s+='<rect x="'+tx+'" y="'+ty+'" width="180" height="61" rx="7" fill="#e6f3e9" stroke="#78aa8c"/><text x="'+(tx+7)+'" y="'+(ty+17)+'" font-size="11" font-weight="700" fill="#185d3e">3RD / 4TH PLACE</text><text x="'+(tx+7)+'" y="'+(ty+36)+'" font-size="11" fill="#18324e">Loser SF1</text><text x="'+(tx+7)+'" y="'+(ty+51)+'" font-size="11" fill="#18324e">Loser SF2</text></svg>';
- return s;
+ for(let k=(pre?1:0);k<stages.length-1;k++)positions[k].forEach((y,i)=>{
+  const x=12+k*cw+boxW,mid=positions[k+1][Math.floor(i/2)]+24;
+  out+='<path d="M '+x+' '+(y+24)+' H '+(x+10)+' V '+mid+' H '+(x+25)+'" stroke="#7691ac" fill="none" stroke-width="1.5"/>';
+ });
+ const x=12+(stages.length-1)*cw,finalY=positions[stages.length-1][0],thirdY=finalY+72;
+ const third=m.third,a=slotResolve(m,third.a),b=slotResolve(m,third.b);
+ out+='<rect x="'+x+'" y="'+thirdY+'" width="'+boxW+'" height="62" rx="7" fill="#e6f3e9" stroke="#78aa8c"/><text x="'+(x+7)+'" y="'+(thirdY+16)+'" font-size="11" font-weight="700" fill="#185d3e">'+esc(third.id+' • 3RD / 4TH PLACE')+'</text><text x="'+(x+7)+'" y="'+(thirdY+36)+'" font-size="11" fill="#18324e">'+esc(withNames?a.text:(a.seed?'#'+a.seed:a.text))+'</text><text x="'+(x+7)+'" y="'+(thirdY+52)+'" font-size="11" fill="#18324e">'+esc(withNames?b.text:(b.seed?'#'+b.seed:b.text))+'</text></svg>';
+ return out;
 }
 function draw(){
  const root=document.getElementById('elimination-results');if(!root)return;
- const n=Number(current);
+ const n=Number(count);
  if(!Number.isInteger(n)||n<4||n>40){root.innerHTML='<p style="color:#b91c1c">'+t('Enter a whole number from 4 to 40.','Masukkan nombor bulat antara 4 hingga 40.')+'</p>';return;}
- const m=model(n);
- let h='<div class="el-stats"><div><b>'+n+'</b><small>'+t('Participants','Peserta')+'</small></div><div><b>'+m.bye+'</b><small>Bye</small></div><div><b>'+m.prelim.length+'</b><small>'+t('Preliminary','Awal')+'</small></div><div><b>Top '+m.size+'</b><small>Bracket</small></div></div>';
- h+='<div class="el-switch"><button class="btn '+(mode==='list'?'el-active':'soft')+'" onclick="elView(\'list\')">'+t('MATCH LIST','SENARAI PERLAWANAN')+'</button><button class="btn '+(mode==='bracket'?'el-active':'soft')+'" onclick="elView(\'bracket\')">'+t('FULL BRACKET','CARTA PENUH')+'</button></div>';
- if(mode==='bracket'){
-  h+='<p class="el-note">'+t('Swipe sideways to view the entire bracket. # means seed; Winner and Loser refer to match outcomes.','Leret ke sisi untuk melihat keseluruhan carta. # ialah seed; Winner dan Loser merujuk keputusan perlawanan.')+'</p><div class="el-scroll">'+svg(m)+'</div>';
+ sanitize();const m=build(n);
+ let h='<div class="el-stats el-stats-r174"><div><b>'+n+'</b><small>'+t('Participants','Peserta')+'</small></div><div><b>'+m.bye+'</b><small>Bye</small></div><div><b>'+m.preCount+'</b><small>Preliminary</small></div><div><b>'+n+'</b><small>'+t('Total Matches','Jumlah Perlawanan')+'</small></div><div><b>Top '+m.size+'</b><small>'+t('Main Bracket','Carta Utama')+'</small></div></div>';
+ h+='<div class="el-switch"><button class="btn '+(view==='list'?'el-active':'soft')+'" onclick="elView(\'list\')">'+t('MATCH LIST','SENARAI PERLAWANAN')+'</button><button class="btn '+(view==='bracket'?'el-active':'soft')+'" onclick="elView(\'bracket\')">'+t('FULL BRACKET','CARTA PENUH')+'</button></div>';
+ if(view==='bracket'){
+  h+='<p class="el-note">'+t('Swipe sideways to view the bracket. M = Match. Select winners below to advance names automatically.','Leret ke sisi untuk melihat carta. M = Match. Pilih pemenang di bawah untuk mara secara automatik.')+'</p><div class="el-scroll">'+svg(m)+'</div>';
+  h+='<div class="el-actions"><button class="btn el-active" onclick="elToggleNames()">'+t('ENTER NAMES','MASUKKAN NAMA')+'</button><button class="btn soft" onclick="elTogglePdf()">'+t('SAVE AS PDF','SIMPAN PDF')+'</button></div>';
  }else{
-  h+='<h3>'+t('Bye Allocation','Penentuan Bye')+'</h3><p>'+(m.bye?'#1'+(m.bye>1?' – #'+m.bye:'')+' → Top '+m.size:t('No Bye.','Tiada Bye.'))+'</p><h3>'+t('Preliminary Matches','Perlawanan Awal')+'</h3>';
-  h+=m.prelim.length?m.prelim.map(p=>'<div class="el-match"><b>'+p.id+'</b><span>#'+p.a+' vs #'+p.b+'</span></div>').join(''):'<p>—</p>';
-  m.rounds.forEach(r=>{h+='<h3>'+r.label+'</h3>'+r.matches.map(p=>'<div class="el-match"><b>'+p.id+'</b><span>'+esc(p.a)+' vs '+esc(p.b)+'</span></div>').join('');});
-  h+='<h3>'+t('3rd / 4th Place','Tempat Ke-3 / Ke-4')+'</h3><div class="el-match"><b>3RD</b><span>Loser SF1 vs Loser SF2</span></div>';
+  h+='<h3>'+t('Bye Allocation','Penentuan Bye')+'</h3><p>'+(m.bye?'#1'+(m.bye>1?'–#'+m.bye:'')+' → Top '+m.size:t('No Bye','Tiada Bye'))+'</p>';
  }
- h+='<button class="btn soft" onclick="elCopy()">'+t('COPY RESULTS','SALIN KEPUTUSAN')+'</button>';
+ if(namesOpen){
+  h+='<section class="el-editor"><h3>'+t('Enter Ranking Names','Masukkan Nama Mengikut Ranking')+'</h3><p class="el-note">'+t('Seed #1 is the highest ranked. Blank names are allowed.','Seed #1 ialah ranking tertinggi. Nama boleh dibiarkan kosong.')+'</p><div class="el-name-list">';
+  for(let i=1;i<=n;i++)h+='<label class="el-name-row"><b>#'+i+'</b><input type="text" value="'+esc(names[i]||'')+'" placeholder="'+esc(t('Archer / Team','Pemanah / Pasukan'))+' '+i+'" oninput="elName('+i+',this.value)"/></label>';
+  h+='</div><button class="btn el-active" onclick="elApplyNames()">'+t('APPLY NAMES','GUNAKAN NAMA')+'</button></section>';
+ }
+ if(pdfOpen){
+  h+='<section class="el-editor"><h3>'+t('PDF Options','Pilihan PDF')+'</h3><label><input type="radio" name="el-pdf" '+(!pdfNames?'checked':'')+' onchange="elPdfMode(false)"/> '+t('Without Names','Tanpa Nama')+'</label><label><input type="radio" name="el-pdf" '+(pdfNames?'checked':'')+' onchange="elPdfMode(true)"/> '+t('With Names','Dengan Nama')+'</label><button class="btn el-active" onclick="elPrint()">'+t('PRINT / SAVE AS PDF','CETAK / SIMPAN PDF')+'</button><p class="el-note">'+t('Use your browser print dialog to save as PDF. For large brackets, choose landscape or A3.','Gunakan dialog cetak pelayar untuk simpan sebagai PDF. Bagi carta besar, pilih landscape atau A3.')+'</p></section>';
+ }
+ h+='<h3>'+t('Match Results / Winner Selection','Keputusan / Pilihan Pemenang')+'</h3><p class="el-note">'+t('Choose the winner of each match; the next round updates automatically.','Pilih pemenang setiap perlawanan; pusingan berikutnya dikemas kini secara automatik.')+'</p>';
+ m.rounds.forEach(r=>{h+='<h3>'+esc(r.label)+'</h3><div class="el-match-grid">'+r.matches.map(match=>row(m,match,true)).join('')+'</div>';});
  root.innerHTML=h;
 }
-window.elView=v=>{mode=v;draw();};
-window.elCount=v=>{current=v;draw();};
-window.elCopy=()=>{const str=report(model(Number(current)));if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(str).then(()=>alert(t('Copied.','Disalin.'))).catch(()=>prompt('Copy:',str));else prompt('Copy:',str);};
+window.elView=v=>{view=v;draw();};
+window.elCount=v=>{count=v;namesOpen=false;pdfOpen=false;applied=false;names={};winners={};draw();};
+window.elName=(seed,value)=>{names[seed]=value;applied=false;};
+window.elToggleNames=()=>{namesOpen=!namesOpen;draw();};
+window.elApplyNames=()=>{applied=true;namesOpen=false;draw();};
+window.elWinner=(id,key)=>{winners[id]=key;sanitize();draw();};
+window.elTogglePdf=()=>{pdfOpen=!pdfOpen;draw();};
+window.elPdfMode=v=>{pdfNames=v;};
+window.elPrint=()=>{
+ const n=Number(count);if(!Number.isInteger(n)||n<4||n>40)return;
+ const m=build(n),svgText=svg(m,pdfNames),title='SCOREBOARD — Elimination Bracket ('+n+' participants)';
+ const win=window.open('','_blank');if(!win){alert(t('Please allow pop-ups to print.','Sila benarkan pop-up untuk mencetak.'));return;}
+ win.document.open();win.document.write('<!doctype html><html><head><meta charset="utf-8"><title>'+esc(title)+'</title><style>@page{size:A3 landscape;margin:10mm}body{font-family:Arial,sans-serif;color:#14345b}h2{margin:0 0 10px}svg{max-width:100%;height:auto}p{font-size:12px}button{padding:9px 16px;margin-bottom:15px}@media print{button{display:none}}</style></head><body><button onclick="window.print()">Print / Save as PDF</button><h2>'+esc(title)+'</h2><p>Participants: '+n+' | Bye: '+m.bye+' | Preliminary: '+m.preCount+' | Total Matches: '+n+'</p>'+svgText+'</body></html>');win.document.close();
+};
 window.eliminationGuide=()=>{
  const bm=typeof infoLang!=='undefined'&&infoLang==='BM';
- page(head(bm?'PANDUAN PUSINGAN PENYINGKIRAN':'ELIMINATION ROUND GUIDE')+'<section class="card el-guide"><h2>'+(bm?'Kalkulator Bye & Carta Perlawanan':'Bye Calculator & Match Bracket')+'</h2><p class="el-note">'+(bm?'Seed #1 ialah peserta ranking tertinggi. Panduan ini tidak merekod keputusan.':'Seed #1 is the highest-ranked participant. This guide does not record match results.')+'</p><label for="el-input">'+(bm?'Jumlah peserta / pasukan (4–40)':'Number of participants / teams (4–40)')+'</label><input id="el-input" type="number" min="4" max="40" step="1" value="'+current+'" oninput="elCount(this.value)" style="display:block;width:100%;padding:12px;margin:8px 0 14px;border:1px solid #9eafc3;border-radius:9px;font-size:18px"/><div id="elimination-results"></div></section>','elimination');
+ page(head(bm?'PANDUAN PUSINGAN PENYINGKIRAN':'ELIMINATION ROUND GUIDE')+'<section class="card el-guide"><h2>'+(bm?'Kalkulator Bye & Carta Perlawanan':'Bye Calculator & Match Bracket')+'</h2><p class="el-note">'+(bm?'Seed #1 ialah peserta ranking tertinggi.':'Seed #1 is the highest-ranked participant.')+'</p><div class="el-input-row"><label for="el-input">'+(bm?'Jumlah peserta / pasukan (4–40)':'Participants / Teams (4–40)')+'<input id="el-input" type="number" min="4" max="40" step="1" value="'+count+'" oninput="elCount(this.value)"/></label><div class="el-input-summary"><strong id="el-input-total">'+count+'</strong><small>'+(bm?'Peserta':'Participants')+'</small></div></div><div id="elimination-results"></div></section>','elimination');
  draw();
 };
 })();
