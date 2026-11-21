@@ -2,12 +2,12 @@
 (function(){
 'use strict';
 let count=20,view='bracket',namesOpen=false,pdfOpen=false,pdfNames=true,applied=false;
-let names={},winners={};
+let names={},winners={},pending={};
 const t=(en,bm)=>typeof infoLang!=='undefined'&&infoLang==='BM'?bm:en;
 const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const orderFor=size=>{let a=[1,2];while(a.length<size){const k=a.length*2+1;a=a.flatMap(v=>[v,k-v]);}return a;};
 function build(n){
- const size=2**Math.floor(Math.log2(n)),bye=2*size-n,preCount=n-size;
+ const size=2**Math.floor(Math.log2(n)),bye=n===size?0:2*size-n,preCount=n-size;
  let id=1,rounds=[],all=[];
  const pre=Array.from({length:preCount},(_,i)=>({id:'M'+id++,round:'Preliminary',a:{seed:bye+i+1},b:{seed:n-i}}));
  if(pre.length){rounds.push({label:'Preliminary',matches:pre});all.push(...pre);}
@@ -48,7 +48,7 @@ function sanitize(){
  }
 }
 function row(m,match,controls){
- const a=slotResolve(m,match.a),b=slotResolve(m,match.b),selected=winners[match.id]||'';
+ const a=slotResolve(m,match.a),b=slotResolve(m,match.b),selected=pending[match.id]!==undefined?pending[match.id]:(winners[match.id]||'');
  const canSelect=a.key&&b.key;
  return '<div class="el-match-card"><b>'+esc(match.id)+'</b><div class="el-participant">'+esc(a.text)+'</div><div class="el-participant">'+esc(b.text)+'</div>'+
  (controls&&canSelect?'<select class="el-winner" aria-label="'+esc(t('Winner of','Pemenang'))+' '+esc(match.id)+'" onchange="elWinner(\''+esc(match.id)+'\',this.value)"><option value="">'+esc(t('Select winner','Pilih pemenang'))+'</option><option value="'+esc(a.key)+'"'+(selected===a.key?' selected':'')+'>'+esc(a.text)+'</option><option value="'+esc(b.key)+'"'+(selected===b.key?' selected':'')+'>'+esc(b.text)+'</option></select>':'')+'</div>';
@@ -85,32 +85,32 @@ function draw(){
  const n=Number(count);
  if(!Number.isInteger(n)||n<4||n>40){root.innerHTML='<p style="color:#b91c1c">'+t('Enter a whole number from 4 to 40.','Masukkan nombor bulat antara 4 hingga 40.')+'</p>';return;}
  sanitize();const m=build(n);
- let h='<div class="el-stats el-stats-r174"><div><b>'+n+'</b><small>'+t('Participants','Peserta')+'</small></div><div><b>'+m.bye+'</b><small>Bye</small></div><div><b>'+m.preCount+'</b><small>Preliminary</small></div><div><b>'+n+'</b><small>'+t('Total Matches','Jumlah Perlawanan')+'</small></div><div><b>Top '+m.size+'</b><small>'+t('Main Bracket','Carta Utama')+'</small></div></div>';
+ let h='<div class="el-stats el-stats-r174"><div><b>'+(m.bye||'–')+'</b><small>Bye</small></div><div><b>'+m.preCount+'</b><small>Preliminary</small></div><div><b>'+n+'</b><small>'+t('Total Matches','Jumlah Perlawanan')+'</small></div><div><b>Top '+m.size+'</b><small>'+t('Main Bracket','Carta Utama')+'</small></div></div>';
  h+='<div class="el-switch"><button class="btn '+(view==='list'?'el-active':'soft')+'" onclick="elView(\'list\')">'+t('MATCH LIST','SENARAI PERLAWANAN')+'</button><button class="btn '+(view==='bracket'?'el-active':'soft')+'" onclick="elView(\'bracket\')">'+t('FULL BRACKET','CARTA PENUH')+'</button></div>';
  if(view==='bracket'){
   h+='<p class="el-note">'+t('Swipe sideways to view the bracket. M = Match. Select winners below to advance names automatically.','Leret ke sisi untuk melihat carta. M = Match. Pilih pemenang di bawah untuk mara secara automatik.')+'</p><div class="el-scroll">'+svg(m)+'</div>';
-  h+='<div class="el-actions"><button class="btn el-active" onclick="elToggleNames()">'+t('ENTER NAMES','MASUKKAN NAMA')+'</button><button class="btn soft" onclick="elTogglePdf()">'+t('SAVE AS PDF','SIMPAN PDF')+'</button></div>';
+  h+='<div class="el-actions"><button class="btn el-active" onclick="elToggleNames()">'+t('ENTER NAMES','MASUKKAN NAMA')+'</button></div>';
  }else{
-  h+='<h3>'+t('Bye Allocation','Penentuan Bye')+'</h3><p>'+(m.bye?'#1'+(m.bye>1?'–#'+m.bye:'')+' → Top '+m.size:t('No Bye','Tiada Bye'))+'</p>';
+  h+='<h3>'+t('Bye Allocation','Penentuan Bye')+'</h3><p>'+(m.bye?'#1'+(m.bye>1?'–#'+m.bye:'')+' → Top '+m.size:t('No Bye','Tiada Bye'))+'</p>';m.rounds.forEach(r=>{h+='<h3>'+esc(r.label)+'</h3>'+r.matches.map(match=>'<div class="el-match"><b>'+esc(match.id)+'</b><span>'+esc(slotResolve(m,match.a).text)+' vs '+esc(slotResolve(m,match.b).text)+'</span></div>').join('');});
  }
- if(namesOpen){
+ if(view==='bracket'&&namesOpen){
   h+='<section class="el-editor"><h3>'+t('Enter Ranking Names','Masukkan Nama Mengikut Ranking')+'</h3><p class="el-note">'+t('Seed #1 is the highest ranked. Blank names are allowed.','Seed #1 ialah ranking tertinggi. Nama boleh dibiarkan kosong.')+'</p><div class="el-name-list">';
   for(let i=1;i<=n;i++)h+='<label class="el-name-row"><b>#'+i+'</b><input type="text" value="'+esc(names[i]||'')+'" placeholder="'+esc(t('Archer / Team','Pemanah / Pasukan'))+' '+i+'" oninput="elName('+i+',this.value)"/></label>';
   h+='</div><button class="btn el-active" onclick="elApplyNames()">'+t('APPLY NAMES','GUNAKAN NAMA')+'</button></section>';
  }
- if(pdfOpen){
+ if(view==='bracket'&&pdfOpen){
   h+='<section class="el-editor"><h3>'+t('PDF Options','Pilihan PDF')+'</h3><label><input type="radio" name="el-pdf" '+(!pdfNames?'checked':'')+' onchange="elPdfMode(false)"/> '+t('Without Names','Tanpa Nama')+'</label><label><input type="radio" name="el-pdf" '+(pdfNames?'checked':'')+' onchange="elPdfMode(true)"/> '+t('With Names','Dengan Nama')+'</label><button class="btn el-active" onclick="elPrint()">'+t('PRINT / SAVE AS PDF','CETAK / SIMPAN PDF')+'</button><p class="el-note">'+t('Use your browser print dialog to save as PDF. For large brackets, choose landscape or A3.','Gunakan dialog cetak pelayar untuk simpan sebagai PDF. Bagi carta besar, pilih landscape atau A3.')+'</p></section>';
  }
- h+='<h3>'+t('Match Results / Winner Selection','Keputusan / Pilihan Pemenang')+'</h3><p class="el-note">'+t('Choose the winner of each match; the next round updates automatically.','Pilih pemenang setiap perlawanan; pusingan berikutnya dikemas kini secara automatik.')+'</p>';
- m.rounds.forEach(r=>{h+='<h3>'+esc(r.label)+'</h3><div class="el-match-grid">'+r.matches.map(match=>row(m,match,true)).join('')+'</div>';});
+ if(view==='bracket'){h+='<h3>'+t('Match Results / Winner Selection','Keputusan / Pilihan Pemenang')+'</h3><p class="el-note">'+t('Select winners and tap UPDATE at the end of each round.','Pilih pemenang dan tekan UPDATE di akhir setiap pusingan.')+'</p>';m.rounds.forEach((r,i)=>{h+='<h3>'+esc(r.label)+'</h3><div class="el-match-grid">'+r.matches.map(match=>row(m,match,true)).join('')+'</div><button class="btn el-active el-update" onclick="elUpdateRound('+i+')">UPDATE</button>';});h+='<div class="el-pdf-bottom"><button class="btn el-active" onclick="elTogglePdf()">'+t('SAVE AS PDF','SIMPAN PDF')+'</button></div>';}
  root.innerHTML=h;
 }
 window.elView=v=>{view=v;draw();};
-window.elCount=v=>{count=v;namesOpen=false;pdfOpen=false;applied=false;names={};winners={};const total=document.getElementById('el-input-total');if(total)total.textContent=v;draw();};
+window.elCount=v=>{count=v;namesOpen=false;pdfOpen=false;applied=false;names={};winners={};pending={};const total=document.getElementById('el-input-total');if(total)total.textContent=v;draw();};
 window.elName=(seed,value)=>{names[seed]=value;applied=false;};
 window.elToggleNames=()=>{namesOpen=!namesOpen;draw();};
 window.elApplyNames=()=>{applied=true;namesOpen=false;draw();};
-window.elWinner=(id,key)=>{winners[id]=key;sanitize();draw();};
+window.elWinner=(id,key)=>{pending[id]=key;};
+window.elUpdateRound=index=>{const m=build(Number(count)),r=m.rounds[index];if(!r)return;for(const match of r.matches){if(Object.prototype.hasOwnProperty.call(pending,match.id)){if(pending[match.id])winners[match.id]=pending[match.id];else delete winners[match.id];delete pending[match.id];}}sanitize();draw();};
 window.elTogglePdf=()=>{pdfOpen=!pdfOpen;draw();};
 window.elPdfMode=v=>{pdfNames=v;};
 window.elPrint=()=>{
@@ -121,7 +121,7 @@ window.elPrint=()=>{
 };
 window.eliminationGuide=()=>{
  const bm=typeof infoLang!=='undefined'&&infoLang==='BM';
- page(head(bm?'PANDUAN PUSINGAN PENYINGKIRAN':'ELIMINATION ROUND GUIDE')+'<section class="card el-guide"><h2>'+(bm?'Kalkulator Bye & Carta Perlawanan':'Bye Calculator & Match Bracket')+'</h2><p class="el-note">'+(bm?'Seed #1 ialah peserta ranking tertinggi.':'Seed #1 is the highest-ranked participant.')+'</p><div class="el-input-row"><label for="el-input">'+(bm?'Jumlah peserta / pasukan (4–40)':'Participants / Teams (4–40)')+'<input id="el-input" type="number" min="4" max="40" step="1" value="'+count+'" oninput="elCount(this.value)"/></label><div class="el-input-summary"><strong id="el-input-total">'+count+'</strong><small>'+(bm?'Peserta':'Participants')+'</small></div></div><div id="elimination-results"></div></section>','elimination');
+ page(head(bm?'PANDUAN PUSINGAN PENYINGKIRAN':'ELIMINATION ROUND GUIDE')+'<section class="card el-guide"><h2>'+(bm?'Kalkulator Bye & Carta Perlawanan':'Bye Calculator & Match Bracket')+'</h2><p class="el-note">'+(bm?'Seed #1 ialah peserta ranking tertinggi.':'Seed #1 is the highest-ranked participant.')+'</p><div class="el-input-row"><label for="el-input">'+(bm?'Jumlah Peserta / Pasukan':'Number of Participants / Teams')+'<input id="el-input" type="number" min="4" max="40" step="1" value="'+count+'" oninput="elCount(this.value)"/></label></div><div id="elimination-results"></div></section>','elimination');
  draw();
 };
 })();
