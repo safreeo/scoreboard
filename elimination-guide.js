@@ -85,7 +85,7 @@ function draw(){
  const n=Number(count);
  if(!Number.isInteger(n)||n<4||n>40){root.innerHTML='<p style="color:#b91c1c">'+t('Enter a whole number from 4 to 40.','Masukkan nombor bulat antara 4 hingga 40.')+'</p>';return;}
  sanitize();const m=build(n);
- let h='<div class="el-stats el-stats-r174"><div><b>'+m.bye+'</b><small>Bye</small></div><div><b>'+m.preCount+'</b><small>Preliminary</small></div><div><b>'+n+'</b><small>'+t('Total Matches','Jumlah Perlawanan')+'</small></div><div><b>Top '+m.size+'</b><small>'+t('Main Bracket','Carta Utama')+'</small></div></div>';
+ let h='<div class="el-stats el-stats-r176"><div><b>'+m.bye+'</b><small>Bye</small></div><div><b>'+m.preCount+'</b><small>Preliminary</small></div><div><b>'+n+'</b><small>'+t('Total Matches','Jumlah Perlawanan')+'</small></div><div><b>Top '+m.size+'</b><small>'+t('Main Bracket','Carta Utama')+'</small></div></div>';
  h+='<div class="el-switch"><button class="btn '+(view==='list'?'el-active':'soft')+'" onclick="elView(\'list\')">'+t('MATCH LIST','SENARAI PERLAWANAN')+'</button><button class="btn '+(view==='bracket'?'el-active':'soft')+'" onclick="elView(\'bracket\')">'+t('FULL BRACKET','CARTA PENUH')+'</button></div>';
  if(view==='bracket'){
   h+='<p class="el-note">'+t('Swipe sideways to view the bracket. M = Match. Select winners below to advance names automatically.','Leret ke sisi untuk melihat carta. M = Match. Pilih pemenang di bawah untuk mara secara automatik.')+'</p><div class="el-scroll" id="el-graph">'+svg(m)+'</div>';
@@ -109,7 +109,7 @@ window.elCount=v=>{count=v;namesOpen=false;pdfOpen=false;applied=false;names={};
 window.elName=(seed,value)=>{names[seed]=value;applied=false;};
 window.elToggleNames=()=>{namesOpen=!namesOpen;draw();};
 window.elApplyNames=()=>{applied=true;namesOpen=false;draw();};
-window.elWinner=(id,key)=>{pending[id]=key;const btn=document.querySelector('[data-el-round="'+id+'"]');if(btn)btn.textContent='UPDATE';};
+window.elWinner=(id,key)=>{pending[id]=key;const m=build(Number(count)),idx=m.rounds.findIndex(r=>r.matches.some(match=>match.id===id));const btn=document.querySelector('[data-el-round="'+idx+'"]');if(btn){btn.textContent='UPDATE';btn.classList.remove('el-completed');btn.classList.add('el-active');}};
 window.elGoGraph=()=>{const el=document.getElementById('el-graph');if(el)el.scrollIntoView({behavior:'smooth',block:'start'});};
 window.elUpdateRound=index=>{const m=build(Number(count)),r=m.rounds[index];if(!r)return;for(const match of r.matches){if(Object.prototype.hasOwnProperty.call(pending,match.id)){if(pending[match.id])winners[match.id]=pending[match.id];else delete winners[match.id];delete pending[match.id];}}sanitize();draw();};
 window.elTogglePdf=()=>{pdfOpen=!pdfOpen;draw();};
