@@ -10603,3 +10603,7 @@ html.font-large .page { font-size: 1.125rem; }
 .el-match span{text-align:right;overflow-wrap:anywhere}
 .el-scroll{width:100%;overflow-x:auto;overflow-y:auto;border:1px solid #d6e0eb;border-radius:12px;background:#f7f9fc;touch-action:pan-x pan-y;-webkit-overflow-scrolling:touch;margin-bottom:16px}
 .el-scroll svg{display:block;max-width:none}
+
+/* R173: SCOREBOARD dark navy selection for elimination controls */
+.el-entry,.el-switch .el-active{background:#0b2f5b !important;color:#fff !important;border-color:#0b2f5b !important}
+.el-entry:hover,.el-switch .el-active:hover{background:#103c70 !important;color:#fff !important}
