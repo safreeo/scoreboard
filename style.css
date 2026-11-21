@@ -10628,3 +10628,6 @@ html.font-large .page { font-size: 1.125rem; }
 .el-match-card>b{font-size:11px;color:#346194}
 .el-participant{overflow-wrap:anywhere;padding:5px 0;border-bottom:1px solid #e5ebf2}
 .el-winner{width:100%;min-width:0;padding:8px;border:1px solid #9eafc3;border-radius:7px;background:#fff;color:#14345b;font-size:12px}
+
+/* R175 */
+.el-input-row{display:block}.el-input-row label{display:block;font-size:17px;font-weight:700}.el-input-row input{text-align:center;font-size:22px;font-weight:600;width:100%}.el-update{display:block;margin:12px 0 22px auto;min-width:125px}.el-pdf-bottom{margin:22px 0 12px;display:flex;justify-content:center}.el-pdf-bottom button{width:100%}
