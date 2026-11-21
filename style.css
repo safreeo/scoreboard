@@ -10669,3 +10669,8 @@ html.font-large .page { font-size: 1.125rem; }
 
 /* R181: separate the Application Info guide card from the SCOREBOARD card */
 .info-legal-card:has(> .el-entry){margin-top:36px!important}
+
+/* R182: restore compact card spacing; separate guide button from subtitle */
+.info-legal-card:has(> .el-entry){margin-top:14px!important}
+.el-entry .btn{margin-bottom:12px!important}
+.el-entry .el-entry-desc{margin-top:12px!important}
