@@ -1,7 +1,7 @@
 /* R174 Elimination Bracket Planner: independent of practice scoring */
 (function(){
 'use strict';
-let count=20,view='bracket',namesOpen=false,pdfOpen=false,pdfNames=true,applied=false;
+let count=16,view='list',namesOpen=false,pdfOpen=false,pdfNames=true,applied=false;
 let names={},winners={},pending={};
 const t=(en,bm)=>typeof infoLang!=='undefined'&&infoLang==='BM'?bm:en;
 const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -12,7 +12,7 @@ function build(n){
  const pre=Array.from({length:preCount},(_,i)=>({id:'M'+id++,round:'Preliminary',a:{seed:bye+i+1},b:{seed:n-i}}));
  if(pre.length){rounds.push({label:'Preliminary',matches:pre});all.push(...pre);}
  const preBySeed=new Map(pre.map(m=>[m.a.seed,m.id]));
- let slots=orderFor(size).map(s=>s<=bye?{seed:s}:{winner:preBySeed.get(s)});
+ let slots=orderFor(size).map(s=>s<=bye||!preBySeed.has(s)?{seed:s}:{winner:preBySeed.get(s)});
  while(slots.length>1){
   const len=slots.length,label=len===2?'Final':len===4?'Semi Final':len===8?'Quarter Final':'Round of '+len;
   const matches=Array.from({length:len/2},(_,i)=>({id:'M'+id++,round:label,a:slots[2*i],b:slots[2*i+1]}));
@@ -85,10 +85,10 @@ function draw(){
  const n=Number(count);
  if(!Number.isInteger(n)||n<4||n>40){root.innerHTML='<p style="color:#b91c1c">'+t('Enter a whole number from 4 to 40.','Masukkan nombor bulat antara 4 hingga 40.')+'</p>';return;}
  sanitize();const m=build(n);
- let h='<div class="el-stats el-stats-r174"><div><b>'+(m.bye||'–')+'</b><small>Bye</small></div><div><b>'+m.preCount+'</b><small>Preliminary</small></div><div><b>'+n+'</b><small>'+t('Total Matches','Jumlah Perlawanan')+'</small></div><div><b>Top '+m.size+'</b><small>'+t('Main Bracket','Carta Utama')+'</small></div></div>';
+ let h='<div class="el-stats el-stats-r174"><div><b>'+m.bye+'</b><small>Bye</small></div><div><b>'+m.preCount+'</b><small>Preliminary</small></div><div><b>'+n+'</b><small>'+t('Total Matches','Jumlah Perlawanan')+'</small></div><div><b>Top '+m.size+'</b><small>'+t('Main Bracket','Carta Utama')+'</small></div></div>';
  h+='<div class="el-switch"><button class="btn '+(view==='list'?'el-active':'soft')+'" onclick="elView(\'list\')">'+t('MATCH LIST','SENARAI PERLAWANAN')+'</button><button class="btn '+(view==='bracket'?'el-active':'soft')+'" onclick="elView(\'bracket\')">'+t('FULL BRACKET','CARTA PENUH')+'</button></div>';
  if(view==='bracket'){
-  h+='<p class="el-note">'+t('Swipe sideways to view the bracket. M = Match. Select winners below to advance names automatically.','Leret ke sisi untuk melihat carta. M = Match. Pilih pemenang di bawah untuk mara secara automatik.')+'</p><div class="el-scroll">'+svg(m)+'</div>';
+  h+='<p class="el-note">'+t('Swipe sideways to view the bracket. M = Match. Select winners below to advance names automatically.','Leret ke sisi untuk melihat carta. M = Match. Pilih pemenang di bawah untuk mara secara automatik.')+'</p><div class="el-scroll" id="el-graph">'+svg(m)+'</div>';
   h+='<div class="el-actions"><button class="btn el-active" onclick="elToggleNames()">'+t('ENTER NAMES','MASUKKAN NAMA')+'</button></div>';
  }else{
   h+='<h3>'+t('Bye Allocation','Penentuan Bye')+'</h3><p>'+(m.bye?'#1'+(m.bye>1?'–#'+m.bye:'')+' → Top '+m.size:t('No Bye','Tiada Bye'))+'</p>';m.rounds.forEach(r=>{h+='<h3>'+esc(r.label)+'</h3>'+r.matches.map(match=>'<div class="el-match"><b>'+esc(match.id)+'</b><span>'+esc(slotResolve(m,match.a).text)+' vs '+esc(slotResolve(m,match.b).text)+'</span></div>').join('');});
@@ -98,7 +98,7 @@ function draw(){
   for(let i=1;i<=n;i++)h+='<label class="el-name-row"><b>#'+i+'</b><input type="text" value="'+esc(names[i]||'')+'" placeholder="'+esc(t('Archer / Team','Pemanah / Pasukan'))+' '+i+'" oninput="elName('+i+',this.value)"/></label>';
   h+='</div><button class="btn el-active" onclick="elApplyNames()">'+t('APPLY NAMES','GUNAKAN NAMA')+'</button></section>';
  }
- if(view==='bracket'){h+='<h3>'+t('Match Results / Winner Selection','Keputusan / Pilihan Pemenang')+'</h3><p class="el-note">'+t('Select winners and tap UPDATE at the end of each round.','Pilih pemenang dan tekan UPDATE di akhir setiap pusingan.')+'</p>';m.rounds.forEach((r,i)=>{h+='<h3>'+esc(r.label)+'</h3><div class="el-match-grid">'+r.matches.map(match=>row(m,match,true)).join('')+'</div><button class="btn el-active el-update" onclick="elUpdateRound('+i+')">UPDATE</button>';});h+='<div class="el-pdf-bottom"><button class="btn el-active" onclick="elTogglePdf()">'+t('SAVE AS PDF','SIMPAN PDF')+'</button></div>'; if(view==='bracket'&&pdfOpen){
+ if(view==='bracket'){h+='<h3>'+t('Match Results / Winner Selection','Keputusan / Pilihan Pemenang')+'</h3><p class="el-note">'+t('Select winners and tap UPDATE at the end of each round.','Pilih pemenang dan tekan UPDATE di akhir setiap pusingan.')+'</p>';m.rounds.forEach((r,i)=>{const complete=r.matches.every(match=>{const a=slotResolve(m,match.a),b=slotResolve(m,match.b);return a.key&&b.key&&winners[match.id]&&(winners[match.id]===a.key||winners[match.id]===b.key);})&&!r.matches.some(match=>Object.prototype.hasOwnProperty.call(pending,match.id));h+='<h3>'+esc(r.label)+'</h3><div class="el-match-grid">'+r.matches.map(match=>row(m,match,true)).join('')+'</div><div class="el-round-actions"><button class="btn '+(complete?'el-completed':'el-active')+'" onclick="elUpdateRound('+i+')">'+(complete?'COMPLETED':'UPDATE')+'</button><button class="btn soft" onclick="elGoGraph()">GRAPH ↑</button></div>';});h+='<div class="el-pdf-bottom"><button class="btn el-active" onclick="elTogglePdf()">'+t('SAVE AS PDF','SIMPAN PDF')+'</button></div>'; if(view==='bracket'&&pdfOpen){
   h+='<section class="el-editor"><h3>'+t('PDF Options','Pilihan PDF')+'</h3><label><input type="radio" name="el-pdf" '+(!pdfNames?'checked':'')+' onchange="elPdfMode(false)"/> '+t('Without Names','Tanpa Nama')+'</label><label><input type="radio" name="el-pdf" '+(pdfNames?'checked':'')+' onchange="elPdfMode(true)"/> '+t('With Names','Dengan Nama')+'</label><button class="btn el-active" onclick="elPrint()">'+t('PRINT / SAVE AS PDF','CETAK / SIMPAN PDF')+'</button><p class="el-note">'+t('Use your browser print dialog to save as PDF. For large brackets, choose landscape or A3.','Gunakan dialog cetak pelayar untuk simpan sebagai PDF. Bagi carta besar, pilih landscape atau A3.')+'</p></section>';
  }
 }
@@ -109,7 +109,8 @@ window.elCount=v=>{count=v;namesOpen=false;pdfOpen=false;applied=false;names={};
 window.elName=(seed,value)=>{names[seed]=value;applied=false;};
 window.elToggleNames=()=>{namesOpen=!namesOpen;draw();};
 window.elApplyNames=()=>{applied=true;namesOpen=false;draw();};
-window.elWinner=(id,key)=>{pending[id]=key;};
+window.elWinner=(id,key)=>{pending[id]=key;const btn=document.querySelector('[data-el-round="'+id+'"]');if(btn)btn.textContent='UPDATE';};
+window.elGoGraph=()=>{const el=document.getElementById('el-graph');if(el)el.scrollIntoView({behavior:'smooth',block:'start'});};
 window.elUpdateRound=index=>{const m=build(Number(count)),r=m.rounds[index];if(!r)return;for(const match of r.matches){if(Object.prototype.hasOwnProperty.call(pending,match.id)){if(pending[match.id])winners[match.id]=pending[match.id];else delete winners[match.id];delete pending[match.id];}}sanitize();draw();};
 window.elTogglePdf=()=>{pdfOpen=!pdfOpen;draw();};
 window.elPdfMode=v=>{pdfNames=v;};
