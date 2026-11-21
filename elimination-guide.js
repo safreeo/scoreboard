@@ -46,7 +46,7 @@ function svg(m){
    s+='<path d="M '+x+' '+(y+23)+' H '+(x+10)+' V '+mid+' H '+(x+23)+'" stroke="#7691ac" fill="none" stroke-width="1.5"/>';
   });
  }
- const tx=12+(stages.length-1)*205,ty=height-78;
+ const tx=12+(stages.length-1)*205,ty=positions[stages.length-1][0]+70;
  s+='<rect x="'+tx+'" y="'+ty+'" width="180" height="61" rx="7" fill="#e6f3e9" stroke="#78aa8c"/><text x="'+(tx+7)+'" y="'+(ty+17)+'" font-size="11" font-weight="700" fill="#185d3e">3RD / 4TH PLACE</text><text x="'+(tx+7)+'" y="'+(ty+36)+'" font-size="11" fill="#18324e">Loser SF1</text><text x="'+(tx+7)+'" y="'+(ty+51)+'" font-size="11" fill="#18324e">Loser SF2</text></svg>';
  return s;
 }
@@ -56,7 +56,7 @@ function draw(){
  if(!Number.isInteger(n)||n<4||n>40){root.innerHTML='<p style="color:#b91c1c">'+t('Enter a whole number from 4 to 40.','Masukkan nombor bulat antara 4 hingga 40.')+'</p>';return;}
  const m=model(n);
  let h='<div class="el-stats"><div><b>'+n+'</b><small>'+t('Participants','Peserta')+'</small></div><div><b>'+m.bye+'</b><small>Bye</small></div><div><b>'+m.prelim.length+'</b><small>'+t('Preliminary','Awal')+'</small></div><div><b>Top '+m.size+'</b><small>Bracket</small></div></div>';
- h+='<div class="el-switch"><button class="btn '+(mode==='list'?'blue':'soft')+'" onclick="elView(\'list\')">'+t('MATCH LIST','SENARAI PERLAWANAN')+'</button><button class="btn '+(mode==='bracket'?'blue':'soft')+'" onclick="elView(\'bracket\')">'+t('FULL BRACKET','CARTA PENUH')+'</button></div>';
+ h+='<div class="el-switch"><button class="btn '+(mode==='list'?'el-active':'soft')+'" onclick="elView(\'list\')">'+t('MATCH LIST','SENARAI PERLAWANAN')+'</button><button class="btn '+(mode==='bracket'?'el-active':'soft')+'" onclick="elView(\'bracket\')">'+t('FULL BRACKET','CARTA PENUH')+'</button></div>';
  if(mode==='bracket'){
   h+='<p class="el-note">'+t('Swipe sideways to view the entire bracket. # means seed; Winner and Loser refer to match outcomes.','Leret ke sisi untuk melihat keseluruhan carta. # ialah seed; Winner dan Loser merujuk keputusan perlawanan.')+'</p><div class="el-scroll">'+svg(m)+'</div>';
  }else{
@@ -73,7 +73,7 @@ window.elCount=v=>{current=v;draw();};
 window.elCopy=()=>{const str=report(model(Number(current)));if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(str).then(()=>alert(t('Copied.','Disalin.'))).catch(()=>prompt('Copy:',str));else prompt('Copy:',str);};
 window.eliminationGuide=()=>{
  const bm=typeof infoLang!=='undefined'&&infoLang==='BM';
- page(head(bm?'PANDUAN PUSINGAN PENYINGKIRAN':'ELIMINATION ROUND GUIDE')+'<section class="card el-guide"><button class="btn soft" onclick="info()">‹ '+(bm?'KEMBALI KE APPLICATION INFO':'BACK TO APPLICATION INFO')+'</button><h2>'+(bm?'Kalkulator Bye & Carta Perlawanan':'Bye Calculator & Match Bracket')+'</h2><p class="el-note">'+(bm?'Seed #1 ialah peserta ranking tertinggi. Panduan ini tidak merekod keputusan.':'Seed #1 is the highest-ranked participant. This guide does not record match results.')+'</p><label for="el-input">'+(bm?'Jumlah peserta / pasukan (4–40)':'Number of participants / teams (4–40)')+'</label><input id="el-input" type="number" min="4" max="40" step="1" value="'+current+'" oninput="elCount(this.value)" style="display:block;width:100%;padding:12px;margin:8px 0 14px;border:1px solid #9eafc3;border-radius:9px;font-size:18px"/><div id="elimination-results"></div></section>','elimination');
+ page(head(bm?'PANDUAN PUSINGAN PENYINGKIRAN':'ELIMINATION ROUND GUIDE')+'<section class="card el-guide"><h2>'+(bm?'Kalkulator Bye & Carta Perlawanan':'Bye Calculator & Match Bracket')+'</h2><p class="el-note">'+(bm?'Seed #1 ialah peserta ranking tertinggi. Panduan ini tidak merekod keputusan.':'Seed #1 is the highest-ranked participant. This guide does not record match results.')+'</p><label for="el-input">'+(bm?'Jumlah peserta / pasukan (4–40)':'Number of participants / teams (4–40)')+'</label><input id="el-input" type="number" min="4" max="40" step="1" value="'+current+'" oninput="elCount(this.value)" style="display:block;width:100%;padding:12px;margin:8px 0 14px;border:1px solid #9eafc3;border-radius:9px;font-size:18px"/><div id="elimination-results"></div></section>','elimination');
  draw();
 };
 })();
