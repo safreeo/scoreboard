@@ -63,7 +63,7 @@ function svg(m,withNames=true){
  const positions=[];
  stages.forEach((stage,k)=>{
   const x=12+k*cw,isPre=pre&&k===0,mainIdx=k-(pre?1:0);
-  const ys=stage.matches.map((match,i)=>isPre?top+(orderFor(m.size).indexOf(match.a.seed)>=0?Math.floor(orderFor(m.size).indexOf(match.a.seed)/2)*step: i*step):top+(Math.pow(2,mainIdx)*step-step)/2+i*Math.pow(2,mainIdx)*step);
+  const ys=stage.matches.map((match,i)=>isPre?top+i*step:top+(Math.pow(2,mainIdx)*step-step)/2+i*Math.pow(2,mainIdx)*step);
   positions.push(ys);
   out+='<text x="'+x+'" y="30" font-size="14" font-weight="700" fill="#14345b">'+esc(stage.label)+'</text>';
   stage.matches.forEach((match,i)=>{
