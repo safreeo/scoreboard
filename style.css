@@ -10666,3 +10666,6 @@ html.font-large .page { font-size: 1.125rem; }
 .el-guide.card{margin-top:0!important;padding-top:16px!important}
 .el-guide.card>h2{margin-top:0!important}
 .info-legal-card:has(> .el-entry){margin-top:14px!important}
+
+/* R181: separate the Application Info guide card from the SCOREBOARD card */
+.info-legal-card:has(> .el-entry){margin-top:36px!important}
