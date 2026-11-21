@@ -5,6 +5,7 @@ let count=16,view='list',namesOpen=false,pdfOpen=false,pdfNames=true,applied=fal
 let names={},winners={},pending={};let customTitle='',titleEnabled=false;
 const t=(en,bm)=>typeof infoLang!=='undefined'&&infoLang==='BM'?bm:en;
 const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const matchLabel=s=>String(s).replace(/\bM(\d+)\b/g,'Match $1');
 const orderFor=size=>{let a=[1,2];while(a.length<size){const k=a.length*2+1;a=a.flatMap(v=>[v,k-v]);}return a;};
 function build(n){
  const size=2**Math.floor(Math.log2(n)),bye=n===size?0:2*size-n,preCount=n-size;
@@ -50,8 +51,8 @@ function sanitize(){
 function row(m,match,controls){
  const a=slotResolve(m,match.a),b=slotResolve(m,match.b),selected=pending[match.id]!==undefined?pending[match.id]:(winners[match.id]||'');
  const canSelect=a.key&&b.key;
- return '<div class="el-match-card"><b>'+esc(match.id)+'</b><div class="el-participant">'+esc(a.text)+'</div><div class="el-participant">'+esc(b.text)+'</div>'+
- (controls&&canSelect?'<select class="el-winner" aria-label="'+esc(t('Winner of','Pemenang'))+' '+esc(match.id)+'" onchange="elWinner(\''+esc(match.id)+'\',this.value)"><option value="">'+esc(t('Select winner','Pilih pemenang'))+'</option><option value="'+esc(a.key)+'"'+(selected===a.key?' selected':'')+'>'+esc(a.text)+'</option><option value="'+esc(b.key)+'"'+(selected===b.key?' selected':'')+'>'+esc(b.text)+'</option></select>':'')+'</div>';
+ return '<div class="el-match-card"><b>'+esc(matchLabel(match.id))+'</b><div class="el-participant">'+esc(matchLabel(a.text))+'</div><div class="el-participant">'+esc(matchLabel(b.text))+'</div>'+
+ (controls&&canSelect?'<select class="el-winner" aria-label="'+esc(t('Winner of','Pemenang'))+' '+esc(matchLabel(match.id))+'" onchange="elWinner(\''+esc(matchLabel(match.id))+'\',this.value)"><option value="">'+esc(t('Select winner','Pilih pemenang'))+'</option><option value="'+esc(a.key)+'"'+(selected===a.key?' selected':'')+'>'+esc(matchLabel(a.text))+'</option><option value="'+esc(b.key)+'"'+(selected===b.key?' selected':'')+'>'+esc(matchLabel(b.text))+'</option></select>':'')+'</div>';
 }
 function svg(m,withNames=true){
  const stages=m.rounds.filter(r=>r.label!=='3rd / 4th Place');
@@ -68,7 +69,7 @@ function svg(m,withNames=true){
   stage.matches.forEach((match,i)=>{
    const y=ys[i],a=slotResolve(m,match.a),b=slotResolve(m,match.b);
    const label=(s)=>{let txt=withNames?s.text:(s.seed?'#'+s.seed:s.text);return txt.length>30?txt.slice(0,29)+'…':txt;};
-   out+='<rect x="'+x+'" y="'+y+'" width="'+boxW+'" height="48" rx="7" fill="#fff" stroke="#9aafc8"/><text x="'+(x+7)+'" y="'+(y+13)+'" font-size="11" font-weight="700" fill="#346194">'+esc(match.id)+'</text><text x="'+(x+7)+'" y="'+(y+28)+'" font-size="11" fill="#18324e">'+esc(label(a))+'</text><text x="'+(x+7)+'" y="'+(y+42)+'" font-size="11" fill="#18324e">'+esc(label(b))+'</text>';
+   out+='<rect x="'+x+'" y="'+y+'" width="'+boxW+'" height="48" rx="7" fill="#fff" stroke="#9aafc8"/><text x="'+(x+7)+'" y="'+(y+13)+'" font-size="11" font-weight="700" fill="#346194">'+esc(matchLabel(match.id))+'</text><text x="'+(x+7)+'" y="'+(y+28)+'" font-size="11" fill="#18324e">'+esc(matchLabel(label(a)))+'</text><text x="'+(x+7)+'" y="'+(y+42)+'" font-size="11" fill="#18324e">'+esc(matchLabel(label(b)))+'</text>';
   });
  });
  for(let k=(pre?1:0);k<stages.length-1;k++)positions[k].forEach((y,i)=>{
@@ -77,7 +78,7 @@ function svg(m,withNames=true){
  });
  const x=12+(stages.length-1)*cw,finalY=positions[stages.length-1][0],thirdY=finalY+72;
  const third=m.third,a=slotResolve(m,third.a),b=slotResolve(m,third.b);
- out+='<rect x="'+x+'" y="'+thirdY+'" width="'+boxW+'" height="62" rx="7" fill="#fff" stroke="#9aafc8"/><text x="'+(x+7)+'" y="'+(thirdY+16)+'" font-size="11" font-weight="700" fill="#14345b">'+esc(third.id+' • 3RD / 4TH PLACE')+'</text><text x="'+(x+7)+'" y="'+(thirdY+36)+'" font-size="11" fill="#18324e">'+esc(withNames?a.text:(a.seed?'#'+a.seed:a.text))+'</text><text x="'+(x+7)+'" y="'+(thirdY+52)+'" font-size="11" fill="#18324e">'+esc(withNames?b.text:(b.seed?'#'+b.seed:b.text))+'</text></svg>';
+ out+='<rect x="'+x+'" y="'+thirdY+'" width="'+boxW+'" height="62" rx="7" fill="#fff" stroke="#9aafc8"/><text x="'+(x+7)+'" y="'+(thirdY+16)+'" font-size="11" font-weight="700" fill="#14345b">'+esc(matchLabel(third.id)+' • 3RD / 4TH PLACE')+'</text><text x="'+(x+7)+'" y="'+(thirdY+36)+'" font-size="11" fill="#18324e">'+esc(matchLabel(withNames?a.text:(a.seed?'#'+a.seed:a.text)))+'</text><text x="'+(x+7)+'" y="'+(thirdY+52)+'" font-size="11" fill="#18324e">'+esc(matchLabel(withNames?b.text:(b.seed?'#'+b.seed:b.text)))+'</text></svg>';
  return out;
 }
 function draw(){
@@ -88,10 +89,10 @@ function draw(){
  let h='<div class="el-stats el-stats-r176"><div><b>'+m.bye+'</b><small>Bye</small></div><div><b>'+m.preCount+'</b><small>Preliminary</small></div><div><b>'+n+'</b><small>'+t('Total Matches','Jumlah Perlawanan')+'</small></div><div><b>Top '+m.size+'</b><small>'+t('Main Bracket','Carta Utama')+'</small></div></div>';
  h+='<div class="el-switch"><button class="btn '+(view==='list'?'el-active':'soft')+'" onclick="elView(\'list\')">'+t('MATCH LIST','SENARAI PERLAWANAN')+'</button><button class="btn '+(view==='bracket'?'el-active':'soft')+'" onclick="elView(\'bracket\')">'+t('FULL BRACKET','CARTA PENUH')+'</button></div>';
  if(view==='bracket'){
-  h+='<p class="el-note">'+t('Swipe sideways to view the bracket. M = Match. Select winners below to advance names automatically.','Leret ke sisi untuk melihat carta. M = Match. Pilih pemenang di bawah untuk mara secara automatik.')+'</p><div class="el-scroll" id="el-graph">'+svg(m)+'</div>';
+  h+='<p class="el-note">'+t('Swipe sideways to view the bracket. Select winners below to advance names automatically.','Leret ke sisi untuk melihat carta. Pilih pemenang di bawah untuk mara secara automatik.')+'</p><div class="el-scroll" id="el-graph">'+svg(m)+'</div>';
   h+='<div class="el-actions"><button class="btn el-active" onclick="elToggleNames()">'+t('ENTER NAMES','MASUKKAN NAMA')+'</button></div>';
  }else{
-  h+='<h3>'+t('Bye Allocation','Penentuan Bye')+'</h3><p>'+(m.bye?'#1'+(m.bye>1?'–#'+m.bye:'')+' → Top '+m.size:t('No Bye','Tiada Bye'))+'</p>';m.rounds.forEach(r=>{h+='<h3>'+esc(r.label)+'</h3>'+r.matches.map(match=>'<div class="el-match"><b>'+esc(match.id)+'</b><span>'+esc(slotResolve(m,match.a).text)+' vs '+esc(slotResolve(m,match.b).text)+'</span></div>').join('');});
+  h+='<h3>'+t('Bye Allocation','Penentuan Bye')+'</h3><p>'+(m.bye?'#1'+(m.bye>1?'–#'+m.bye:'')+' → Top '+m.size:t('No Bye','Tiada Bye'))+'</p>';m.rounds.forEach(r=>{h+='<h3>'+esc(r.label)+'</h3>'+r.matches.map(match=>'<div class="el-match"><b>'+esc(matchLabel(match.id))+'</b><span>'+esc(matchLabel(slotResolve(m,match.a).text))+' vs '+esc(matchLabel(slotResolve(m,match.b).text))+'</span></div>').join('');});
  }
  if(view==='bracket'&&namesOpen){
   h+='<section class="el-editor"><h3>'+t('Enter Ranking Names','Masukkan Nama Mengikut Ranking')+'</h3><p class="el-note">'+t('Seed #1 is the highest ranked. Blank names are allowed.','Seed #1 ialah ranking tertinggi. Nama boleh dibiarkan kosong.')+'</p><div class="el-name-list">';
@@ -136,7 +137,7 @@ window.elPrint=()=>{
  const result=finalResultsHtml(m,pdfNames);
  const win=window.open('','_blank');if(!win){alert(t('Please allow pop-ups to print.','Sila benarkan pop-up untuk mencetak.'));return;}
  const writePrint=location=>{win.document.open();
- win.document.write('<!doctype html><html><head><meta charset="utf-8"><title>ELIMINATION ROUND</title><style>@page{size:A3 landscape;margin:0}*{box-sizing:border-box}html,body{margin:0;padding:0;font-family:Arial,sans-serif;color:#14345b}body{width:420mm;height:297mm;padding:8mm;overflow:hidden}.sheet{height:281mm;display:flex;flex-direction:column;align-items:stretch;break-inside:avoid;page-break-inside:avoid}h1,h2{text-align:center;font-size:23pt;margin:0 0 2mm;font-weight:800}h2{font-size:20pt}.info{text-align:center;font-size:10pt;margin:1mm 0}.chart{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;margin:2mm 0}.chart svg{display:block;width:100%;height:100%;object-fit:contain}.el-final-results{background:#e3f3e9;border:1px solid #80ae94;border-radius:7px;padding:3mm 5mm;min-width:50%;font-size:10pt}.el-final-results h3{text-align:center;margin:0 0 2mm;font-size:12pt}.el-final-results div{margin:1mm 0}.footer{display:flex;align-items:flex-end;justify-content:space-between;gap:12mm;min-height:25mm}.brand{font-size:12pt;font-weight:700;white-space:nowrap;text-align:right}@media print{html,body{width:420mm;height:297mm}body{padding:8mm}svg{max-height:100%}}</style></head><body><main class="sheet"><h1>ELIMINATION ROUND</h1>'+extraTitle+'<p class="info">Participants: '+n+' | Bye: '+m.bye+' | Preliminary: '+m.preCount+' | Total Matches: '+n+'</p><p class="info">Date: '+esc(date)+' | Time: '+esc(time)+'<span class="info-location">'+(location?' | Location: '+esc(location):'')+'</span></p><div class="chart">'+chart+'</div><footer class="footer">'+result+'<div class="brand">PWA: SCOREBOARD</div></footer></main><script>window.addEventListener("load",function(){setTimeout(function(){window.print()},400)});<\/script></body></html>');
+ win.document.write('<!doctype html><html><head><meta charset="utf-8"><title>ELIMINATION ROUND</title><style>@page{size:A3 landscape;margin:0}*{box-sizing:border-box}html,body{margin:0;padding:0;font-family:Arial,sans-serif;color:#14345b}body{width:420mm;height:297mm;padding:8mm;overflow:hidden}.sheet{height:281mm;display:flex;flex-direction:column;align-items:stretch;break-inside:avoid;page-break-inside:avoid}h1,h2{text-align:center;font-size:23pt;margin:0 0 2mm;font-weight:800}h2{font-size:20pt}.info{text-align:center;font-size:10pt;margin:1mm 0}.chart{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;margin:2mm 0}.chart svg{display:block;width:100%;height:100%;object-fit:contain}.footer{width:100%;padding-left:1%;padding-right:3%}.el-final-results{background:#e3f3e9;border:1px solid #80ae94;border-radius:7px;padding:3mm 5mm;width:40%;min-width:0;font-size:10pt}.el-final-results h3{text-align:center;margin:0 0 2mm;font-size:12pt}.el-final-results div{margin:1mm 0}.footer{display:flex;align-items:flex-end;justify-content:space-between;gap:12mm;min-height:25mm}.brand{font-size:12pt;font-weight:700;white-space:nowrap;text-align:right;margin-left:auto}@media print{html,body{width:420mm;height:297mm}body{padding:8mm}svg{max-height:100%}}</style></head><body><main class="sheet"><h1>ELIMINATION ROUND</h1>'+extraTitle+'<p class="info">Participants: '+n+' | Bye: '+m.bye+' | Preliminary: '+m.preCount+' | Total Matches: '+n+'</p><p class="info">Date: '+esc(date)+' | Time: '+esc(time)+'<span class="info-location">'+(location?' | Location: '+esc(location):'')+'</span></p><div class="chart">'+chart+'</div><footer class="footer">'+result+'<div class="brand">PWA: SCOREBOARD</div></footer></main><script>window.addEventListener("load",function(){setTimeout(function(){window.print()},400)});<\/script></body></html>');
  win.document.close();};
  // Populate the popup synchronously in the user's tap gesture. Waiting for GPS
  // before document.write leaves an empty about:blank tab in Android browsers.
