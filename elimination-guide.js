@@ -155,9 +155,21 @@ window.elPrint=()=>{
   },error=>{try{if(!win.closed){const el=win.document.querySelector('.info-location');if(el&&!el.textContent.trim())el.textContent='';}}catch(e){}},{enableHighAccuracy:true,timeout:8000,maximumAge:300000});
  }
 };
+function preloadEliminationLocation(){
+ const enabled=(typeof S!=='undefined'&&S&&S.gps===true)||(typeof localStorage!=='undefined'&&localStorage.getItem('as_gps')==='true');
+ if(!enabled||!navigator.geolocation)return;
+ navigator.geolocation.getCurrentPosition(async position=>{
+  const lat=position.coords.latitude,lon=position.coords.longitude;
+  let name='';
+  try{if(typeof resolveLocationName==='function')name=await resolveLocationName(lat,lon);}catch(e){}
+  if(!name)name=lat.toFixed(5)+', '+lon.toFixed(5);
+  try{localStorage.setItem('el_last_gps_location',name);}catch(e){}
+ },()=>{},{enableHighAccuracy:true,timeout:8000,maximumAge:300000});
+}
 window.eliminationGuide=()=>{
  const bm=typeof infoLang!=='undefined'&&infoLang==='BM';
  page(head(bm?'PANDUAN PUSINGAN PENYINGKIRAN':'ELIMINATION ROUND GUIDE')+'<section class="card el-guide"><h2>'+(bm?'Kalkulator Bye & Carta Perlawanan':'Bye Calculator & Match Bracket')+'</h2><p class="el-note">'+(bm?'Seed #1 ialah peserta ranking tertinggi.':'Seed #1 is the highest-ranked participant.')+'</p><div class="el-input-row"><label for="el-input">'+(bm?'Jumlah Peserta / Pasukan':'Number of Participants / Teams')+'<input id="el-input" type="number" min="4" max="40" step="1" value="'+count+'" oninput="elCount(this.value)"/></label></div><div id="elimination-results"></div></section>','elimination');
  draw();
+ preloadEliminationLocation();
 };
 })();
