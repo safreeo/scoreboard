@@ -1,6 +1,6 @@
 {
-  "name": "SCOREBOARD",
-  "short_name": "SCOREBOARD",
+  "name": "Scoreboard",
+  "short_name": "Scoreboard",
   "description": "Practical archery scoring, practice tracking and performance review.",
   "start_url": "./",
   "scope": "./",
