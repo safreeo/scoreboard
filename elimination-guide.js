@@ -129,28 +129,30 @@ window.elTitleToggle=enabled=>{titleEnabled=enabled;draw();};
 window.elTitleChange=value=>{customTitle=value;};
 window.elPrint=()=>{
  const n=Number(count);if(!Number.isInteger(n)||n<4||n>40)return;
- const m=build(n),chart=svg(m,pdfNames),now=new Date();
+ const m=build(n),chart=svg(m,pdfNames).replace('<svg ','<svg preserveAspectRatio="none" '),now=new Date();
  const date=now.toLocaleDateString('en-GB',{day:'2-digit',month:'long',year:'numeric'});
  const time=now.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
  const gpsEnabled=(typeof S!=='undefined'&&S&&S.gps===true)||(typeof localStorage!=='undefined'&&localStorage.getItem('as_gps')==='true');
  const sessionLocation=typeof S!=='undefined'&&S&&S.session&&S.session.location?String(S.session.location):'';
+ const cachedLocation=(()=>{try{return localStorage.getItem('el_last_gps_location')||'';}catch(e){return '';}})();
  const extraTitle=titleEnabled&&customTitle.trim()?'<h2>'+esc(customTitle.trim().toUpperCase())+'</h2>':'';
  const result=finalResultsHtml(m,pdfNames);
  const win=window.open('','_blank');if(!win){alert(t('Please allow pop-ups to print.','Sila benarkan pop-up untuk mencetak.'));return;}
  const writePrint=location=>{win.document.open();
- win.document.write('<!doctype html><html><head><meta charset="utf-8"><title>ELIMINATION ROUND</title><style>@page{size:A3 landscape;margin:0}*{box-sizing:border-box}html,body{margin:0;padding:0;font-family:Arial,sans-serif;color:#14345b}body{width:420mm;height:297mm;padding:8mm;overflow:hidden}.sheet{height:281mm;display:flex;flex-direction:column;align-items:stretch;break-inside:avoid;page-break-inside:avoid}h1,h2{text-align:center;font-size:23pt;margin:0 0 2mm;font-weight:800}h2{font-size:20pt}.info{text-align:center;font-size:10pt;margin:1mm 0}.chart{flex:none;min-height:0;display:flex;flex-direction:column;align-items:stretch;justify-content:flex-start;margin:2mm 0 0;background:#f7f9fc}.chart svg{display:block;width:100%;height:auto;max-height:206mm;object-fit:contain}.footer{width:80%;margin-left:auto;margin-right:auto;padding:0}.el-final-results{background:#e3f3e9;border:1px solid #80ae94;border-radius:7px;padding:3mm 5mm;width:40%;min-width:0;font-size:10pt}.el-final-results h3{text-align:center;margin:0 0 2mm;font-size:12pt}.el-final-results div{margin:1mm 0}.footer{position:static;width:100%;margin:0;display:flex;align-items:flex-end;justify-content:space-between;gap:12mm;min-height:22mm;padding:0 3mm 2mm}.brand{font-size:12pt;font-weight:700;white-space:nowrap;text-align:right;margin-left:auto}@media print{html,body{width:420mm;height:297mm}body{padding:8mm}svg{max-height:100%}}</style></head><body><main class="sheet"><h1>ELIMINATION ROUND</h1>'+extraTitle+'<p class="info">Participants: '+n+' | Bye: '+m.bye+' | Preliminary: '+m.preCount+' | Total Matches: '+n+'</p><p class="info">Date: '+esc(date)+' | Time: '+esc(time)+'<span class="info-location">'+(location?' | Location: '+esc(location):'')+'</span></p><div class="chart">'+chart+'<footer class="footer">'+result+'<div class="brand">PWA: SCOREBOARD</div></footer></div></main><script>window.addEventListener("load",function(){setTimeout(function(){window.print()},'+(gpsEnabled?9000:450)+')});<\/script></body></html>');
+ win.document.write('<!doctype html><html><head><meta charset="utf-8"><title>ELIMINATION ROUND</title><style>@page{size:A3 landscape;margin:0}*{box-sizing:border-box}html,body{margin:0;padding:0;font-family:Arial,sans-serif;color:#14345b}body{width:420mm;height:297mm;padding:8mm;overflow:hidden}.sheet{height:281mm;display:flex;flex-direction:column;align-items:stretch;break-inside:avoid;page-break-inside:avoid}h1,h2{text-align:center;font-size:23pt;margin:0 0 2mm;font-weight:800}h2{font-size:20pt}.info{text-align:center;font-size:10pt;margin:1mm 0}.chart{flex:none;min-height:0;display:flex;flex-direction:column;align-items:stretch;justify-content:flex-start;margin:2mm 0 0;background:#f7f9fc}.chart svg{display:block;width:100%;height:190mm;max-height:none;object-fit:fill}.footer{width:100%;margin:0;padding:0}.el-final-results{background:#e3f3e9;border:1px solid #80ae94;border-radius:7px;padding:3mm 5mm;width:40%;min-width:0;font-size:10pt}.el-final-results h3{text-align:center;margin:0 0 2mm;font-size:12pt}.el-final-results div{margin:1mm 0}.footer{position:static;width:100%;margin:0;display:flex;align-items:flex-end;justify-content:space-between;gap:12mm;min-height:22mm;padding:0 3mm 2mm}.brand{font-size:12pt;font-weight:700;white-space:nowrap;text-align:right;margin-left:auto}@media print{html,body{width:420mm;height:297mm}body{padding:8mm}svg{max-height:100%}}</style></head><body><main class="sheet"><h1>ELIMINATION ROUND</h1>'+extraTitle+'<p class="info">Participants: '+n+' | Bye: '+m.bye+' | Preliminary: '+m.preCount+' | Total Matches: '+n+'</p><p class="info">Date: '+esc(date)+' | Time: '+esc(time)+'<span class="info-location">'+(location?' | Location: '+esc(location):'')+'</span></p><div class="chart">'+chart+'<footer class="footer">'+result+'<div class="brand">PWA: SCOREBOARD</div></footer></div></main><script>window.addEventListener("load",function(){setTimeout(function(){window.print()},100)});<\/script></body></html>');
  win.document.close();};
  // Render the complete bracket immediately; never replace the popup document
  // after GPS resolves, as Android may detach the original about:blank tab.
- writePrint(gpsEnabled?sessionLocation:'');
+ writePrint(gpsEnabled?(sessionLocation||cachedLocation):'');
  if(gpsEnabled&&navigator.geolocation){
   navigator.geolocation.getCurrentPosition(async position=>{
    const lat=position.coords.latitude,lon=position.coords.longitude;
    let locationText='';
    try{if(typeof resolveLocationName==='function')locationText=await resolveLocationName(lat,lon);}catch(e){}
    if(!locationText&&Number.isFinite(lat)&&Number.isFinite(lon))locationText=lat.toFixed(5)+', '+lon.toFixed(5);
+   if(locationText)try{localStorage.setItem('el_last_gps_location',locationText);}catch(e){}
    try{if(!win.closed){const el=win.document.querySelector('.info-location');if(el&&locationText)el.textContent=' | Location: '+locationText;}}catch(e){}
-  },error=>{try{if(!win.closed){const el=win.document.querySelector('.info-location');if(el)el.textContent=' | Location: unavailable (GPS '+error.code+')';}}catch(e){}},{enableHighAccuracy:true,timeout:8000,maximumAge:300000});
+  },error=>{try{if(!win.closed){const el=win.document.querySelector('.info-location');if(el&&!el.textContent.trim())el.textContent='';}}catch(e){}},{enableHighAccuracy:true,timeout:8000,maximumAge:300000});
  }
 };
 window.eliminationGuide=()=>{
