@@ -10661,3 +10661,8 @@ html.font-large .page { font-size: 1.125rem; }
 /* R179: return guide card closer to header; title option matches PDF name label */
 .el-guide.card{margin-top:14px!important}
 .el-title-toggle{font-size:13px;font-weight:400}
+
+/* R180: compact elimination header spacing without affecting other pages */
+.el-guide.card{margin-top:0!important;padding-top:16px!important}
+.el-guide.card>h2{margin-top:0!important}
+.info-legal-card:has(> .el-entry){margin-top:14px!important}
