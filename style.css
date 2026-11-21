@@ -10674,3 +10674,7 @@ html.font-large .page { font-size: 1.125rem; }
 .info-legal-card:has(> .el-entry){margin-top:14px!important}
 .el-entry .btn{margin-bottom:12px!important}
 .el-entry .el-entry-desc{margin-top:12px!important}
+
+/* R182 selector correction: .el-entry is the button, not a wrapper */
+.info-legal-card:has(.el-entry){margin-top:14px!important}
+.info-legal-card .el-entry + p{margin-top:18px!important}
