@@ -10657,3 +10657,7 @@ html.font-large .page { font-size: 1.125rem; }
 .el-final-results div{margin:7px 0;font-size:14px}
 .el-title-toggle{display:flex;align-items:center;gap:8px;margin:8px 0;font-size:14px;font-weight:600}
 .el-custom-title{width:100%;box-sizing:border-box;border:1px solid #9eafc3;border-radius:8px;padding:12px;font-size:15px;text-transform:uppercase}
+
+/* R179: return guide card closer to header; title option matches PDF name label */
+.el-guide.card{margin-top:14px!important}
+.el-title-toggle{font-size:13px;font-weight:400}
