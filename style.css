@@ -10678,3 +10678,12 @@ html.font-large .page { font-size: 1.125rem; }
 /* R182 selector correction: .el-entry is the button, not a wrapper */
 .info-legal-card:has(.el-entry){margin-top:14px!important}
 .info-legal-card .el-entry + p{margin-top:18px!important}
+
+/* R209: elimination PDF options layout */
+.el-paper-field{margin:18px 0 12px;display:flex;flex-direction:column;gap:12px}
+.el-paper-field>label{display:block;font-size:15px;font-weight:600}
+.el-paper-field>select{display:block;width:100%;box-sizing:border-box;padding:12px;border:1px solid #b7c6d3;border-radius:9px;background:#fff;color:#14345b;font-size:15px}
+.el-guide .el-pdf-name{margin:10px 0 7px}
+.el-guide .el-title-toggle{margin:5px 0 8px}
+.el-guide .el-custom-title{margin:0 0 8px}
+.el-guide .el-pdf-bottom{margin:20px 0 6px}
