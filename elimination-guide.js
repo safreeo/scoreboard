@@ -13,10 +13,11 @@ function captureCategory(){Object.assign(categories[activeCategory],{count,view,
 function loadCategory(i){activeCategory=i;({count,view,namesOpen,applied,names,winners,pending}=categories[i]);}
 function categoryOptions(selected){return categories.map((c,i)=>'<option value="'+i+'"'+(i===selected?' selected':'')+'>'+esc(categoryName(i))+'</option>').join('');}
 function categoryNav(){
- return '<div style="position:sticky;top:0;z-index:15;background:#fff;padding:8px 0;border-bottom:1px solid #dbe3ec;margin:10px 0" id="el-category-nav"><label style="display:block;font-weight:700;color:#14345b;margin-bottom:5px" for="el-cat-jump">'+t('Active Category','Kategori Aktif')+': '+esc(categoryName(activeCategory))+'</label><div style="display:flex;gap:6px;overflow-x:auto;padding:2px 0 5px">'+categories.map((c,i)=>'<button type="button" class="btn '+(i===activeCategory?'el-active':'soft')+'" style="flex:0 0 auto;min-width:76px;max-width:210px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:8px 10px" aria-pressed="'+(i===activeCategory)+'" title="'+esc(categoryName(i))+'" onclick="elSwitchCategory('+i+')">'+esc(categoryName(i))+'</button>').join('')+'</div>'+(categories.length>3?'<select id="el-cat-jump" style="width:100%;margin-top:4px" aria-label="'+t('Jump to category','Pergi ke kategori')+'" onchange="elSwitchCategory(Number(this.value))">'+categoryOptions(activeCategory)+'</select>':'')+'</div>';
+ return '<div style="position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:980px;box-sizing:border-box;z-index:40;background:#fff;padding:8px 14px calc(8px + env(safe-area-inset-bottom, 0px));border-top:1px solid #dbe3ec;box-shadow:0 -4px 14px #14345b18;'+(categories.length===1?'display:none;':'')+'" id="el-category-nav"><div id="el-active-category-name" style="display:block;font-weight:700;color:#14345b;margin-bottom:5px">'+t('Active Category','Kategori Aktif')+': '+esc(categoryName(activeCategory))+'</div><div style="display:flex;gap:6px;overflow-x:auto;padding:2px 0 5px">'+categories.map((c,i)=>'<button type="button" class="btn '+(i===activeCategory?'el-active':'soft')+'" style="flex:0 0 auto;min-width:76px;max-width:210px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:8px 10px" data-el-cat-tab="'+i+'" aria-pressed="'+(i===activeCategory)+'" title="'+esc(categoryName(i))+'" onclick="elSwitchCategory('+i+')">'+esc(categoryName(i))+'</button>').join('')+'</div>'+(categories.length>3?'<select id="el-cat-jump" style="width:100%;margin-top:4px" aria-label="'+t('Jump to category','Pergi ke kategori')+'" onchange="elSwitchCategory(Number(this.value))">'+categoryOptions(activeCategory)+'</select>':'')+'</div>';
 }
 function refreshCategoryControls(){
  const nav=document.getElementById('el-category-nav');if(nav)nav.outerHTML=categoryNav();
+ const guide=document.querySelector('.el-guide');if(guide)guide.style.paddingBottom=categories.length>1?'calc('+(categories.length>3?155:110)+'px + env(safe-area-inset-bottom, 0px))':'';
  const name=document.getElementById('el-cat-name');if(name){name.value=categories[activeCategory].label;name.placeholder=categoryName(activeCategory);}
  const input=document.getElementById('el-input');if(input)input.value=count;
  const total=document.getElementById('el-cat-count');if(total)total.value=categories.length;
@@ -37,7 +38,13 @@ window.elCategoryCount=v=>{
  else while(categories.length<n)categories.push(freshCategory(categories.length));
  refreshCategoryControls();draw();
 };
-window.elRenameCategory=v=>{categories[activeCategory].label=String(v).trim().slice(0,60);refreshCategoryControls();draw();};
+window.elRenameCategory=v=>{
+ categories[activeCategory].label=String(v).slice(0,60);
+ const label=categoryName(activeCategory),heading=document.getElementById('el-active-category-name'),tab=document.querySelector('[data-el-cat-tab="'+activeCategory+'"]');
+ if(heading)heading.textContent=t('Active Category','Kategori Aktif')+': '+label;
+ if(tab){tab.textContent=label;tab.title=label;}
+ for(const id of ['el-cat-jump','el-print-category']){const select=document.getElementById(id);if(select&&select.options[activeCategory])select.options[activeCategory].textContent=label;}
+};
 const matchLabel=s=>String(s).replace(/\bM(\d+)\b/g,'Match $1');
 const orderFor=size=>{let a=[1,2];while(a.length<size){const k=a.length*2+1;a=a.flatMap(v=>[v,k-v]);}return a;};
 function build(n){
@@ -232,8 +239,8 @@ function preloadEliminationLocation(){
 window.eliminationGuide=()=>{
  const bm=typeof infoLang!=='undefined'&&infoLang==='BM';
  captureCategory();
- page(head(bm?'PANDUAN PUSINGAN PENYINGKIRAN':'ELIMINATION ROUND GUIDE').replace('page-head-blue','page-head-magenta')+'<section class="card el-guide"><h2>'+(bm?'Kalkulator Bye & Carta Perlawanan':'Bye Calculator & Match Bracket')+'</h2><p class="el-note">'+(bm?'Seed #1 ialah peserta ranking tertinggi.':'Seed #1 is the highest-ranked participant.')+'</p><div class="el-input-row"><label for="el-cat-count">'+t('Number of Categories','Bilangan Kategori')+'<input id="el-cat-count" type="number" min="1" max="12" step="1" value="'+categories.length+'" onchange="elCategoryCount(this.value)"/></label></div>'+categoryNav()+'<div class="el-input-row"><label for="el-cat-name">'+t('Category Name','Nama Kategori')+'<input id="el-cat-name" type="text" maxlength="60" value="'+esc(categories[activeCategory].label)+'" placeholder="'+esc(categoryName(activeCategory))+'" onchange="elRenameCategory(this.value)"/></label></div><div class="el-input-row"><label for="el-input">'+(bm?'Jumlah Peserta / Pasukan':'Number of Participants / Teams')+'<input id="el-input" type="number" min="4" max="40" step="1" value="'+count+'" onchange="elCount(this.value)"/></label></div><div id="elimination-results"></div></section>','elimination');
- draw();
+ page(head(bm?'PANDUAN PUSINGAN PENYINGKIRAN':'ELIMINATION ROUND GUIDE').replace('page-head-blue','page-head-magenta')+'<section class="card el-guide"><h2>'+(bm?'Kalkulator Bye & Carta Perlawanan':'Bye Calculator & Match Bracket')+'</h2><p class="el-note">'+(bm?'Seed #1 ialah peserta ranking tertinggi.':'Seed #1 is the highest-ranked participant.')+'</p><div class="el-input-row"><label for="el-cat-count">'+t('Number of Categories','Bilangan Kategori')+'<input id="el-cat-count" type="number" min="1" max="12" step="1" value="'+categories.length+'" onchange="elCategoryCount(this.value)"/></label></div>'+categoryNav()+'<div class="el-input-row"><label for="el-cat-name">'+t('Category Name','Nama Kategori')+'<input id="el-cat-name" type="text" maxlength="60" value="'+esc(categories[activeCategory].label)+'" placeholder="'+esc(categoryName(activeCategory))+'" oninput="elRenameCategory(this.value)"/></label></div><div class="el-input-row"><label for="el-input">'+(bm?'Jumlah Peserta / Pasukan':'Number of Participants / Teams')+'<input id="el-input" type="number" min="4" max="40" step="1" value="'+count+'" onchange="elCount(this.value)"/></label></div><div id="elimination-results"></div></section>','elimination');
+ refreshCategoryControls();draw();
  preloadEliminationLocation();
 };
 })();
