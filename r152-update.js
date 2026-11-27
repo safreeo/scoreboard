@@ -3,6 +3,7 @@
   'use strict';
   const GREY='#64748b';
   function versionInfo(){
+    const build=typeof SCOREBOARD_BUILD_INFO!=='undefined'?SCOREBOARD_BUILD_INFO:{version:'1.1.95',date:'27 November 2026'};
     const card=document.querySelector('.app-info-card');
     if(!card)return;
     const spans=card.querySelectorAll('span');
@@ -10,11 +11,11 @@
       const t=s.textContent||'';
       if(/^(App Version|Versi Aplikasi)\s*:/i.test(t.trim())){
         const b=s.querySelector('b');
-        if(b&&!t.includes('1.1.94')){while(b.nextSibling)b.nextSibling.remove();s.append(document.createTextNode(' 1.1.94'));}
+        if(b&&t.trim()!==b.textContent.trim()+' '+build.version){while(b.nextSibling)b.nextSibling.remove();s.append(document.createTextNode(' '+build.version));}
       }
       if(/^(Last Updated|Kemas Kini Terakhir)\s*:/i.test(t.trim())){
         const b=s.querySelector('b');
-        if(b&&!t.includes('23 November 2026')){while(b.nextSibling)b.nextSibling.remove();s.append(document.createTextNode(' 23 November 2026'));}
+        if(b&&t.trim()!==b.textContent.trim()+' '+build.date){while(b.nextSibling)b.nextSibling.remove();s.append(document.createTextNode(' '+build.date));}
       }
     }
   }

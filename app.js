@@ -5,6 +5,7 @@
    ========================================================= */
 
 const A = document.getElementById("app");
+const SCOREBOARD_BUILD_INFO = Object.freeze({version:"1.1.95",date:"27 November 2026"});
 
 const LS = (key, fallback) => {
   try {
@@ -10945,8 +10946,8 @@ function info(tab = null) {
         </div>
       </div>
       <div class="info-meta">
-        <span><b>${bm?'Versi Aplikasi':'App Version'}:</b> 1.1.95</span>
-        <span><b>${bm?'Kemas Kini Terakhir':'Last Updated'}:</b> 27 November 2026</span>
+        <span><b>${bm?'Versi Aplikasi':'App Version'}:</b> ${SCOREBOARD_BUILD_INFO.version}</span>
+        <span><b>${bm?'Kemas Kini Terakhir':'Last Updated'}:</b> ${SCOREBOARD_BUILD_INFO.date}</span>
       </div>
       <div class="info-tab-row">
         <button class="btn ${manualActive ? "blue" : "soft"}" onclick="info('manual')">${bm?'MANUAL PENGGUNA':'USER MANUAL'}</button>
