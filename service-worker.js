@@ -1,4 +1,4 @@
-const CACHE_NAME = "scoreboard-v1.1.96-elimination-r214";
+const CACHE_NAME = "scoreboard-v1.1.97-elimination-r215";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -51,7 +51,7 @@ const APP_SHELL = [
   "./assets/referee-whistle.mp3",
   "./manifest.webmanifest?v=1214",
   "./style.css?v=1242",
-  "./app.js?v=1242",
+  "./app.js?v=1243",
   "./r75-update.js?v=1166",
   "./r76-update.js?v=1166",
   "./r78-update.js?v=1166",
@@ -86,11 +86,11 @@ const APP_SHELL = [
   "./r123-update.js?v=1166",
   "./r124-update.js?v=1166",
   "./r125-update.js?v=1166",
-  "./r152-update.js?v=1242",
+  "./r152-update.js?v=1243",
   "./r153-update.js?v=1166",
   "./r155-update.js?v=1193",
   "./r157-update.js?v=1166",
-  "./elimination-guide.js?v=1242"
+  "./elimination-guide.js?v=1243"
 ];
 self.addEventListener("install", event => {
   event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(APP_SHELL.map(url => new Request(url,{cache:"reload"})))).then(() => self.skipWaiting()));
