@@ -9218,7 +9218,7 @@ function settings() {
 
       <p>
         Delete all Archer Lists, Practice History,
-        Presets, Settings and unfinished sessions
+        Presets, Settings, unfinished sessions and Elimination Round records
         stored on this device.
       </p>
 
@@ -10682,7 +10682,10 @@ function exportBackup() {
       ),
 
     unfinished:
-      getUnfinished()
+      getUnfinished(),
+
+    elimination:
+      typeof window.elGetBackup === 'function' ? window.elGetBackup() : LS('as_elimination_session', null)
   };
 
 
@@ -10739,6 +10742,9 @@ function restoreBackup(
           return;
         }
 
+
+        // Older backups have no elimination field: preserve any active tournament.
+        if (Object.prototype.hasOwnProperty.call(data, 'elimination') && typeof window.elValidateBackup === 'function') window.elValidateBackup(data.elimination);
 
         S.archers =
           Array.isArray(
@@ -10822,6 +10828,8 @@ function restoreBackup(
         }
 
 
+        if (Object.prototype.hasOwnProperty.call(data, 'elimination') && typeof window.elRestoreBackup === 'function') window.elRestoreBackup(data.elimination);
+
         save();
 
 
@@ -10874,7 +10882,7 @@ function factoryReset() {
     confirm(
       "FINAL CONFIRMATION\n\n" +
       "Practice History, Archer Lists, Presets, Settings " +
-      "and unfinished scores will be permanently deleted.\n\n" +
+      "unfinished scores and Elimination Round records will be permanently deleted.\n\n" +
       "Factory Reset now?"
     );
 
@@ -10893,7 +10901,9 @@ function factoryReset() {
     "as_font",
     "as_timer",
     "as_default_archer",
-    "as_unfinished_session"
+    "as_unfinished_session",
+    "as_elimination_session",
+    "el_last_gps_location"
   ].forEach(
     key =>
       localStorage.removeItem(
@@ -10985,7 +10995,7 @@ function userManualHTML() {
       <details class="manual-accordion"><summary>13. Manage Scoring Matrix</summary><div class="manual-accordion-body"><p>Open Manage Scoring Matrix to review and select the scoring values used for a session. Use the available matrix management controls to configure scoring options. Check the selected matrix before starting because it determines the score buttons, totals and point breakdown.</p></div></details>
       <details class="manual-accordion"><summary>14. Scoring Page Controls & Current Ranking</summary><div class="manual-accordion-body"><p>The Scoring Page provides management controls for Round, End, Arrows/End, Check Points (CP), Lane, Group and Timer, depending on the active format and session. Use the relevant control to review or adjust an available setting. Select Summary to view scores and the current ranking during the session; rankings reflect scores recorded so far and may change as scoring continues.</p></div></details>
       <details class="manual-accordion"><summary>15. Contact & Feedback</summary><div class="manual-accordion-body"><p>Open Application Info and select Contact & Feedback to send comments about the app, report an issue or rate aspects such as usability, speed, scoring accuracy, timer and sharing. Complete the available feedback fields and use the provided submission or sharing option.</p></div></details>
-      <details class="manual-accordion"><summary>16. Elimination Round Guide</summary><div class="manual-accordion-body"><p>Open Application Info → Elimination Round Guide. Set Number of Categories (1–12), enter each category name and switch using the fixed category shortcuts at the bottom. Each category keeps its own participant count, names and winners while the app is open. In Full Bracket, choose PDF Category to export one category at a time. Enter 4–40 participants or teams (default: 16). The Bye Calculator shows Byes, Preliminary matches, Total Matches and the main bracket. Match List displays seeded pairings; Full Bracket displays the elimination chart. Enter participant names if required, select match winners and tap UPDATE to confirm each round. The button changes to COMPLETED; editing a result requires UPDATE again. Use GRAPH to return to the bracket. Final Results displays 1st through 4th positions. Select A4 or A3 Landscape, optionally include names and add a custom PDF title, then tap SAVE AS PDF. For a blank bracket, leave winner fields unselected.</p></div></details>
+      <details class="manual-accordion"><summary>16. Elimination Round Guide</summary><div class="manual-accordion-body"><p>Open Application Info → Elimination Round Guide. Set Number of Categories (1–12), enter each category name and switch using the fixed category shortcuts at the bottom. Each category keeps its own participant count, names and winners. Changes, including winner selections not yet applied, are auto-saved on this device. Reopen Elimination Round Guide to resume automatically. NEW ELIMINATION ROUND replaces the current tournament after confirmation. Backup Data includes the tournament; Restore Data can recover it. Factory Reset deletes it. In Full Bracket, choose PDF Category to export one category at a time. Enter 4–40 participants or teams (default: 16). The Bye Calculator shows Byes, Preliminary matches, Total Matches and the main bracket. Match List displays seeded pairings; Full Bracket displays the elimination chart. Enter participant names if required, select match winners and tap UPDATE to confirm each round. The button changes to COMPLETED; editing a result requires UPDATE again. Use GRAPH to return to the bracket. Final Results displays 1st through 4th positions. Select A4 or A3 Landscape, optionally include names and add a custom PDF title, then tap SAVE AS PDF. For a blank bracket, leave winner fields unselected.</p></div></details>
     </section>`;
   return `
     <section class="card user-manual-card">
@@ -11007,7 +11017,7 @@ function userManualHTML() {
       <details class="manual-accordion"><summary>13. Manage Scoring Matrix</summary><div class="manual-accordion-body"><p>Buka Manage Scoring Matrix untuk menyemak dan memilih nilai markah bagi sesi. Gunakan kawalan pengurusan matriks yang tersedia untuk menetapkan pilihan pemarkahan. Semak matriks sebelum bermula kerana ia menentukan butang markah, jumlah skor dan pecahan mata.</p></div></details>
       <details class="manual-accordion"><summary>14. Kawalan Scoring Page & Kedudukan Semasa</summary><div class="manual-accordion-body"><p>Scoring Page menyediakan kawalan pengurusan Round, End, Arrows/End, Check Points (CP), Lane, Group dan Timer mengikut format serta sesi yang aktif. Gunakan kawalan berkaitan untuk menyemak atau mengubah tetapan yang dibenarkan. Pilih Summary untuk melihat skor dan kedudukan semasa ketika sesi berlangsung; kedudukan berdasarkan markah yang sudah direkod dan boleh berubah sepanjang sesi.</p></div></details>
       <details class="manual-accordion"><summary>15. Contact & Feedback</summary><div class="manual-accordion-body"><p>Buka Application Info dan pilih Contact & Feedback untuk menghantar pandangan, melaporkan masalah atau memberikan penilaian terhadap kemudahan penggunaan, kelajuan, ketepatan skor, pemasa dan perkongsian. Lengkapkan ruangan maklum balas yang tersedia dan gunakan pilihan penghantaran atau perkongsian yang disediakan.</p></div></details>
-      <details class="manual-accordion"><summary>16. Panduan Elimination Round</summary><div class="manual-accordion-body"><p>Buka Application Info → Elimination Round Guide. Tetapkan Bilangan Kategori (1–12), masukkan nama kategori dan bertukar menggunakan pintasan kategori yang kekal di bahagian bawah. Setiap kategori mempunyai jumlah peserta, nama dan pemenang tersendiri semasa aplikasi dibuka. Dalam Carta Penuh, pilih Kategori PDF untuk mencetak satu kategori pada satu masa. Masukkan 4–40 peserta atau pasukan (asal: 16). Bye Calculator memaparkan Bye, perlawanan Preliminary, jumlah perlawanan dan carta utama. Match List menunjukkan pasangan mengikut seed, manakala Full Bracket menunjukkan carta penyingkiran. Masukkan nama jika perlu, pilih pemenang dan tekan UPDATE untuk mengesahkan setiap pusingan. Butang bertukar menjadi COMPLETED; jika keputusan diubah, tekan UPDATE sekali lagi. GRAPH membawa kembali ke carta. Final Results memaparkan tempat pertama hingga keempat. Pilih A4 atau A3 Landscape, tentukan sama ada nama disertakan dan tambah tajuk PDF jika perlu, kemudian tekan SAVE AS PDF. Untuk carta kosong, jangan pilih pemenang.</p></div></details>
+      <details class="manual-accordion"><summary>16. Panduan Elimination Round</summary><div class="manual-accordion-body"><p>Buka Application Info → Elimination Round Guide. Tetapkan Bilangan Kategori (1–12), masukkan nama kategori dan bertukar menggunakan pintasan kategori yang kekal di bahagian bawah. Setiap kategori mempunyai jumlah peserta, nama dan pemenang tersendiri. Perubahan, termasuk pilihan pemenang yang belum disahkan, disimpan secara automatik pada peranti ini. Buka semula panduan untuk menyambung secara automatik. PUSINGAN PENYINGKIRAN BAHARU menggantikan pertandingan semasa selepas pengesahan. Backup Data menyertakan pertandingan; Restore Data boleh memulihkannya. Factory Reset memadamkannya. Dalam Carta Penuh, pilih Kategori PDF untuk mencetak satu kategori pada satu masa. Masukkan 4–40 peserta atau pasukan (asal: 16). Bye Calculator memaparkan Bye, perlawanan Preliminary, jumlah perlawanan dan carta utama. Match List menunjukkan pasangan mengikut seed, manakala Full Bracket menunjukkan carta penyingkiran. Masukkan nama jika perlu, pilih pemenang dan tekan UPDATE untuk mengesahkan setiap pusingan. Butang bertukar menjadi COMPLETED; jika keputusan diubah, tekan UPDATE sekali lagi. GRAPH membawa kembali ke carta. Final Results memaparkan tempat pertama hingga keempat. Pilih A4 atau A3 Landscape, tentukan sama ada nama disertakan dan tambah tajuk PDF jika perlu, kemudian tekan SAVE AS PDF. Untuk carta kosong, jangan pilih pemenang.</p></div></details>
     </section>`;
 }
 
