@@ -1,4 +1,4 @@
-/* R215 Elimination history: independent archived brackets */
+/* R216 Elimination history title controls and placeholder */
 (function(){
 'use strict';
 let count=16,view='list',namesOpen=false,pdfOpen=false,pdfNames=true,applied=false;
@@ -74,8 +74,8 @@ window.elHistoryEntryHTML=()=>{
 window.elSaveHistory=()=>{
  if(document.getElementById('el-save-history-dialog'))return;
  const overlay=document.createElement('div');overlay.id='el-save-history-dialog';overlay.className='modal-overlay';
- const defaultTitle=archiveTitle||(titleEnabled?customTitle.trim():'')||t('Elimination Round','Pusingan Penyingkiran');
- overlay.innerHTML='<div class="modal-card" role="dialog" aria-modal="true"><h3>'+t('SAVE TO HISTORY','SIMPAN KE SEJARAH')+'</h3><p>'+t('Save all categories as one tournament. Only confirmed winners appear in the chart. Saving again updates this record.','Simpan semua kategori sebagai satu pertandingan. Hanya pemenang yang telah disahkan dipaparkan dalam carta. Simpan semula untuk mengemas kini rekod.')+'</p><label class="modal-field-label" for="el-history-title">'+t('Tournament Title','Tajuk Pertandingan')+'</label><input id="el-history-title" type="text" maxlength="120" value="'+esc(defaultTitle)+'"/><div id="el-history-save-error" role="status" style="color:#b91c1c"></div><div class="modal-actions"><button class="btn green" data-el-save>'+t('SAVE','SIMPAN')+'</button><button class="btn soft" data-el-cancel>'+t('CANCEL','BATAL')+'</button></div></div>';
+ const defaultTitle=archiveTitle||'';
+ overlay.innerHTML='<div class="modal-card" role="dialog" aria-modal="true"><h3>'+t('SAVE TO HISTORY','SIMPAN KE SEJARAH')+'</h3><p>'+t('Save all categories as one tournament. Only confirmed winners appear in the chart. Saving again updates this record.','Simpan semua kategori sebagai satu pertandingan. Hanya pemenang yang telah disahkan dipaparkan dalam carta. Simpan semula untuk mengemas kini rekod.')+'</p><label class="modal-field-label" for="el-history-title">'+t('Tournament Title','Tajuk Pertandingan')+'</label><input id="el-history-title" type="text" maxlength="120" placeholder="'+t('Type title here','Taip tajuk di sini')+'" value="'+esc(defaultTitle)+'"/><div id="el-history-save-error" role="status" style="color:#b91c1c"></div><div class="modal-actions"><button class="btn green" data-el-save>'+t('SAVE','SIMPAN')+'</button><button class="btn soft" data-el-cancel>'+t('CANCEL','BATAL')+'</button></div></div>';
  overlay.querySelector('[data-el-cancel]').addEventListener('click',()=>overlay.remove());
  overlay.querySelector('[data-el-save]').addEventListener('click',()=>{
   const title=overlay.querySelector('#el-history-title').value.trim(),error=overlay.querySelector('#el-history-save-error');
@@ -93,9 +93,27 @@ function saveArchive(title){
 }
 window.elHistoryPage=()=>{
  let records=[],error='';try{records=readArchives();}catch(e){error=t('Unable to read saved history.','Gagal membaca sejarah yang disimpan.');}
- const cards=records.map((r,i)=>'<section class="card"><h3 style="margin:0 0 6px">'+esc(r.title)+'</h3><p class="el-note">'+esc(archiveDate(r))+' • '+r.state.categories.length+' '+t('Categories','Kategori')+'</p><p class="el-note">'+r.state.categories.map((c,j)=>esc(archiveLabel(c,j))+' ('+c.count+')').join(' • ')+'</p><button class="btn el-entry" style="width:100%" onclick="elOpenArchive('+i+')">'+t('VIEW BRACKET','LIHAT CARTA')+'</button></section>').join('');
+ const cards=records.map((r,i)=>'<section class="card"><div class="el-history-title-row"><h3>'+esc(r.title)+'</h3><button type="button" class="history-note-icon" title="'+t('Edit title','Sunting tajuk')+'" aria-label="'+t('Edit title','Sunting tajuk')+'" onclick="elEditArchiveTitle('+i+')">✏️</button><button type="button" class="history-note-icon history-note-delete" title="'+t('Delete record','Padam rekod')+'" aria-label="'+t('Delete record','Padam rekod')+'" onclick="elDeleteArchiveAt('+i+')">🗑️</button></div><p class="el-note">'+esc(archiveDate(r))+' • '+r.state.categories.length+' '+t(r.state.categories.length===1?'Category':'Categories','Kategori')+'</p><p class="el-note">'+r.state.categories.map((c,j)=>esc(archiveLabel(c,j))+' ('+c.count+')').join(' • ')+'</p><button class="btn el-entry" style="width:100%" onclick="elOpenArchive('+i+')">'+t('VIEW BRACKET','LIHAT CARTA')+'</button></section>').join('');
  page(head(t('ELIMINATION ROUND HISTORY','SEJARAH PUSINGAN PENYINGKIRAN')).replace('page-head-blue','page-head-green')+'<section class="card"><button class="btn soft" style="width:100%" onclick="eliminationGuide()">'+t('OPEN CURRENT ELIMINATION ROUND','BUKA PUSINGAN PENYINGKIRAN SEMASA')+'</button></section>'+(error?'<section class="card">'+esc(error)+'</section>':cards||'<section class="card"><p>'+t('No saved elimination rounds yet. Use SAVE TO HISTORY in Full Bracket.','Belum ada rekod. Gunakan SIMPAN KE SEJARAH dalam Carta Penuh.')+'</p></section>'),'el-history');
 };
+window.elEditArchiveTitle=i=>{
+ let r;try{r=readArchives()[i];}catch(e){return;}if(!r||document.getElementById('el-edit-title-dialog'))return;
+ const overlay=document.createElement('div');overlay.id='el-edit-title-dialog';overlay.className='modal-overlay';
+ overlay.innerHTML='<div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="el-edit-title-heading"><h3 id="el-edit-title-heading">'+t('EDIT TITLE','SUNTING TAJUK')+'</h3><label class="modal-field-label" for="el-edit-history-title">'+t('Tournament Title','Tajuk Pertandingan')+'</label><input id="el-edit-history-title" type="text" maxlength="120" placeholder="'+t('Type title here','Taip tajuk di sini')+'" value="'+esc(r.title)+'"/><div id="el-edit-title-error" role="status" style="color:#b91c1c"></div><div class="modal-actions"><button class="btn green" data-el-save>'+t('SAVE','SIMPAN')+'</button><button class="btn soft" data-el-cancel>'+t('CANCEL','BATAL')+'</button></div></div>';
+ overlay.querySelector('[data-el-cancel]').addEventListener('click',()=>overlay.remove());
+ overlay.querySelector('[data-el-save]').addEventListener('click',()=>{
+  const title=overlay.querySelector('#el-edit-history-title').value.trim(),error=overlay.querySelector('#el-edit-title-error');
+  if(!title){error.textContent=t('Enter a title.','Masukkan tajuk.');return;}
+  try{
+   const records=readArchives(),record=records.find(x=>x.id===r.id);if(!record)throw Error('Missing record');
+   record.title=title;record.state.archiveTitle=title;writeArchives(records);
+   if(archiveId===r.id){archiveTitle=title;saveState();}
+   overlay.remove();window.elHistoryPage();
+  }catch(e){error.textContent=t('Unable to save title. Check device storage.','Gagal menyimpan tajuk. Semak storan peranti.');}
+ });
+ document.body.appendChild(overlay);
+};
+window.elDeleteArchiveAt=i=>{let r;try{r=readArchives()[i];}catch(e){return;}if(r)deleteArchiveRecord(r);};
 window.elOpenArchive=i=>{try{const r=readArchives()[i];if(!r)return;archiveSelectedId=r.id;archiveCategory=0;archivePaper=r.state.paperSize;archiveNames=r.state.pdfNames;window.elArchiveView();}catch(e){}};
 function selectedArchive(){return readArchives().find(r=>r.id===archiveSelectedId);}
 function withArchive(r,i,fn){const original=copy(snapshot());try{applySnapshot(copy(r.state));loadCategory(i);return fn();}finally{applySnapshot(original);}}
@@ -109,7 +127,8 @@ window.elArchiveSwitch=i=>{if(Number.isInteger(i)&&i>=0){archiveCategory=i;windo
 window.elArchivePaper=v=>{archivePaper=v==='A3'?'A3':'A4';};
 window.elArchiveNames=v=>{archiveNames=!!v;};
 window.elArchivePrint=()=>{const r=selectedArchive();if(!r||!r.state.categories[archiveCategory])return;withArchive(r,archiveCategory,()=>{paperSize=archivePaper;pdfNames=archiveNames;titleEnabled=true;customTitle=r.title;window.elPrint(r.date);});};
-window.elDeleteArchive=()=>{const r=selectedArchive();if(!r)return;elConfirm(t('DELETE SAVED RECORD?','PADAM REKOD DISIMPAN?'),t('Delete this saved tournament? The current elimination round will not be changed.','Padam pertandingan yang disimpan ini? Pusingan penyingkiran semasa tidak berubah.'),t('DELETE','PADAM'),()=>{try{writeArchives(readArchives().filter(x=>x.id!==r.id));window.elHistoryPage();}catch(e){alert(t('Unable to delete record.','Gagal memadam rekod.'));}},null,true);};
+function deleteArchiveRecord(r){elConfirm(t('DELETE SAVED RECORD?','PADAM REKOD DISIMPAN?'),t('Delete "'+r.title+'"? The current elimination round will not be changed.','Padam "'+r.title+'"? Pusingan penyingkiran semasa tidak berubah.'),t('DELETE','PADAM'),()=>{try{writeArchives(readArchives().filter(x=>x.id!==r.id));window.elHistoryPage();}catch(e){alert(t('Unable to delete record.','Gagal memadam rekod.'));}},null,true);}
+window.elDeleteArchive=()=>{const r=selectedArchive();if(r)deleteArchiveRecord(r);};
 function categoryOptions(selected){return categories.map((c,i)=>'<option value="'+i+'"'+(i===selected?' selected':'')+'>'+esc(categoryName(i))+'</option>').join('');}
 function categoryNav(){
  return '<div style="position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:980px;box-sizing:border-box;z-index:40;background:#fff;padding:8px 14px calc(8px + env(safe-area-inset-bottom, 0px));border-top:1px solid #dbe3ec;box-shadow:0 -4px 14px #14345b18;'+(categories.length===1?'display:none;':'')+'" id="el-category-nav"><div id="el-active-category-name" style="display:block;font-weight:700;color:#14345b;margin-bottom:5px">'+t('Active Category','Kategori Aktif')+': '+esc(categoryName(activeCategory))+'</div><div style="display:flex;gap:6px;overflow-x:auto;padding:2px 0 5px">'+categories.map((c,i)=>'<button type="button" class="btn '+(i===activeCategory?'el-category-active':'soft')+'" style="flex:0 0 auto;min-width:76px;max-width:210px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:8px 10px" data-el-cat-tab="'+i+'" aria-pressed="'+(i===activeCategory)+'" title="'+esc(categoryName(i))+'" onclick="elSwitchCategory('+i+')">'+esc(categoryName(i))+'</button>').join('')+'</div>'+(categories.length>3?'<select id="el-cat-jump" style="width:100%;margin-top:4px" aria-label="'+t('Jump to category','Pergi ke kategori')+'" onchange="elSwitchCategory(Number(this.value))">'+categoryOptions(activeCategory)+'</select>':'')+'</div>';

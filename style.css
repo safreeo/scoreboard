@@ -10694,3 +10694,9 @@ html.font-large .page { font-size: 1.125rem; }
 .el-guide #el-cat-name{color:#0b2f5b}
 .el-guide #el-cat-name::placeholder{color:#aab4c1;opacity:1;font-weight:500;font-size:.85em}
 #el-category-nav .btn.el-category-active,#el-category-nav .btn.el-category-active:hover,#el-category-nav .btn.el-category-active:active{background:#0b2f5b!important;background-color:#0b2f5b!important;color:#fff!important;border-color:#0b2f5b!important}
+
+/* R216 — archive title actions */
+.el-history-title-row{display:flex;align-items:center;gap:8px;margin:0 0 6px;min-width:0}
+.el-history-title-row h3{flex:1 1 auto;min-width:0;overflow-wrap:anywhere;margin:0!important}
+.el-history-title-row .history-note-icon{flex:0 0 auto;min-width:36px;min-height:40px}
+#el-history-title::placeholder,#el-edit-history-title::placeholder{color:#aab4c1!important;opacity:1;font-weight:500}
