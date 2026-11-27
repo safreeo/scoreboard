@@ -10687,3 +10687,10 @@ html.font-large .page { font-size: 1.125rem; }
 .el-guide .el-title-toggle{margin:5px 0 8px}
 .el-guide .el-custom-title{margin:0 0 8px}
 .el-guide .el-pdf-bottom{margin:20px 0 6px}
+
+/* R214 — elimination-only controls */
+.el-guide .el-category-stepper{margin:8px 0 16px;grid-template-columns:52px minmax(70px,1fr) 52px;gap:10px}
+.el-guide .el-category-stepper button:disabled{opacity:.38;cursor:default}
+.el-guide #el-cat-name{color:#0b2f5b}
+.el-guide #el-cat-name::placeholder{color:#aab4c1;opacity:1;font-weight:500;font-size:.85em}
+#el-category-nav .btn.el-category-active,#el-category-nav .btn.el-category-active:hover,#el-category-nav .btn.el-category-active:active{background:#0b2f5b!important;background-color:#0b2f5b!important;color:#fff!important;border-color:#0b2f5b!important}
