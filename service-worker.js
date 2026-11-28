@@ -1,4 +1,4 @@
-const CACHE_NAME = "scoreboard-v1.1.98-elimination-r217";
+const CACHE_NAME = "scoreboard-v1.1.99-r218";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -50,8 +50,8 @@ const APP_SHELL = [
   "./assets/icon-maskable-512.png",
   "./assets/referee-whistle.mp3",
   "./manifest.webmanifest?v=1214",
-  "./style.css?v=1244",
-  "./app.js?v=1245",
+  "./style.css?v=1246",
+  "./app.js?v=1246",
   "./r75-update.js?v=1166",
   "./r76-update.js?v=1166",
   "./r78-update.js?v=1166",
@@ -86,7 +86,7 @@ const APP_SHELL = [
   "./r123-update.js?v=1166",
   "./r124-update.js?v=1166",
   "./r125-update.js?v=1166",
-  "./r152-update.js?v=1245",
+  "./r152-update.js?v=1246",
   "./r153-update.js?v=1166",
   "./r155-update.js?v=1193",
   "./r157-update.js?v=1166",

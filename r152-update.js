@@ -3,7 +3,7 @@
   'use strict';
   const GREY='#64748b';
   function versionInfo(){
-    const build=typeof SCOREBOARD_BUILD_INFO!=='undefined'?SCOREBOARD_BUILD_INFO:{version:'1.1.98',date:'28 November 2026'};
+    const build=typeof SCOREBOARD_BUILD_INFO!=='undefined'?SCOREBOARD_BUILD_INFO:{version:'1.1.99',date:'28 November 2026'};
     const card=document.querySelector('.app-info-card');
     if(!card)return;
     const spans=card.querySelectorAll('span');

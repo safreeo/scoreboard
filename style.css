@@ -10700,3 +10700,13 @@ html.font-large .page { font-size: 1.125rem; }
 .el-history-title-row h3{flex:1 1 auto;min-width:0;overflow-wrap:anywhere;margin:0!important}
 .el-history-title-row .history-note-icon{flex:0 0 auto;min-width:36px;min-height:40px}
 #el-history-title::placeholder,#el-edit-history-title::placeholder{color:#aab4c1!important;opacity:1;font-weight:500}
+
+/* R218 — readable bilingual user manual and consistent delete icons */
+.user-manual-card .manual-accordion-body{line-height:1.55;overflow-wrap:break-word}
+.user-manual-card .manual-accordion-body h4{font-size:1em;color:#0b2f5b;font-weight:750;line-height:1.35;margin:18px 0 7px}
+.user-manual-card .manual-accordion-body h4:first-child{margin-top:2px}
+.user-manual-card .manual-accordion-body p{margin:0 0 10px}
+.user-manual-card .manual-accordion-body ul,.user-manual-card .manual-accordion-body ol{margin:0 0 12px;padding-left:1.45em;line-height:1.55}
+.user-manual-card .manual-accordion-body li{margin:0 0 7px;padding-left:2px}
+.user-manual-card .manual-accordion-body .manual-tip{background:#eef4fb;border-left:3px solid #0b6df3;border-radius:6px;padding:10px 12px;margin:12px 0;color:#0b2f5b}
+.preset-del,.matrix-delete{font-size:1.12rem;line-height:1.2}
